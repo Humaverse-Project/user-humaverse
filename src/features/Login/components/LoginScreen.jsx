@@ -144,16 +144,6 @@ export default function LoginScreen() {
                                         </Text>
                                     </NavLink>
                                 </Grid>
-                                <Grid item>
-                                    <NavLink
-                                        to="/register"
-                                        style={{ textDecoration: 'none' }}
-                                    >
-                                        <Text color="primary.main">
-                                            Pas du compte? S'inscrire
-                                        </Text>
-                                    </NavLink>
-                                </Grid>
                             </Grid>
                         </Box>
                     </Box>
