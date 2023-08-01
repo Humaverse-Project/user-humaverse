@@ -4,15 +4,13 @@ import { useTheme } from '@mui/material/styles'
 import { Box, InputAdornment, TextField } from '@mui/material'
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined'
 import FormGroup from '@mui/material/FormGroup'
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, frFR } from '@mui/x-data-grid';
 
 function FicheRHScreen() {
     const [searchTerm, setSearchTerm] = useState('');
-
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
     };
-
     const theme = useTheme()
     const columns = [
         { field: 'nomEntreprise', headerName: 'Nom de l\'entreprise', width: 200, editable: true },
@@ -235,7 +233,6 @@ function FicheRHScreen() {
         );
         setRhData(updatedData);
     };
-
     const handleRowDelete = (params) => {
         const updatedData = rhData.filter((entreprise) => entreprise.id !== params.id);
         setRhData(updatedData);
@@ -309,9 +306,7 @@ function FicheRHScreen() {
                         disableSelectionOnClick
                         disableColumnMenu
                         onRowDelete={handleRowDelete}
-                        components={{
-                            Toolbar: () => null,
-                        }}
+                        localeText={frFR.components.MuiDataGrid.defaultProps.localeText}
                     />
                 </Box>
             </Box>
