@@ -7,11 +7,8 @@ import { Card } from '@mui/material'
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import { CardActionArea } from '@mui/material'
-import { BarPlot } from '@mui/x-charts/BarChart';
-import { LinePlot } from '@mui/x-charts/LineChart';
-import { ChartContainer } from '@mui/x-charts/ChartContainer';
-import { ChartsXAxis } from '@mui/x-charts/ChartsXAxis';
-import { ChartsYAxis } from '@mui/x-charts/ChartsYAxis';
+import { MyChart } from './ChartHome'
+import { NavLink } from 'react-router-dom'
 
 //ICONES
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'
@@ -74,11 +71,13 @@ function HomeScreen() {
                                     mx: 0,
                                 }
                             }}>
-                        <CardActionArea sx={{ width: 150 }}>
-                            <CardContent sx={{ p: 4 }}>
-                                <GroupsOutlinedIcon sx={{ fontSize: 92, color: 'black.main' }} />
-                            </CardContent>
-                        </CardActionArea>
+                        <NavLink to={'/ficherh'}>
+                            <CardActionArea sx={{ width: 150 }}>
+                                <CardContent sx={{ p: 4 }}>
+                                    <GroupsOutlinedIcon sx={{ fontSize: 92, color: 'black.main' }} />
+                                </CardContent>
+                            </CardActionArea>
+                        </NavLink>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h5">
@@ -107,11 +106,13 @@ function HomeScreen() {
                                     my: 1,
                                     mx: 0,
                                 } }}>
-                        <CardActionArea sx={{ width: 150 }}>
-                            <CardContent sx={{ p: 4 }}>
-                                <LibraryBooksIcon sx={{ fontSize: 92, color: 'black.main' }} />
-                            </CardContent>
-                        </CardActionArea>
+                        <NavLink to={'/ficheformation'}>
+                            <CardActionArea sx={{ width: 150 }}>
+                                <CardContent sx={{ p: 4 }}>
+                                    <LibraryBooksIcon sx={{ fontSize: 92, color: 'black.main' }} />
+                                </CardContent>
+                            </CardActionArea>
+                        </NavLink>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h5">
@@ -157,34 +158,7 @@ function HomeScreen() {
                                 <Typography component="div" variant="h5">
                                     Histogramme utilisateurs RH
                                 </Typography>
-                                <ChartContainer
-                                    series={series}
-                                    width={500}
-                                    height={400}
-                                    xAxis={[
-                                        {
-                                        id: 'month',
-                                        data: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet"],
-                                        scaleType: 'band',
-                                        valueFormatter: (value) => value.toString(),
-                                        },
-                                    ]}
-                                    yAxis={[
-                                        {
-                                        id: 'eco',
-                                        scaleType: 'linear',
-                                        },
-                                        {
-                                        id: 'pib',
-                                        scaleType: 'log',
-                                        },
-                                    ]}
-                                    >
-                                    <BarPlot />
-                                    <LinePlot />
-                                    <ChartsXAxis label="Mois" position="bottom" axisId="month" />
-                                    <ChartsYAxis label="Nombre" position="left" axisId="eco" />
-                                </ChartContainer>
+                                {MyChart(series)}
                             </CardContent>
                         </Box>
                     </Card>
@@ -203,34 +177,7 @@ function HomeScreen() {
                                 <Typography component="div" variant="h5">
                                     Histogramme formations et test
                                 </Typography>
-                                <ChartContainer
-                                    series={seriesformation}
-                                    width={500}
-                                    height={400}
-                                    xAxis={[
-                                        {
-                                        id: 'month',
-                                        data: ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet"],
-                                        scaleType: 'band',
-                                        valueFormatter: (value) => value.toString(),
-                                        },
-                                    ]}
-                                    yAxis={[
-                                        {
-                                        id: 'eco',
-                                        scaleType: 'linear',
-                                        },
-                                        {
-                                        id: 'pib',
-                                        scaleType: 'log',
-                                        },
-                                    ]}
-                                    >
-                                    <BarPlot />
-                                    <LinePlot />
-                                    <ChartsXAxis label="Mois" position="bottom" axisId="month" />
-                                    <ChartsYAxis label="Nombre" position="left" axisId="eco" />
-                                </ChartContainer>
+                                {MyChart(seriesformation)}
                             </CardContent>
                         </Box>
                     </Card>
