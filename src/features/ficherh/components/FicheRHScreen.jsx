@@ -5,19 +5,6 @@ import { Box, InputAdornment, TextField } from '@mui/material'
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined'
 import FormGroup from '@mui/material/FormGroup'
 import { DataGrid } from '@mui/x-data-grid';
-import Button from '@mui/material/Button';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/DeleteOutlined';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Close';
-import {
-    GridRowModes,
-    DataGridPro,
-    GridToolbarContainer,
-    GridActionsCellItem,
-    GridRowEditStopReasons,
-  } from '@mui/x-data-grid';
 
 function FicheRHScreen() {
     const [searchTerm, setSearchTerm] = useState('');
