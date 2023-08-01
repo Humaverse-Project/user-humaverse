@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import { CardActionArea } from '@mui/material'
 import { MyChart } from './ChartHome'
+import { NavLink } from 'react-router-dom'
+
 //ICONES
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
@@ -69,11 +71,13 @@ function HomeScreen() {
                                     mx: 0,
                                 }
                             }}>
-                        <CardActionArea sx={{ width: 150 }}>
-                            <CardContent sx={{ p: 4 }}>
-                                <GroupsOutlinedIcon sx={{ fontSize: 92, color: 'black.main' }} />
-                            </CardContent>
-                        </CardActionArea>
+                        <NavLink to={'/ficherh'}>
+                            <CardActionArea sx={{ width: 150 }}>
+                                <CardContent sx={{ p: 4 }}>
+                                    <GroupsOutlinedIcon sx={{ fontSize: 92, color: 'black.main' }} />
+                                </CardContent>
+                            </CardActionArea>
+                        </NavLink>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h5">
@@ -102,11 +106,13 @@ function HomeScreen() {
                                     my: 1,
                                     mx: 0,
                                 } }}>
-                        <CardActionArea sx={{ width: 150 }}>
-                            <CardContent sx={{ p: 4 }}>
-                                <LibraryBooksIcon sx={{ fontSize: 92, color: 'black.main' }} />
-                            </CardContent>
-                        </CardActionArea>
+                        <NavLink to={'/ficheformation'}>
+                            <CardActionArea sx={{ width: 150 }}>
+                                <CardContent sx={{ p: 4 }}>
+                                    <LibraryBooksIcon sx={{ fontSize: 92, color: 'black.main' }} />
+                                </CardContent>
+                            </CardActionArea>
+                        </NavLink>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <CardContent sx={{ flex: '1 0 auto' }}>
                                 <Typography component="div" variant="h5">
