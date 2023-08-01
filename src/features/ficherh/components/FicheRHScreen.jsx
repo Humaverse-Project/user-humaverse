@@ -7,20 +7,21 @@ import FormGroup from '@mui/material/FormGroup'
 import { DataGrid } from '@mui/x-data-grid';
 
 function FicheRHScreen() {
-    const [textToSearh, setTextToSearh] = useState()
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
     const theme = useTheme()
     const columns = [
-        { field: 'nomEntreprise', headerName: 'nom Entreprise', width: 150 },
-        { field: 'adresse', headerName: 'adresse', width: 130 },
-        { field: 'siret', headerName: 'siret', width: 130 },
-        {
-          field: 'codeNAF',
-          headerName: 'code NAF',
-          width: 90,
-        },
-        { field: 'tailleEntreprise', headerName: 'taille Entreprise', width: 130 },
-        { field: 'nomRH', headerName: 'nom RH', width: 130 },
-        { field: 'numeroTVA', headerName: 'numero TVA', width: 130 },
+        { field: 'nomEntreprise', headerName: 'Nom de l\'entreprise', width: 200, editable: true },
+        { field: 'adresse', headerName: 'Adresse', width: 250, editable: true },
+        { field: 'siret', headerName: 'Siret', width: 100, editable: true },
+        { field: 'codeNAF', headerName: 'Code NAF', width: 100, editable: true },
+        { field: 'tailleEntreprise', headerName: 'Taille de l\'entreprise', width: 120, editable: true },
+        { field: 'nomRH', headerName: 'Nom de l\'intervenant RH', width: 200, editable: true },
+        { field: 'numeroTVA', headerName: 'Numéro de TVA', width: 150, editable: true }
     ];
     const rows = [
         {
@@ -224,11 +225,26 @@ function FicheRHScreen() {
             numeroTVA: "JP97531086420",
         },
     ];
+    const [rhData, setRhData] = useState(rows);
+    const filteredData = rows.filter((entreprise) =>
+        entreprise.nomEntreprise.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const handleRowUpdate = (params) => {
+        const updatedData = rhData.map((entreprise) =>
+            entreprise.id === params.id ? { ...entreprise, ...params.data } : entreprise
+        );
+        setRhData(updatedData);
+    };
+
+    const handleRowDelete = (params) => {
+        const updatedData = rhData.filter((entreprise) => entreprise.id !== params.id);
+        setRhData(updatedData);
+    };
     return (
         <Fragment>
             <HeaderInScreen
                 title={'Fiche par utilisateur RH'}
-                secondSubtitle={textToSearh && 'Recherche'}
+                secondSubtitle={searchTerm && 'Recherche'}
             />
             <Box
                 backgroundColor="background.paper"
@@ -249,8 +265,8 @@ function FicheRHScreen() {
                 <Box>
                     <TextField
                         id="outlined-basic"
-                        value={textToSearh}
-                        onChange={(e) => setTextToSearh(e.target.value)}
+                        value={searchTerm}
+                        onChange={handleSearch}
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
@@ -281,14 +297,21 @@ function FicheRHScreen() {
                     }}
                 >
                     <DataGrid
-                        rows={rows}
+                        rows={filteredData}
                         columns={columns}
                         initialState={{
-                        pagination: {
-                            paginationModel: { page: 0, pageSize: 5 },
-                        },
+                            pagination: {
+                                paginationModel: { page: 0, pageSize: 10 },
+                            },
                         }}
                         pageSizeOptions={[5, 10]}
+                        onEditCellChangeCommitted={handleRowUpdate}
+                        disableSelectionOnClick
+                        disableColumnMenu
+                        onRowDelete={handleRowDelete}
+                        components={{
+                            Toolbar: () => null,
+                        }}
                     />
                 </Box>
             </Box>
