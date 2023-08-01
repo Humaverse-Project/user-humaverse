@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import {
     HomeScreen,
+    FicheRHScreen,
     NotFoundScreen,
     LoginScreen
 } from './features'
@@ -22,6 +23,11 @@ function Navigation() {
             id: 3,
             path: '*',
             components: <NotFoundScreen />,
+        },
+        {
+            id: 4,
+            path: '/ficherh',
+            components: <FicheRHScreen />,
         }
     ]
 
