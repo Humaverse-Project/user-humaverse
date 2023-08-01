@@ -13,7 +13,7 @@ function HeaderGlobal() {
 
     return (
         <Row justifyContent={'space-between'} px={3} height={'10vh'}>
-            <DynamicHeadNav title={'ACCUEIL'} />
+            <DynamicHeadNav title={'Dashboard'} />
             {!matcheMD && (
                 <Text variant="bigTitleBold" color="blue.main" mr={20}>
                     YUMA
