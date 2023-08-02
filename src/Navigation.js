@@ -3,7 +3,8 @@ import {
     HomeScreen,
     FicheRHScreen,
     NotFoundScreen,
-    LoginScreen
+    LoginScreen,
+    FicheFormationScreen
 } from './features'
 
 function Navigation() {
@@ -28,6 +29,11 @@ function Navigation() {
             id: 4,
             path: '/ficherh',
             components: <FicheRHScreen />,
+        },
+        {
+            id: 5,
+            path: '/ficheformation',
+            components: <FicheFormationScreen />,
         }
     ]
 
