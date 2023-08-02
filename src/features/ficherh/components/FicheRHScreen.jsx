@@ -29,7 +29,7 @@ function FicheRHScreen() {
                 py={6}
                 px={4}
             >
-                {TableStriped(columns, rows)}
+                {TableStriped(columns, rows, 'nomEntreprise')}
             </Box>
         </Fragment>
     )
