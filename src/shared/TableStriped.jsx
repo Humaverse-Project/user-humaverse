@@ -5,7 +5,7 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined'
 import FormGroup from '@mui/material/FormGroup'
 import { useTheme } from '@mui/material/styles'
 import './Table.css'
-function TableStriped(columns, rows) {
+function TableStriped(columns, rows, key) {
 
     const theme = useTheme()
 
@@ -18,7 +18,7 @@ function TableStriped(columns, rows) {
     const [rhData, setRhData] = useState(rows);
 
     const filteredData = rows.filter((entreprise) =>
-        entreprise.nomEntreprise.toLowerCase().includes(searchTerm.toLowerCase())
+        entreprise[key].toLowerCase().includes(searchTerm.toLowerCase())
     );
     const handleRowUpdate = (params) => {
         const updatedData = rhData.map((entreprise) =>
@@ -31,7 +31,6 @@ function TableStriped(columns, rows) {
         setRhData(updatedData);
     };
     const getRowClassName = (params) => {
-        console.log(params)
         return (params.indexRelativeToCurrentPage % 2 === 0) ? 'striped-row' : '';
     };
     return (

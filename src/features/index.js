@@ -4,6 +4,8 @@ import HomeScreen from './home/components/HomeScreen'
 import NotFoundScreen from './notFound/NotFoundScreen'
 import LoginScreen from './Login/components/LoginScreen'
 import FicheRHScreen from './ficherh/components/FicheRHScreen'
+import FicheFormationScreen from './ficheformation/components/FicheFormationScreen'
+
 //import COMPONENTS REUSABLES
 
 export {
@@ -11,6 +13,7 @@ export {
     HomeScreen,
     LoginScreen,
     NotFoundScreen,
-    FicheRHScreen
+    FicheRHScreen,
+    FicheFormationScreen
     //components reusables
 }

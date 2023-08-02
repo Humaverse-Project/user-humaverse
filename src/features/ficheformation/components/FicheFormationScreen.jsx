@@ -6,12 +6,13 @@ import { Box } from '@mui/material'
 import { columns, rows } from './variable.js';
 import { TableStriped } from '../../../shared'
 
-function FicheRHScreen() {
+function FicheFormationScreen() {
     const theme = useTheme()
+
     return (
         <Fragment>
             <HeaderInScreen
-                title={'Fiche par utilisateur RH'}
+                title={'Fiche par organisme de formation'}
             />
             <Box
                 backgroundColor="background.paper"
@@ -29,9 +30,9 @@ function FicheRHScreen() {
                 py={6}
                 px={4}
             >
-                {TableStriped(columns, rows, 'nomEntreprise')}
+                {TableStriped(columns, rows, 'formation')}
             </Box>
         </Fragment>
     )
 }
-export default FicheRHScreen
+export default FicheFormationScreen
