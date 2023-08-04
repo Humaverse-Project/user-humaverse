@@ -5,5 +5,6 @@ export const menu = [
     {"nom":"USERS", "url":"/user"},    
     {"nom":"COMPETENCES", "url":"/competences"},    
     {"nom":"FINANCE", "url":"/finance"},    
-    {"nom":"STORE", "url":"/store"},    
+    {"nom":"STORE", "url":"/store"},
+    {"nom":"METIER", "url":"/metier"},
 ]

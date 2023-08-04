@@ -43,7 +43,6 @@ function HomeScreen() {
         ...data,
         date: "",
     }));
-    console.log(filteredData)
     return (
         <Fragment>
             <HeaderGlobal />
@@ -54,6 +53,7 @@ function HomeScreen() {
                 justifyContent="center"
                 alignItems="center"
                 height={'auto'}
+                minHeight="80vh"
             >
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={3}>
