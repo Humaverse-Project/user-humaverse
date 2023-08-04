@@ -187,7 +187,6 @@ function MetierScreen() {
                                 },
                             }}
                             enableTopToolbar={false} //hide top toolbar
-                            enableBottomToolbar={false} //hide bottom toolbar
                             muiTableHeadCellProps={{
                                 sx: {
                                     color: 'black.main'

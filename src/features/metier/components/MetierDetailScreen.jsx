@@ -19,13 +19,11 @@ function MetierDetailScreen() {
     
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [accessToken, setAccessToken] = useState(null);
   
     useEffect(() => {
       // Appel d'authentification client pour obtenir l'access token
       authenticateClient()
         .then((data) => {
-          setAccessToken(data.access_token);
   
           // Utilisation de l'access token pour l'appel API GET avec Authorization
           getFicheMetierDataCode(data.access_token, code)
