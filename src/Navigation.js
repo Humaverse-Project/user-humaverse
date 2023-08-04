@@ -5,7 +5,8 @@ import {
     NotFoundScreen,
     LoginScreen,
     FicheFormationScreen,
-    MetierScreen
+    MetierScreen,
+    MetierDetailScreen
 } from './features'
 
 function Navigation() {
@@ -40,6 +41,11 @@ function Navigation() {
             id: 6,
             path: '/metier',
             components: <MetierScreen />,
+        },
+        {
+            id: 7,
+            path: '/metierdetail/:code',
+            components: <MetierDetailScreen />,
         }
     ]
 
