@@ -2,7 +2,6 @@ import { DataGrid, frFR } from '@mui/x-data-grid'
 import { Fragment, useState } from 'react'
 import { Box, InputAdornment, TextField } from '@mui/material'
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined'
-import FormGroup from '@mui/material/FormGroup'
 import { useTheme } from '@mui/material/styles'
 import './Table.css'
 function TableStriped(columns, rows, key) {
@@ -49,9 +48,6 @@ function TableStriped(columns, rows, key) {
                     }}
                     variant="outlined"
                 />
-                <FormGroup sx={{ ml: 2, mt: 1 }}>
-                    
-                </FormGroup>
             </Box>
             <Box
                 sx={{
