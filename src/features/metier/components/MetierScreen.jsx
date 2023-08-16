@@ -63,7 +63,7 @@ function MetierScreen() {
       return (
         <Fragment>
             <HeaderInScreen
-                title={'Liste metier'}
+                title={'COMPETENCES'}
             />
             <Box
                 backgroundColor="background.paper"
@@ -76,7 +76,7 @@ function MetierScreen() {
             >
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={3}>
-                        {LeftMenu('METIER')}
+                        {LeftMenu('COMPETENCES')}
                     </Grid>
                     <Grid item xs={12} md={9}
                         sx={{
@@ -101,7 +101,7 @@ function MetierScreen() {
         return (
             <Fragment>
                 <HeaderInScreen
-                    title={'Liste metier'}
+                    title={'COMPETENCES'}
                 />
                 <Box
                     backgroundColor="background.paper"
@@ -114,7 +114,7 @@ function MetierScreen() {
                 >
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={3}>
-                            {LeftMenu('METIER')}
+                            {LeftMenu('COMPETENCES')}
                         </Grid>
                         <Grid item xs={12} md={9}
                             sx={{
@@ -139,7 +139,7 @@ function MetierScreen() {
     return (
       <Fragment>
         <HeaderInScreen
-            title={'Liste metier'}
+            title={'COMPETENCES'}
         />
         <Box
             backgroundColor="background.paper"
@@ -152,7 +152,7 @@ function MetierScreen() {
         >
             <Grid container spacing={2}>
                 <Grid item xs={12} md={3}>
-                    {LeftMenu('METIER')}
+                    {LeftMenu('COMPETENCES')}
                 </Grid>
                 <Grid item xs={12} md={9}
                     sx={{

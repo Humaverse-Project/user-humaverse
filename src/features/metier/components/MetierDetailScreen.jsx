@@ -121,7 +121,7 @@ function MetierDetailScreen() {
             >
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={3}>
-                        {LeftMenu('METIER')}
+                        {LeftMenu('COMPETENCES')}
                     </Grid>
                     <Grid item xs={12} md={9}
                         sx={{
@@ -159,7 +159,7 @@ function MetierDetailScreen() {
                 >
                     <Grid container spacing={2}>
                         <Grid item xs={12} md={3}>
-                            {LeftMenu('METIER')}
+                            {LeftMenu('COMPETENCES')}
                         </Grid>
                         <Grid item xs={12} md={9}
                             sx={{
@@ -197,7 +197,7 @@ function MetierDetailScreen() {
         >
             <Grid container spacing={2}>
                 <Grid item xs={12} md={3}>
-                    {LeftMenu('METIER')}
+                    {LeftMenu('COMPETENCES')}
                 </Grid>
                 <Grid item xs={12} md={9}
                     sx={{

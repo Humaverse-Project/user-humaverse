@@ -39,12 +39,12 @@ function Navigation() {
         },
         {
             id: 6,
-            path: '/metier',
+            path: '/competences',
             components: <MetierScreen />,
         },
         {
             id: 7,
-            path: '/metierdetail/:code',
+            path: '/competences/:code',
             components: <MetierDetailScreen />,
         }
     ]
