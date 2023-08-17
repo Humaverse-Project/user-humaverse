@@ -3,7 +3,7 @@ import { LoadingAPI } from '../../../shared'
 import { LeftMenu } from '../../../shared'
 import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
 import { authenticateClient, getFicheMetierData } from '../../../services/PoleEmploisService';
-import { listmetier, postmetier } from '../../../services/PosteService';
+import { listmetier, postmetier, updatemetier, deletemetier } from '../../../services/MetierService';
 import MaterialReactTable from 'material-react-table';
 import { useTheme } from '@mui/material/styles'
 import Grid from '@mui/material/Grid';
@@ -29,22 +29,35 @@ function MetierScreen() {
     const page = 'COMPETENCES'
     const [data, setData] = useState([]);
     const [datatable, setTableData] = useState([]);
+    const [metierlistdata, setMetierlistdata] = useState([]);
+    const [metiercodedata, setMetiercodedata] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [accessToken, setAccessToken] = useState(null);
-  
+    const [selectedmetier, setNewnode] = useState({
+        nom: "",
+        code: ""
+    });
     useEffect(() => {
       authenticateClient()
         .then((data) => {
           setAccessToken(data.access_token);
           getFicheMetierData(data.access_token)
             .then((data) => {
-              
-              const formattedData = data.map((item) => ({
-                code: item.code,
-                libelle: item.metier.libelle,
-              }));
-              setData(formattedData);
+                const formattedData = data.map((item) => ({
+                    code: item.code,
+                    libelle: item.metier.libelle,
+                }));
+                setData(formattedData);
+                const formattedmetier = formattedData.map((item) => ({
+                    'label': item.libelle
+                }));
+                setMetierlistdata(formattedmetier)
+                const formattedDatacode = data.map((item) => ({
+                    'label': item.code
+                }));
+                setMetiercodedata(formattedDatacode)
+                console.log()
               setLoading(false);
             })
             .catch((error) => {
@@ -57,12 +70,14 @@ function MetierScreen() {
           setLoading(false);
         });
         listmetier()
-        .then((data) => {
-            setTableData(data);
-            setLoading(false);
+            .then((data) => {
+                console.log(data)
+                setTableData(data);
+                setLoading(false);
         })
         .catch((error) => {
           console.error('bakend error:', error.message);
+          setError('bakend error');
           setLoading(false);
         });
     }, []);
@@ -71,16 +86,55 @@ function MetierScreen() {
     const [validationErrors, setValidationErrors] = useState({});
 
     const handleCreateNewRow = (values) => {
-        datatable.push(values);
-        setTableData([...datatable]);
+        setLoading(true);
+        postmetier(values)
+        .then((data) => {
+            console.log(data)
+            // setTableData(data);
+            setTableData([...data]);
+            setLoading(false);
+        })
+        .catch((error) => {
+            setError('bakend error');
+            console.error('bakend error:', error.message);
+            setLoading(false);
+        });
+        
     };
 
     const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-        if (!Object.keys(validationErrors).length) {
-            datatable[row.index] = values;
-        setTableData([...datatable]);
-        exitEditingMode();
+        if(values.code !== ""){
+            selectedmetier.code = values.code
         }
+        if(values.nom !== ""){
+            selectedmetier.nom = values.nom
+        }
+        if(values.descriptionC !== ""){
+            selectedmetier.descriptionC = values.descriptionC
+        }
+        if(values.descriptionP !== ""){
+            selectedmetier.descriptionC = values.descriptionP
+        }
+        selectedmetier.id = values.id
+        console.log(selectedmetier)
+        setLoading(true);
+        updatemetier(selectedmetier)
+        .then((data) => {
+            console.log(data)
+            // setTableData(data);
+            setTableData([...data]);
+            setLoading(false);
+        })
+        .catch((error) => {
+            setError('bakend error');
+            console.error('bakend error:', error.message);
+            setLoading(false);
+        });
+        // if (!Object.keys(validationErrors).length) {
+        //     datatable[row.index] = values;
+        //     setTableData([...datatable]);
+        //     exitEditingMode();
+        // }
     };
 
     const handleCancelRowEdits = () => {
@@ -91,6 +145,20 @@ function MetierScreen() {
         (row) => {
             datatable.splice(row.index, 1);
             setTableData([...datatable]);
+            console.log(row.original.id)
+            setLoading(true);
+            deletemetier(row.original.id)
+            .then((data) => {
+                console.log(data)
+                // setTableData(data);
+                setTableData([...data]);
+                setLoading(false);
+            })
+            .catch((error) => {
+                setError('bakend error');
+                console.error('bakend error:', error.message);
+                setLoading(false);
+            });
         },
         [datatable],
     );
@@ -108,12 +176,88 @@ function MetierScreen() {
           {
             accessorKey: 'code',
             header: 'Code Rome',
-            size: 140
+            size: 140,
+            Edit: ({ cell, column, table }) => <Autocomplete
+                defaultValue={cell.getValue()}
+                sx={{
+                    width: '100%',
+                }}
+                disablePortal
+                options={metiercodedata}
+                onChange={(e, value) =>
+                    setNewnode({ ...selectedmetier, nom: value.label })
+                }
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        required
+                        label="Code" 
+                        name="code"
+                        variant="outlined"
+                    />
+                )}
+            />,
           },
           {
             accessorKey: 'nom',
             header: 'Nom',
-            size: 140
+            size: 140,
+            Edit: ({ cell, column, table }) => <Autocomplete
+                defaultValue={cell.getValue()}
+                sx={{
+                    width: '100%',
+                }}
+                disablePortal
+                options={metierlistdata}
+                onChange={(e, value) =>
+                    setNewnode({ ...selectedmetier, code: value.label })
+                }
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        required
+                        label="Nom" 
+                        name="nom"
+                        variant="outlined"
+                    />
+                )}
+            />
+          },
+          {
+            accessorKey: 'descriptionC',
+            header: 'Decription courte',
+            size: 140,
+            enableHiding: true,
+            Edit: ({ cell, column, table }) => <TextField
+                defaultValue={cell.getValue()}
+                key="descriptionC"
+                label="description courte"
+                name="descriptionC"
+                onChange={(e) =>
+                    setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                }
+                sx={{
+                    width: '100%',
+                }}
+            />
+          },
+          {
+            accessorKey: 'descriptionL',
+            header: 'Decription longue',
+            size: 140,
+            enableHiding: true,
+            Edit: ({ cell, column, table }) => <TextField
+                defaultValue={cell.getValue()}
+                key="descriptionL"
+                label="description longue"
+                name="descriptionL"
+                onChange={(e) =>
+                    setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                }
+                sx={{
+                    width: '100%',
+                }}
+            />
           },
           {
             accessorKey: 'creation',
@@ -172,6 +316,7 @@ function MetierScreen() {
                     </Box>
                     <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
                         <MaterialReactTable
+                            initialState={{ columnVisibility: { description_c: false,  description_l: false} }}
                             displayColumnDefOptions={{
                             'mrt-row-actions': {
                                 muiTableHeadCellProps: {
@@ -200,13 +345,21 @@ function MetierScreen() {
                             muiTableBodyProps={{
                                 sx: {
                                     '& tr:nth-of-type(odd)': {
-                                    backgroundColor: '#f5f5f5',
+                                        backgroundColor: '#f5f5f5',
                                     },
                                 },
                             }}
                             muiTableBodyCellProps={{
                                 sx: {
                                     color: 'black.main'
+                                },
+                            }}
+                            muiTableBodyRowProps={{
+                                sx: {
+                                    ':hover td': {
+                                        backgroundColor: '#f5f5f5',
+                                    },
+                                    backgroundColor: 'unset',
                                 },
                             }}
                             muiTableHeadRowProps={{
@@ -251,7 +404,8 @@ function MetierScreen() {
                             open={createModalOpen}
                             onClose={() => setCreateModalOpen(false)}
                             onSubmit={handleCreateNewRow}
-                            metierlist={data}
+                            metierlist={metierlistdata}
+                            codelist={metiercodedata}
                         />
                     </Paper>
                 </Grid>
@@ -260,13 +414,9 @@ function MetierScreen() {
     </Fragment>
     );
 }
-export const CreateNewMetierModal = ({ open, columns, onClose, onSubmit, metierlist }) => {
-    const formattedData = metierlist.map((item) => ({
-        'label': item.libelle
-    }));
-    const formattedDatacode = metierlist.map((item) => ({
-        'label': item.code
-    }));
+export const CreateNewMetierModal = ({ open, columns, onClose, onSubmit, metierlist, codelist }) => {
+    const formattedData = metierlist
+    const formattedDatacode = codelist
     const [newmetier, setNewnode] = useState({
         nom: "",
         code: ""
@@ -331,6 +481,30 @@ export const CreateNewMetierModal = ({ open, columns, onClose, onSubmit, metierl
                     />
                 )}
               />
+              <TextField
+                key="description_c"
+                label="description courte"
+                name="description_c"
+                onChange={(e) =>
+                    setNewnode({ ...newmetier, [e.target.name]: e.target.value })
+                }
+                sx={{
+                    m: 2,
+                    width: '90%',
+                }}
+              />
+              <TextField
+                key="description_l"
+                label="description long"
+                name="description_l"
+                onChange={(e) =>
+                    setNewnode({ ...newmetier, [e.target.name]: e.target.value })
+                }
+                sx={{
+                    m: 2,
+                    width: '90%',
+                }}
+              />
             </Stack>
           </form>
         </DialogContent>
@@ -342,5 +516,5 @@ export const CreateNewMetierModal = ({ open, columns, onClose, onSubmit, metierl
         </DialogActions>
       </Dialog>
     );
-  };
+};
 export default MetierScreen
