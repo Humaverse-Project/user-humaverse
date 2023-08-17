@@ -2,7 +2,7 @@ import HeaderInScreen from '../../header/HeaderInScreen'
 import { LoadingAPI } from '../../../shared'
 import { LeftMenu } from '../../../shared'
 import React, { Fragment, useState, useEffect, useMemo } from 'react';
-import { authenticateClient, getFicheMetierData } from './api';
+import { authenticateClient, getFicheMetierData } from '../../../services/PoleEmploisService';
 import MaterialReactTable from 'material-react-table';
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box';
