@@ -1,5 +1,6 @@
 import HeaderInScreen from '../../header/HeaderInScreen'
 import { LeftMenu } from '../../../shared'
+import { LoadingAPI } from '../../../shared'
 import React, { Fragment, useState, useEffect, useMemo } from 'react';
 import { authenticateClient, getFicheMetierDataCode } from './api';
 import MaterialReactTable from 'material-react-table';
@@ -12,7 +13,7 @@ import { useParams } from 'react-router-dom'; // Importez useParams pour récup�
 
 function MetierDetailScreen() {
     const { code } = useParams();
-
+    const page = 'COMPETENCES'
     const theme = useTheme()
     const [data, setData] = useState(null);
     const [GroupesSavoirs, setGroupesSavoirs] = useState(null);
@@ -104,80 +105,15 @@ function MetierDetailScreen() {
     );
     
 
-    if (loading) {
-      return (
-        <Fragment>
-            <HeaderInScreen
-                title={'Détail métier '+code}
-            />
-            <Box
-                backgroundColor="background.paper"
-                display={'flex'}
-                flexDirection="column"
-                justifyContent="center"
-                alignItems="center"
-                height={'auto'}
-                minHeight="80vh"
-            >
-                <Grid container spacing={2}>
-                    <Grid item xs={12} md={3}>
-                        {LeftMenu('COMPETENCES')}
-                    </Grid>
-                    <Grid item xs={12} md={9}
-                        sx={{
-                            [theme.breakpoints.up('lg')]: {
-                                mt: 5,
-                            },
-                            [theme.breakpoints.down('sm')]: {
-                                my: 1,
-                                mx: 0,
-                            },
-                        }}
-                    >
-                        <div>Loading...</div>
-                    </Grid>
-                </Grid>
-            </Box>
-        </Fragment>
-      );
-    }
-  
-    if (error) {
+    if (loading || error) {
         return (
-            <Fragment>
-                <HeaderInScreen
-                    title={'Détail métier '+code}
-                />
-                <Box
-                    backgroundColor="background.paper"
-                    display={'flex'}
-                    flexDirection="column"
-                    justifyContent="center"
-                    alignItems="center"
-                    height={'auto'}
-                    minHeight="80vh"
-                >
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={3}>
-                            {LeftMenu('COMPETENCES')}
-                        </Grid>
-                        <Grid item xs={12} md={9}
-                            sx={{
-                                [theme.breakpoints.up('lg')]: {
-                                    mt: 5,
-                                },
-                                [theme.breakpoints.down('sm')]: {
-                                    my: 1,
-                                    mx: 0,
-                                },
-                            }}
-                        >
-                            <div>Error: {error}</div>
-                        </Grid>
-                    </Grid>
-                </Box>
-            </Fragment>
-        )
+          <Fragment>
+              <HeaderInScreen
+                  title={'Détail métier '+code}
+              />
+              { LoadingAPI (loading, error, page)}
+          </Fragment>
+        );
     }
   
     // Affichez les données récupérées
@@ -197,7 +133,7 @@ function MetierDetailScreen() {
         >
             <Grid container spacing={2}>
                 <Grid item xs={12} md={3}>
-                    {LeftMenu('COMPETENCES')}
+                    {LeftMenu(page)}
                 </Grid>
                 <Grid item xs={12} md={9}
                     sx={{
