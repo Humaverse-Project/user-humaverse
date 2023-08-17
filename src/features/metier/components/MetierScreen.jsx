@@ -1,31 +1,42 @@
 import HeaderInScreen from '../../header/HeaderInScreen'
 import { LoadingAPI } from '../../../shared'
 import { LeftMenu } from '../../../shared'
-import React, { Fragment, useState, useEffect, useMemo } from 'react';
+import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
 import { authenticateClient, getFicheMetierData } from '../../../services/PoleEmploisService';
+import { listmetier, postmetier } from '../../../services/PosteService';
 import MaterialReactTable from 'material-react-table';
 import { useTheme } from '@mui/material/styles'
-import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    Stack,
+    TextField,
+    Tooltip,
+    Autocomplete
+} from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
-import { Link } from 'react-router-dom';
 
 function MetierScreen() {
     const theme = useTheme()
     const page = 'COMPETENCES'
-    const [data, setData] = useState(null);
+    const [data, setData] = useState([]);
+    const [datatable, setTableData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [accessToken, setAccessToken] = useState(null);
   
     useEffect(() => {
-      // Appel d'authentification client pour obtenir l'access token
       authenticateClient()
         .then((data) => {
           setAccessToken(data.access_token);
-  
-          // Utilisation de l'access token pour l'appel API GET avec Authorization
           getFicheMetierData(data.access_token)
             .then((data) => {
               
@@ -45,18 +56,72 @@ function MetierScreen() {
           console.error('Authentication error:', error.message);
           setLoading(false);
         });
+        listmetier()
+        .then((data) => {
+            setTableData(data);
+            setLoading(false);
+        })
+        .catch((error) => {
+          console.error('bakend error:', error.message);
+          setLoading(false);
+        });
     }, []);
-  
+    
+    const [createModalOpen, setCreateModalOpen] = useState(false);
+    const [validationErrors, setValidationErrors] = useState({});
+
+    const handleCreateNewRow = (values) => {
+        datatable.push(values);
+        setTableData([...datatable]);
+    };
+
+    const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
+        if (!Object.keys(validationErrors).length) {
+            datatable[row.index] = values;
+        setTableData([...datatable]);
+        exitEditingMode();
+        }
+    };
+
+    const handleCancelRowEdits = () => {
+        setValidationErrors({});
+    };
+
+    const handleDeleteRow = useCallback(
+        (row) => {
+            datatable.splice(row.index, 1);
+            setTableData([...datatable]);
+        },
+        [datatable],
+    );
+    
     const columns = useMemo(
-        () =>[
-            { 
-                accessorKey: 'code',
-                header: 'Code',
-                Cell: ({ cell, column }) => (
-                    <Link to={`/competences/${cell.getValue()}`}>{cell.getValue()}</Link>
-                ),
-            },
-            { accessorKey: 'libelle', header: 'Libellé' },
+        () => [
+          {
+            accessorKey: 'id',
+            header: 'ID',
+            enableColumnOrdering: true,
+            enableEditing: false,
+            enableSorting: true,
+            size: 80,
+          },
+          {
+            accessorKey: 'code',
+            header: 'Code Rome',
+            size: 140
+          },
+          {
+            accessorKey: 'nom',
+            header: 'Nom',
+            size: 140
+          },
+          {
+            accessorKey: 'creation',
+            header: 'Date création',
+            enableColumnOrdering: true,
+            enableEditing: false,
+            enableSorting: true,
+          }
         ],
         [],
     );
@@ -105,15 +170,33 @@ function MetierScreen() {
                     <Box>
                         
                     </Box>
-                    <Paper sx={{ mt: 2, width: '100%'}}>
+                    <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
                         <MaterialReactTable
+                            displayColumnDefOptions={{
+                            'mrt-row-actions': {
+                                muiTableHeadCellProps: {
+                                align: 'center',
+                                },
+                                size: 120,
+                            },
+                            }}
                             columns={columns}
-                            data={data}
-                            rowsPerPageOptions={[5, 10, 20]}
-                            pagination
-                            autoHeight
-                            localization={MRT_Localization_FR}
-                            enableStickyHeader
+                            data={datatable}
+                            editingMode="modal"
+                            enableColumnOrdering
+                            enableEditing
+                            onEditingRowSave={handleSaveRowEdits}
+                            onEditingRowCancel={handleCancelRowEdits}
+                            muiBottomToolbarProps = {{
+                                sx: {
+                                    backgroundColor: 'unset'
+                                },
+                            }}
+                            muiTopToolbarProps = {{
+                                sx: {
+                                    backgroundColor: 'unset'
+                                },
+                            }}
                             muiTableBodyProps={{
                                 sx: {
                                     '& tr:nth-of-type(odd)': {
@@ -126,24 +209,49 @@ function MetierScreen() {
                                     color: 'black.main'
                                 },
                             }}
-                            enableTopToolbar={false} //hide top toolbar
-                            muiTableHeadCellProps={{
-                                sx: {
-                                    color: 'black.main'
-                                },
-                            }}
                             muiTableHeadRowProps={{
                                 sx: {
-                                    backgroundColor: "unset"
+                                    color: 'black.main',
+                                    backgroundColor: 'unset'
                                 },
                             }}
-                            muiTableBodyRowProps={{
+                            muiTableHeadCellProps={{
                                 sx: {
-                                    backgroundColor: "unset"
+                                    color: 'black.main',
+                                    backgroundColor: 'unset'
                                 },
-                                hover: false
                             }}
-                            initialState={{ density: 'compact' }}
+                            renderRowActions={({ row, table }) => (
+                            <Box sx={{ display: 'flex', gap: '1rem' }}>
+                                <Tooltip arrow placement="left" title="Edit">
+                                <IconButton onClick={() => table.setEditingRow(row)}>
+                                    <Edit />
+                                </IconButton>
+                                </Tooltip>
+                                <Tooltip arrow placement="right" title="Delete">
+                                <IconButton color="error" onClick={() => handleDeleteRow(row)}>
+                                    <Delete />
+                                </IconButton>
+                                </Tooltip>
+                            </Box>
+                            )}
+                            renderTopToolbarCustomActions={() => (
+                            <Button
+                                color="secondary"
+                                onClick={() => setCreateModalOpen(true)}
+                                variant="contained"
+                            >
+                                Ajoute nouveau metier
+                            </Button>
+                            )}
+                            localization={MRT_Localization_FR}
+                        />
+                        <CreateNewMetierModal
+                            columns={columns}
+                            open={createModalOpen}
+                            onClose={() => setCreateModalOpen(false)}
+                            onSubmit={handleCreateNewRow}
+                            metierlist={data}
                         />
                     </Paper>
                 </Grid>
@@ -152,5 +260,87 @@ function MetierScreen() {
     </Fragment>
     );
 }
-
+export const CreateNewMetierModal = ({ open, columns, onClose, onSubmit, metierlist }) => {
+    const formattedData = metierlist.map((item) => ({
+        'label': item.libelle
+    }));
+    const formattedDatacode = metierlist.map((item) => ({
+        'label': item.code
+    }));
+    const [newmetier, setNewnode] = useState({
+        nom: "",
+        code: ""
+    });
+    const handleChangeMetier = (event, value) => {
+      setNewnode({ ...newmetier, nom: value.label });
+    };
+    const handleChangeCode = (event, value) => {
+        setNewnode({ ...newmetier, code: value.label });
+    };
+  
+    const handleSubmit = () => {
+      onSubmit(newmetier);
+      onClose();
+    };
+  
+    return (
+      <Dialog open={open} maxWidth={'md'}>
+        <DialogTitle textAlign="center">Crée un métier</DialogTitle>
+        <DialogContent  dividers={true}>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <Stack
+              sx={{
+                minWidth: { xs: '300px', sm: '360px', md: '400px' },
+                gap: '1.5rem',
+              }}
+            >
+              <Autocomplete
+                sx={{
+                    m: 2,
+                    width: '90%',
+                }}
+                disablePortal
+                options={formattedDatacode}
+                onChange={handleChangeCode}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        required
+                        label="Code" 
+                        name="code"
+                        variant="outlined"
+                    />
+                )}
+              />
+              <Autocomplete
+                sx={{
+                    m: 2,
+                    width: '90%',
+                }}
+                freeSolo
+                disablePortal
+                options={formattedData}
+                onChange={handleChangeMetier}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        required
+                        label="Nom" 
+                        name="nom"
+                        variant="outlined"
+                    />
+                )}
+              />
+            </Stack>
+          </form>
+        </DialogContent>
+        <DialogActions sx={{ p: '1.25rem' }}>
+          <Button onClick={onClose}>Annuler</Button>
+          <Button color="secondary" onClick={handleSubmit} variant="contained">
+            Crée un métier
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  };
 export default MetierScreen
