@@ -27,7 +27,6 @@ function CompetanceScreen({setLoading, setError}) {
         code: ""
     });
     useEffect(() => {
-        setLoading(true);
         const fetchData = async () => {
             try {
                 const access = await authenticateClient();
