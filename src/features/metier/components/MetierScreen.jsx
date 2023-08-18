@@ -1,12 +1,7 @@
-import HeaderInScreen from '../../header/HeaderInScreen'
-import { LoadingAPI } from '../../../shared'
-import { LeftMenu } from '../../../shared'
-import React, { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { authenticateClient, getFicheMetierData } from '../../../services/PoleEmploisService';
 import { listmetier, postmetier, updatemetier, deletemetier } from '../../../services/MetierService';
 import MaterialReactTable from 'material-react-table';
-import { useTheme } from '@mui/material/styles'
-import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import CreateNewMetierModal from './NewMetierModal';
 import {
@@ -20,15 +15,10 @@ import {
 import { Delete, Edit } from '@mui/icons-material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 
-function MetierScreen() {
-    const theme = useTheme()
-    const page = 'COMPETENCES'
-    const [data, setData] = useState([]);
+function MetierScreen({setLoading, setError}) {
     const [datatable, setTableData] = useState([]);
     const [metierlistdata, setMetierlistdata] = useState([]);
     const [metiercodedata, setMetiercodedata] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [selectedmetier, setNewnode] = useState({
         nom: "",
         code: ""
@@ -47,7 +37,6 @@ function MetierScreen() {
                     code: item.code,
                     libelle: item.metier.libelle,
                 }));
-                setData(formattedData);
                 const formattedmetier = formattedData.map((item) => ({
                     'label': item.libelle
                 }));
@@ -64,7 +53,7 @@ function MetierScreen() {
             }
         };
         fetchData();
-    }, []);
+    }, [setLoading, setLoading]);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
 
@@ -186,6 +175,9 @@ function MetierScreen() {
                         label="Nom" 
                         name="nom"
                         variant="outlined"
+                        onChange={(e) =>
+                            setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                        }
                     />
                 )}
             />
@@ -236,147 +228,100 @@ function MetierScreen() {
         ],
         [metiercodedata, metierlistdata, selectedmetier],
     );
-
-    if (loading || error) {
-      return (
-        <Fragment>
-            <HeaderInScreen
-                title={page}
-            />
-            { LoadingAPI (loading, error, page)}
-        </Fragment>
-      );
-    }
-  
     // Affichez les données récupérées
     return (
-      <Fragment>
-        <HeaderInScreen
-            title={page}
-        />
-        <Box
-            backgroundColor="background.paper"
-            display={'flex'}
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            height={'auto'}
-            minHeight="80vh"
-        >
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={3}>
-                    {LeftMenu(page)}
-                </Grid>
-                <Grid item xs={12} md={9}
-                    sx={{
-                        [theme.breakpoints.up('lg')]: {
-                            mt: 5,
+        <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
+            <MaterialReactTable
+                initialState={{ columnVisibility: { descriptionC: false,  descriptionL: false} }}
+                displayColumnDefOptions={{
+                'mrt-row-actions': {
+                    muiTableHeadCellProps: {
+                    align: 'center',
+                    },
+                    size: 120,
+                },
+                }}
+                columns={columns}
+                data={datatable}
+                editingMode="modal"
+                enableColumnOrdering
+                enableEditing
+                onEditingRowSave={handleSaveRowEdits}
+                muiBottomToolbarProps = {{
+                    sx: {
+                        backgroundColor: 'unset'
+                    },
+                }}
+                muiTopToolbarProps = {{
+                    sx: {
+                        backgroundColor: 'unset'
+                    },
+                }}
+                muiTableBodyProps={{
+                    sx: {
+                        '& tr:nth-of-type(odd)': {
+                            backgroundColor: '#f5f5f5',
                         },
-                        [theme.breakpoints.down('sm')]: {
-                            my: 1,
-                            mx: 0,
+                    },
+                }}
+                muiTableBodyCellProps={{
+                    sx: {
+                        color: 'black.main'
+                    },
+                }}
+                muiTableBodyRowProps={{
+                    sx: {
+                        ':hover td': {
+                            backgroundColor: '#f5f5f5',
                         },
-                    }}
+                        backgroundColor: 'unset',
+                    },
+                }}
+                muiTableHeadRowProps={{
+                    sx: {
+                        color: 'black.main',
+                        backgroundColor: 'unset'
+                    },
+                }}
+                muiTableHeadCellProps={{
+                    sx: {
+                        color: 'black.main',
+                        backgroundColor: 'unset'
+                    },
+                }}
+                renderRowActions={({ row, table }) => (
+                <Box sx={{ display: 'flex', gap: '1rem' }}>
+                    <Tooltip arrow placement="left" title="Edit">
+                    <IconButton onClick={() => table.setEditingRow(row)}>
+                        <Edit />
+                    </IconButton>
+                    </Tooltip>
+                    <Tooltip arrow placement="right" title="Delete">
+                    <IconButton color="error" onClick={() => handleDeleteRow(row)}>
+                        <Delete />
+                    </IconButton>
+                    </Tooltip>
+                </Box>
+                )}
+                renderTopToolbarCustomActions={() => (
+                <Button
+                    color="secondary"
+                    onClick={() => setCreateModalOpen(true)}
+                    variant="contained"
                 >
-                    <Box>
-                        
-                    </Box>
-                    <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
-                        <MaterialReactTable
-                            initialState={{ columnVisibility: { descriptionC: false,  descriptionL: false} }}
-                            displayColumnDefOptions={{
-                            'mrt-row-actions': {
-                                muiTableHeadCellProps: {
-                                align: 'center',
-                                },
-                                size: 120,
-                            },
-                            }}
-                            columns={columns}
-                            data={datatable}
-                            editingMode="modal"
-                            enableColumnOrdering
-                            enableEditing
-                            onEditingRowSave={handleSaveRowEdits}
-                            muiBottomToolbarProps = {{
-                                sx: {
-                                    backgroundColor: 'unset'
-                                },
-                            }}
-                            muiTopToolbarProps = {{
-                                sx: {
-                                    backgroundColor: 'unset'
-                                },
-                            }}
-                            muiTableBodyProps={{
-                                sx: {
-                                    '& tr:nth-of-type(odd)': {
-                                        backgroundColor: '#f5f5f5',
-                                    },
-                                },
-                            }}
-                            muiTableBodyCellProps={{
-                                sx: {
-                                    color: 'black.main'
-                                },
-                            }}
-                            muiTableBodyRowProps={{
-                                sx: {
-                                    ':hover td': {
-                                        backgroundColor: '#f5f5f5',
-                                    },
-                                    backgroundColor: 'unset',
-                                },
-                            }}
-                            muiTableHeadRowProps={{
-                                sx: {
-                                    color: 'black.main',
-                                    backgroundColor: 'unset'
-                                },
-                            }}
-                            muiTableHeadCellProps={{
-                                sx: {
-                                    color: 'black.main',
-                                    backgroundColor: 'unset'
-                                },
-                            }}
-                            renderRowActions={({ row, table }) => (
-                            <Box sx={{ display: 'flex', gap: '1rem' }}>
-                                <Tooltip arrow placement="left" title="Edit">
-                                <IconButton onClick={() => table.setEditingRow(row)}>
-                                    <Edit />
-                                </IconButton>
-                                </Tooltip>
-                                <Tooltip arrow placement="right" title="Delete">
-                                <IconButton color="error" onClick={() => handleDeleteRow(row)}>
-                                    <Delete />
-                                </IconButton>
-                                </Tooltip>
-                            </Box>
-                            )}
-                            renderTopToolbarCustomActions={() => (
-                            <Button
-                                color="secondary"
-                                onClick={() => setCreateModalOpen(true)}
-                                variant="contained"
-                            >
-                                Ajoute nouveau metier
-                            </Button>
-                            )}
-                            localization={MRT_Localization_FR}
-                        />
-                        <CreateNewMetierModal
-                            open={createModalOpen}
-                            onClose={() => setCreateModalOpen(false)}
-                            onSubmit={handleCreateNewRow}
-                            metierlist={metierlistdata}
-                            codelist={metiercodedata}
-                        />
-                    </Paper>
-                </Grid>
-            </Grid>
-        </Box>
-    </Fragment>
+                    Ajoute nouveau metier
+                </Button>
+                )}
+                localization={MRT_Localization_FR}
+            />
+            <CreateNewMetierModal
+                open={createModalOpen}
+                onClose={() => setCreateModalOpen(false)}
+                onSubmit={handleCreateNewRow}
+                metierlist={metierlistdata}
+                codelist={metiercodedata}
+            />
+        </Paper>
     );
 }
 

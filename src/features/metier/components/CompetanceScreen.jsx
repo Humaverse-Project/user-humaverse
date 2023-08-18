@@ -1,155 +1,323 @@
-import HeaderInScreen from '../../header/HeaderInScreen'
-import { LoadingAPI } from '../../../shared'
-import { LeftMenu } from '../../../shared'
-import React, { Fragment, useState, useEffect, useMemo } from 'react';
-import { authenticateClient, getFicheMetierData } from '../../../services/PoleEmploisService';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { authenticateClient, getListeCompetance } from '../../../services/PoleEmploisService';
+import { listcompetance, postcompetance, updatecompetance, deletecompetance } from '../../../services/CompetanceService';
 import MaterialReactTable from 'material-react-table';
-import { useTheme } from '@mui/material/styles'
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
+import CreateNewCompetanceModal from './NewCompetanceModal';
+import {
+    Box,
+    Button,
+    IconButton,
+    TextField,
+    Tooltip,
+    Autocomplete
+} from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
-import { Link } from 'react-router-dom';
 
-function CompetanceScreen() {
-    const theme = useTheme()
-    const page = 'COMPETENCES'
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [accessToken, setAccessToken] = useState(null);
-  
+function CompetanceScreen({setLoading, setError}) {
+    const [datatable, setTableData] = useState([]);
+    const [metiercodedata, setMetiercodedata] = useState([]);
+    const [selectedmetier, setNewnode] = useState({
+        code: "",
+        class: ""
+    });
     useEffect(() => {
-      // Appel d'authentification client pour obtenir l'access token
-      authenticateClient()
+        const fetchData = async () => {
+            try {
+                const access = await authenticateClient();
+                const datametierexistant = await listcompetance();
+                const dataaccess = await access;
+                const reponsemetie = await datametierexistant;
+                setTableData(reponsemetie);
+                const metier = await getListeCompetance(dataaccess.access_token);
+                const datametier = await metier;
+                const formattedData = datametier.map((item) => ({
+                    code: item.code,
+                    libelle: item.libelle,
+                }));
+                const formattedDatacode = formattedData.map((item) => ({
+                    'label': item.code
+                }));
+                setMetiercodedata(formattedDatacode)
+              setLoading(false);
+            } catch (error) {
+              console.error('Une erreur s\'est produite :', error);
+              setError("Une erreur s'est produite lors de l'appele serveur");
+              setLoading(false);
+            }
+        };
+        fetchData();
+    }, [setLoading, setLoading]);
+    
+    const [createModalOpen, setCreateModalOpen] = useState(false);
+
+    const handleCreateNewRow = (values) => {
+        console.log(values)
+        setLoading(true);
+        postcompetance(values)
         .then((data) => {
-          setAccessToken(data.access_token);
-  
-          // Utilisation de l'access token pour l'appel API GET avec Authorization
-          getFicheMetierData(data.access_token)
-            .then((data) => {
-              
-              const formattedData = data.map((item) => ({
-                code: item.code,
-                libelle: item.metier.libelle,
-              }));
-              setData(formattedData);
-              setLoading(false);
-            })
-            .catch((error) => {
-              setError(error.message);
-              setLoading(false);
-            });
+            setTableData([...data]);
+            setLoading(false);
         })
         .catch((error) => {
-          console.error('Authentication error:', error.message);
-          setLoading(false);
+            setError('bakend error');
+            console.error('bakend error:', error.message);
+            setLoading(false);
         });
-    }, []);
-  
-    const columns = useMemo(
-        () =>[
-            { 
-                accessorKey: 'code',
-                header: 'Code',
-                Cell: ({ cell, column }) => (
-                    <Link to={`/competences/${cell.getValue()}`}>{cell.getValue()}</Link>
-                ),
-            },
-            { accessorKey: 'libelle', header: 'Libellé' },
-        ],
-        [],
-    );
+        
+    };
 
-    if (loading || error) {
-      return (
-        <Fragment>
-            <HeaderInScreen
-                title={page}
+    const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
+        if(selectedmetier.code !== ""){
+            selectedmetier.code = values.code
+        }
+        if(selectedmetier.class !== ""){
+            selectedmetier.class = values.class
+        }
+        if(selectedmetier.descriptionC !== ""){
+            selectedmetier.descriptionC = values.descriptionC
+        }
+        if(selectedmetier.descriptionL !== ""){
+            selectedmetier.descriptionL = values.descriptionL
+        }
+        selectedmetier.id = values.id
+        console.log(values,selectedmetier)
+        setLoading(true);
+        updatecompetance(selectedmetier)
+        .then((data) => {
+            setTableData([...data]);
+            setLoading(false);
+        })
+        .catch((error) => {
+            setError('bakend error');
+            console.error('bakend error:', error.message);
+            setLoading(false);
+        });
+    };
+
+    const handleDeleteRow = useCallback(
+        (row) => {
+            datatable.splice(row.index, 1);
+            setTableData([...datatable]);
+            setLoading(true);
+            deletecompetance(row.original.id)
+            .then((data) => {
+                setTableData([...data]);
+                setLoading(false);
+            })
+            .catch((error) => {
+                setError('bakend error');
+                console.error('bakend error:', error.message);
+                setLoading(false);
+            });
+        },
+        [datatable],
+    );
+    
+    const columns = useMemo(
+        () => [
+          {
+            accessorKey: 'id',
+            header: 'ID',
+            enableColumnOrdering: true,
+            enableEditing: false,
+            enableSorting: true,
+            size: 80,
+          },
+          {
+            accessorKey: 'code',
+            header: 'Source',
+            size: 140,
+            Edit: ({ cell, column, table }) => <Autocomplete
+                defaultValue={cell.getValue()}
+                sx={{
+                    width: '100%',
+                }}
+                freeSolo
+                disablePortal
+                options={metiercodedata}
+                onChange={(e, value) =>
+                    setNewnode({ ...selectedmetier, code: value.label })
+                }
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        required
+                        label="Source" 
+                        name="code"
+                        variant="outlined"
+                        onChange={(e) =>
+                            setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                        }
+                    />
+                )}
+            />,
+          },
+          {
+            accessorKey: 'class',
+            header: 'Classe',
+            size: 140,
+            Edit: ({ cell, column, table }) => <Autocomplete
+                defaultValue={cell.getValue()}
+                sx={{
+                    width: '100%',
+                }}
+                disablePortal
+                options={["Savoirs", "Savoirs Faire", "Savoirs Être", "Accrédidations"]}
+                onChange={(e, value) =>
+                    setNewnode({ ...selectedmetier, class: value })
+                }
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        required
+                        label="Classe" 
+                        name="class"
+                        variant="outlined"
+                    />
+                )}
+            />,
+          },
+          {
+            accessorKey: 'descriptionC',
+            header: 'Decription courte',
+            size: 140,
+            enableHiding: true,
+            Edit: ({ cell, column, table }) => <TextField
+                defaultValue={cell.getValue()}
+                key="descriptionC"
+                label="description courte"
+                name="descriptionC"
+                onChange={(e) =>
+                    setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                }
+                sx={{
+                    width: '100%',
+                }}
             />
-            { LoadingAPI (loading, error, page)}
-        </Fragment>
-      );
-    }
-  
+          },
+          {
+            accessorKey: 'descriptionL',
+            header: 'Decription longue',
+            size: 140,
+            enableHiding: true,
+            Edit: ({ cell, column, table }) => <TextField
+                defaultValue={cell.getValue()}
+                key="descriptionL"
+                label="description longue"
+                name="descriptionL"
+                onChange={(e) =>
+                    setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                }
+                sx={{
+                    width: '100%',
+                }}
+            />
+          },
+          {
+            accessorKey: 'creation',
+            header: 'Date création',
+            enableColumnOrdering: true,
+            enableEditing: false,
+            enableSorting: true,
+          }
+        ],
+        [metiercodedata, selectedmetier],
+    );
     // Affichez les données récupérées
     return (
-      <Fragment>
-        <HeaderInScreen
-            title={page}
-        />
-        <Box
-            backgroundColor="background.paper"
-            display={'flex'}
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            height={'auto'}
-            minHeight="80vh"
-        >
-            <Grid container spacing={2}>
-                <Grid item xs={12} md={3}>
-                    {LeftMenu(page)}
-                </Grid>
-                <Grid item xs={12} md={9}
-                    sx={{
-                        [theme.breakpoints.up('lg')]: {
-                            mt: 5,
+        <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
+            <MaterialReactTable
+                initialState={{ columnVisibility: { descriptionL: false} }}
+                displayColumnDefOptions={{
+                'mrt-row-actions': {
+                    muiTableHeadCellProps: {
+                    align: 'center',
+                    },
+                    size: 120,
+                },
+                }}
+                columns={columns}
+                data={datatable}
+                editingMode="modal"
+                enableColumnOrdering
+                enableEditing
+                onEditingRowSave={handleSaveRowEdits}
+                muiBottomToolbarProps = {{
+                    sx: {
+                        backgroundColor: 'unset'
+                    },
+                }}
+                muiTopToolbarProps = {{
+                    sx: {
+                        backgroundColor: 'unset'
+                    },
+                }}
+                muiTableBodyProps={{
+                    sx: {
+                        '& tr:nth-of-type(odd)': {
+                            backgroundColor: '#f5f5f5',
                         },
-                        [theme.breakpoints.down('sm')]: {
-                            my: 1,
-                            mx: 0,
+                    },
+                }}
+                muiTableBodyCellProps={{
+                    sx: {
+                        color: 'black.main'
+                    },
+                }}
+                muiTableBodyRowProps={{
+                    sx: {
+                        ':hover td': {
+                            backgroundColor: '#f5f5f5',
                         },
-                    }}
+                        backgroundColor: 'unset',
+                    },
+                }}
+                muiTableHeadRowProps={{
+                    sx: {
+                        color: 'black.main',
+                        backgroundColor: 'unset'
+                    },
+                }}
+                muiTableHeadCellProps={{
+                    sx: {
+                        color: 'black.main',
+                        backgroundColor: 'unset'
+                    },
+                }}
+                renderRowActions={({ row, table }) => (
+                <Box sx={{ display: 'flex', gap: '1rem' }}>
+                    <Tooltip arrow placement="left" title="Edit">
+                    <IconButton onClick={() => table.setEditingRow(row)}>
+                        <Edit />
+                    </IconButton>
+                    </Tooltip>
+                    <Tooltip arrow placement="right" title="Delete">
+                    <IconButton color="error" onClick={() => handleDeleteRow(row)}>
+                        <Delete />
+                    </IconButton>
+                    </Tooltip>
+                </Box>
+                )}
+                renderTopToolbarCustomActions={() => (
+                <Button
+                    color="secondary"
+                    onClick={() => setCreateModalOpen(true)}
+                    variant="contained"
                 >
-                    <Box>
-                        
-                    </Box>
-                    <Paper sx={{ mt: 2, width: '100%'}}>
-                        <MaterialReactTable
-                            columns={columns}
-                            data={data}
-                            rowsPerPageOptions={[5, 10, 20]}
-                            pagination
-                            autoHeight
-                            localization={MRT_Localization_FR}
-                            enableStickyHeader
-                            muiTableBodyProps={{
-                                sx: {
-                                    '& tr:nth-of-type(odd)': {
-                                    backgroundColor: '#f5f5f5',
-                                    },
-                                },
-                            }}
-                            muiTableBodyCellProps={{
-                                sx: {
-                                    color: 'black.main'
-                                },
-                            }}
-                            enableTopToolbar={false} //hide top toolbar
-                            muiTableHeadCellProps={{
-                                sx: {
-                                    color: 'black.main'
-                                },
-                            }}
-                            muiTableHeadRowProps={{
-                                sx: {
-                                    backgroundColor: "unset"
-                                },
-                            }}
-                            muiTableBodyRowProps={{
-                                sx: {
-                                    backgroundColor: "unset"
-                                },
-                                hover: false
-                            }}
-                            initialState={{ density: 'compact' }}
-                        />
-                    </Paper>
-                </Grid>
-            </Grid>
-        </Box>
-    </Fragment>
+                    Ajouté nouveau competance
+                </Button>
+                )}
+                localization={MRT_Localization_FR}
+            />
+            <CreateNewCompetanceModal
+                open={createModalOpen}
+                onClose={() => setCreateModalOpen(false)}
+                onSubmit={handleCreateNewRow}
+                codelist={metiercodedata}
+            />
+        </Paper>
     );
 }
 
