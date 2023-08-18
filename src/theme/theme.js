@@ -7,6 +7,8 @@ const palette = {
     grey: '#E5E7E6',
     greyText: '#7E7E7E',
     greyCard: '#CACACA',
+    logocolor: '#ff2600',
+    green: '#00f900',
 }
 
 const typo = {
@@ -59,6 +61,12 @@ const theme = createTheme({
         text: {
             primary: palette.red,
             secondary: '#000000',
+        },
+        logocolor: {
+            main: palette.logocolor,
+        },
+        green: {
+            main: palette.green,
         },
         /*custom: {
       light: '#ffa726',

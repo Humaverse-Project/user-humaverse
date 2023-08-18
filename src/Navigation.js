@@ -4,7 +4,9 @@ import {
     FicheRHScreen,
     NotFoundScreen,
     LoginScreen,
-    FicheFormationScreen
+    FicheFormationScreen,
+    MainScreen,
+    MetierDetailScreen
 } from './features'
 
 function Navigation() {
@@ -34,6 +36,16 @@ function Navigation() {
             id: 5,
             path: '/ficheformation',
             components: <FicheFormationScreen />,
+        },
+        {
+            id: 6,
+            path: '/competences',
+            components: <MainScreen />,
+        },
+        {
+            id: 7,
+            path: '/competences/:code',
+            components: <MetierDetailScreen />,
         }
     ]
 
