@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { authenticateClient, getFicheMetierData } from '../../../services/PoleEmploisService';
-import { listmetier, postmetier, updatemetier, deletemetier } from '../../../services/MetierService';
+import { authenticateClient, getListeCompetance } from '../../../services/PoleEmploisService';
+import { listcompetance, postcompetance, updatecompetance, deletecompetance } from '../../../services/CompetanceService';
 import MaterialReactTable from 'material-react-table';
 import Paper from '@mui/material/Paper';
-import CreateNewMetierModal from './NewMetierModal';
+import CreateNewCompetanceModal from './NewCompetanceModal';
 import {
     Box,
     Button,
@@ -16,35 +16,26 @@ import { Delete, Edit } from '@mui/icons-material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 
 function CompetanceScreen({setLoading, setError}) {
-    
-    const page = 'COMPETENCES'
-    const [data, setData] = useState([]);
     const [datatable, setTableData] = useState([]);
-    const [metierlistdata, setMetierlistdata] = useState([]);
     const [metiercodedata, setMetiercodedata] = useState([]);
     const [selectedmetier, setNewnode] = useState({
-        nom: "",
-        code: ""
+        code: "",
+        class: ""
     });
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const access = await authenticateClient();
-                const datametierexistant = await listmetier();
+                const datametierexistant = await listcompetance();
                 const dataaccess = await access;
                 const reponsemetie = await datametierexistant;
                 setTableData(reponsemetie);
-                const metier = await getFicheMetierData(dataaccess.access_token);
+                const metier = await getListeCompetance(dataaccess.access_token);
                 const datametier = await metier;
                 const formattedData = datametier.map((item) => ({
                     code: item.code,
-                    libelle: item.metier.libelle,
+                    libelle: item.libelle,
                 }));
-                setData(formattedData);
-                const formattedmetier = formattedData.map((item) => ({
-                    'label': item.libelle
-                }));
-                setMetierlistdata(formattedmetier)
                 const formattedDatacode = formattedData.map((item) => ({
                     'label': item.code
                 }));
@@ -57,13 +48,14 @@ function CompetanceScreen({setLoading, setError}) {
             }
         };
         fetchData();
-    }, []);
+    }, [setLoading, setLoading]);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
 
     const handleCreateNewRow = (values) => {
+        console.log(values)
         setLoading(true);
-        postmetier(values)
+        postcompetance(values)
         .then((data) => {
             setTableData([...data]);
             setLoading(false);
@@ -77,22 +69,22 @@ function CompetanceScreen({setLoading, setError}) {
     };
 
     const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-        if(values.code !== ""){
+        if(selectedmetier.code !== ""){
             selectedmetier.code = values.code
         }
-        if(values.nom !== ""){
-            selectedmetier.nom = values.nom
+        if(selectedmetier.class !== ""){
+            selectedmetier.class = values.class
         }
-        if(values.descriptionC !== ""){
+        if(selectedmetier.descriptionC !== ""){
             selectedmetier.descriptionC = values.descriptionC
         }
-        if(values.descriptionP !== ""){
-            selectedmetier.descriptionP = values.descriptionP
+        if(selectedmetier.descriptionL !== ""){
+            selectedmetier.descriptionL = values.descriptionL
         }
         selectedmetier.id = values.id
-        console.log(selectedmetier)
+        console.log(values,selectedmetier)
         setLoading(true);
-        updatemetier(selectedmetier)
+        updatecompetance(selectedmetier)
         .then((data) => {
             setTableData([...data]);
             setLoading(false);
@@ -109,7 +101,7 @@ function CompetanceScreen({setLoading, setError}) {
             datatable.splice(row.index, 1);
             setTableData([...datatable]);
             setLoading(true);
-            deletemetier(row.original.id)
+            deletecompetance(row.original.id)
             .then((data) => {
                 setTableData([...data]);
                 setLoading(false);
@@ -135,40 +127,16 @@ function CompetanceScreen({setLoading, setError}) {
           },
           {
             accessorKey: 'code',
-            header: 'Code Rome',
+            header: 'Source',
             size: 140,
             Edit: ({ cell, column, table }) => <Autocomplete
                 defaultValue={cell.getValue()}
                 sx={{
                     width: '100%',
                 }}
+                freeSolo
                 disablePortal
                 options={metiercodedata}
-                onChange={(e, value) =>
-                    setNewnode({ ...selectedmetier, nom: value.label })
-                }
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        required
-                        label="Code" 
-                        name="code"
-                        variant="outlined"
-                    />
-                )}
-            />,
-          },
-          {
-            accessorKey: 'nom',
-            header: 'Nom',
-            size: 140,
-            Edit: ({ cell, column, table }) => <Autocomplete
-                defaultValue={cell.getValue()}
-                sx={{
-                    width: '100%',
-                }}
-                disablePortal
-                options={metierlistdata}
                 onChange={(e, value) =>
                     setNewnode({ ...selectedmetier, code: value.label })
                 }
@@ -176,12 +144,40 @@ function CompetanceScreen({setLoading, setError}) {
                     <TextField
                         {...params}
                         required
-                        label="Nom" 
-                        name="nom"
+                        label="Source" 
+                        name="code"
+                        variant="outlined"
+                        onChange={(e) =>
+                            setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                        }
+                    />
+                )}
+            />,
+          },
+          {
+            accessorKey: 'class',
+            header: 'Classe',
+            size: 140,
+            Edit: ({ cell, column, table }) => <Autocomplete
+                defaultValue={cell.getValue()}
+                sx={{
+                    width: '100%',
+                }}
+                disablePortal
+                options={["Savoirs", "Savoirs Faire", "Savoirs Être", "Accrédidations"]}
+                onChange={(e, value) =>
+                    setNewnode({ ...selectedmetier, class: value })
+                }
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        required
+                        label="Classe" 
+                        name="class"
                         variant="outlined"
                     />
                 )}
-            />
+            />,
           },
           {
             accessorKey: 'descriptionC',
@@ -227,13 +223,13 @@ function CompetanceScreen({setLoading, setError}) {
             enableSorting: true,
           }
         ],
-        [metiercodedata, metierlistdata, selectedmetier],
+        [metiercodedata, selectedmetier],
     );
     // Affichez les données récupérées
     return (
         <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
             <MaterialReactTable
-                initialState={{ columnVisibility: { descriptionC: false,  descriptionL: false} }}
+                initialState={{ columnVisibility: { descriptionL: false} }}
                 displayColumnDefOptions={{
                 'mrt-row-actions': {
                     muiTableHeadCellProps: {
@@ -310,16 +306,15 @@ function CompetanceScreen({setLoading, setError}) {
                     onClick={() => setCreateModalOpen(true)}
                     variant="contained"
                 >
-                    Ajoute nouveau metier
+                    Ajouté nouveau competance
                 </Button>
                 )}
                 localization={MRT_Localization_FR}
             />
-            <CreateNewMetierModal
+            <CreateNewCompetanceModal
                 open={createModalOpen}
                 onClose={() => setCreateModalOpen(false)}
                 onSubmit={handleCreateNewRow}
-                metierlist={metierlistdata}
                 codelist={metiercodedata}
             />
         </Paper>

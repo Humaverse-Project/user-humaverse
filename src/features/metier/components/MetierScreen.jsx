@@ -16,8 +16,6 @@ import { Delete, Edit } from '@mui/icons-material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 
 function MetierScreen({setLoading, setError}) {
-    const page = 'COMPETENCES'
-    const [data, setData] = useState([]);
     const [datatable, setTableData] = useState([]);
     const [metierlistdata, setMetierlistdata] = useState([]);
     const [metiercodedata, setMetiercodedata] = useState([]);
@@ -39,7 +37,6 @@ function MetierScreen({setLoading, setError}) {
                     code: item.code,
                     libelle: item.metier.libelle,
                 }));
-                setData(formattedData);
                 const formattedmetier = formattedData.map((item) => ({
                     'label': item.libelle
                 }));
@@ -56,7 +53,7 @@ function MetierScreen({setLoading, setError}) {
             }
         };
         fetchData();
-    }, []);
+    }, [setLoading, setLoading]);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
 
@@ -178,6 +175,9 @@ function MetierScreen({setLoading, setError}) {
                         label="Nom" 
                         name="nom"
                         variant="outlined"
+                        onChange={(e) =>
+                            setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                        }
                     />
                 )}
             />

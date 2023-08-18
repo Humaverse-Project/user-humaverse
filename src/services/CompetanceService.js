@@ -12,12 +12,12 @@ export async function listcompetance() {
     return await response.json();
 }
 
-export async function postmetier(formdata) {
+export async function postcompetance(formdata) {
     const url = `${base_url}/competance/new`;
 
     const body = new URLSearchParams();
     body.append('code', formdata.code);
-    body.append('nom', formdata.nom);
+    body.append('class', formdata.class);
     body.append('description_c', formdata.description_c);
     body.append('description_l', formdata.description_l);
 
@@ -35,12 +35,12 @@ export async function postmetier(formdata) {
     return await response.json();
 }
 
-export async function updatemetier(formdata) {
+export async function updatecompetance(formdata) {
     const url = `${base_url}/competance/${formdata.id}/edit`;
 
     const body = new URLSearchParams();
     body.append('code', formdata.code);
-    body.append('nom', formdata.nom);
+    body.append('class', formdata.class);
     body.append('description_c', formdata.descriptionC);
     body.append('description_l', formdata.descriptionL);
 
@@ -58,7 +58,7 @@ export async function updatemetier(formdata) {
     return await response.json();
 }
 
-export async function deletemetier(id) {
+export async function deletecompetance(id) {
     const url = `${base_url}/competance/${id}`;
 
     const body = new URLSearchParams();

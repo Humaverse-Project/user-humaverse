@@ -10,28 +10,25 @@ import {
     Autocomplete
 } from '@mui/material';
 
-const CreateNewMetierModal = ({ open, onClose, onSubmit, metierlist, codelist }) => {
-    const formattedData = metierlist
+const CreateNewCompetanceModal = ({ open, onClose, onSubmit, codelist }) => {
     const formattedDatacode = codelist
     const [newmetier, setNewnode] = useState({
-        nom: "",
+        class: "",
         code: ""
     });
-    const handleChangeMetier = (event, value) => {
-      setNewnode({ ...newmetier, nom: value.label });
-    };
-    const handleChangeCode = (event, value) => {
-        setNewnode({ ...newmetier, code: value.label });
-    };
   
     const handleSubmit = () => {
       onSubmit(newmetier);
       onClose();
     };
-  
+
+    const handleChangeCode = (event, value) => {
+        setNewnode({ ...newmetier, code: value.label });
+    };
+    
     return (
       <Dialog open={open} maxWidth={'md'}>
-        <DialogTitle textAlign="center">Crée un métier</DialogTitle>
+        <DialogTitle textAlign="center">Crée une competance</DialogTitle>
         <DialogContent  dividers={true}>
           <form onSubmit={(e) => e.preventDefault()}>
             <Stack
@@ -46,15 +43,19 @@ const CreateNewMetierModal = ({ open, onClose, onSubmit, metierlist, codelist })
                     width: '90%',
                 }}
                 disablePortal
-                options={formattedDatacode}
+                freeSolo
                 onChange={handleChangeCode}
+                options={formattedDatacode}
                 renderInput={(params) => (
                     <TextField
                         {...params}
                         required
-                        label="Code" 
+                        label="Source" 
                         name="code"
                         variant="outlined"
+                        onChange={(e) =>
+                            setNewnode({ ...newmetier, [e.target.name]: e.target.value })
+                        }
                     />
                 )}
               />
@@ -63,20 +64,18 @@ const CreateNewMetierModal = ({ open, onClose, onSubmit, metierlist, codelist })
                     m: 2,
                     width: '90%',
                 }}
-                freeSolo
                 disablePortal
-                options={formattedData}
-                onChange={handleChangeMetier}
+                options={["Savoirs", "Savoirs Faire", "Savoirs Être", "Accrédidations"]}
+                onChange={(e, value) =>
+                  setNewnode({ ...newmetier, class: value })
+                }
                 renderInput={(params) => (
                     <TextField
                         {...params}
                         required
-                        label="Nom" 
-                        name="nom"
+                        label="Classe" 
+                        name="class"
                         variant="outlined"
-                        onChange={(e) =>
-                            setNewnode({ ...newmetier, [e.target.name]: e.target.value })
-                        }
                     />
                 )}
               />
@@ -110,11 +109,11 @@ const CreateNewMetierModal = ({ open, onClose, onSubmit, metierlist, codelist })
         <DialogActions sx={{ p: '1.25rem' }}>
           <Button onClick={onClose}>Annuler</Button>
           <Button color="secondary" onClick={handleSubmit} variant="contained">
-            Crée un métier
+            Crée le competance
           </Button>
         </DialogActions>
       </Dialog>
     );
 };
 
-export default CreateNewMetierModal
+export default CreateNewCompetanceModal
