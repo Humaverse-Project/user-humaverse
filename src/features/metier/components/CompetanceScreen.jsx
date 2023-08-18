@@ -18,10 +18,7 @@ import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 function CompetanceScreen({setLoading, setError}) {
     const [datatable, setTableData] = useState([]);
     const [metiercodedata, setMetiercodedata] = useState([]);
-    const [selectedmetier, setNewnode] = useState({
-        code: "",
-        class: ""
-    });
+    const [selectedmetier, setNewnode] = useState({});
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -48,7 +45,7 @@ function CompetanceScreen({setLoading, setError}) {
             }
         };
         fetchData();
-    }, [setLoading, setLoading]);
+    }, [setLoading, setError]);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
 
@@ -67,27 +64,30 @@ function CompetanceScreen({setLoading, setError}) {
         });
         
     };
-
+    const handleCancelRowEdits = () => {
+        setNewnode({})
+    };
     const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-        if(selectedmetier.code !== ""){
+        if(selectedmetier.code === undefined){
             selectedmetier.code = values.code
         }
-        if(selectedmetier.class !== ""){
+        if(selectedmetier.class === undefined){
             selectedmetier.class = values.class
         }
-        if(selectedmetier.descriptionC !== ""){
+        if(selectedmetier.descriptionC === undefined){
             selectedmetier.descriptionC = values.descriptionC
         }
-        if(selectedmetier.descriptionL !== ""){
+        if(selectedmetier.descriptionL === undefined){
             selectedmetier.descriptionL = values.descriptionL
         }
         selectedmetier.id = values.id
-        console.log(values,selectedmetier)
+        console.log(values,selectedmetier, values)
         setLoading(true);
         updatecompetance(selectedmetier)
         .then((data) => {
             setTableData([...data]);
             setLoading(false);
+            handleCancelRowEdits()
         })
         .catch((error) => {
             setError('bakend error');
@@ -98,8 +98,6 @@ function CompetanceScreen({setLoading, setError}) {
 
     const handleDeleteRow = useCallback(
         (row) => {
-            datatable.splice(row.index, 1);
-            setTableData([...datatable]);
             setLoading(true);
             deletecompetance(row.original.id)
             .then((data) => {
@@ -112,7 +110,7 @@ function CompetanceScreen({setLoading, setError}) {
                 setLoading(false);
             });
         },
-        [datatable],
+        [setLoading, setError],
     );
     
     const columns = useMemo(
@@ -137,9 +135,9 @@ function CompetanceScreen({setLoading, setError}) {
                 freeSolo
                 disablePortal
                 options={metiercodedata}
-                onChange={(e, value) =>
-                    setNewnode({ ...selectedmetier, code: value.label })
-                }
+                onChange={(e, value) =>{
+                    if (value != null) setNewnode({ ...selectedmetier, code: value.label })
+                }}
                 renderInput={(params) => (
                     <TextField
                         {...params}
@@ -165,9 +163,9 @@ function CompetanceScreen({setLoading, setError}) {
                 }}
                 disablePortal
                 options={["Savoirs", "Savoirs Faire", "Savoirs Être", "Accrédidations"]}
-                onChange={(e, value) =>
-                    setNewnode({ ...selectedmetier, class: value })
-                }
+                onChange={(e, value) =>{
+                    if (value != null) setNewnode({ ...selectedmetier, class: value })
+                }}
                 renderInput={(params) => (
                     <TextField
                         {...params}
@@ -244,6 +242,7 @@ function CompetanceScreen({setLoading, setError}) {
                 enableColumnOrdering
                 enableEditing
                 onEditingRowSave={handleSaveRowEdits}
+                onEditingRowCancel={handleCancelRowEdits}
                 muiBottomToolbarProps = {{
                     sx: {
                         backgroundColor: 'unset'

@@ -19,10 +19,7 @@ function MetierScreen({setLoading, setError}) {
     const [datatable, setTableData] = useState([]);
     const [metierlistdata, setMetierlistdata] = useState([]);
     const [metiercodedata, setMetiercodedata] = useState([]);
-    const [selectedmetier, setNewnode] = useState({
-        nom: "",
-        code: ""
-    });
+    const [selectedmetier, setNewnode] = useState({});
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -53,7 +50,7 @@ function MetierScreen({setLoading, setError}) {
             }
         };
         fetchData();
-    }, [setLoading, setLoading]);
+    }, [setLoading, setError]);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
 
@@ -71,27 +68,29 @@ function MetierScreen({setLoading, setError}) {
         });
         
     };
-
+    const handleCancelRowEdits = () => {
+        setNewnode({})
+    };
     const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-        if(values.code !== ""){
+        if(selectedmetier.code === undefined){
             selectedmetier.code = values.code
         }
-        if(values.nom !== ""){
+        if(selectedmetier.nom  === undefined){
             selectedmetier.nom = values.nom
         }
-        if(values.descriptionC !== ""){
+        if(selectedmetier.descriptionC  === undefined){
             selectedmetier.descriptionC = values.descriptionC
         }
-        if(values.descriptionP !== ""){
-            selectedmetier.descriptionP = values.descriptionP
+        if(selectedmetier.descriptionL  === undefined){
+            selectedmetier.descriptionL = values.descriptionL
         }
         selectedmetier.id = values.id
-        console.log(selectedmetier)
         setLoading(true);
         updatemetier(selectedmetier)
         .then((data) => {
             setTableData([...data]);
             setLoading(false);
+            handleCancelRowEdits()
         })
         .catch((error) => {
             setError('bakend error');
@@ -102,8 +101,6 @@ function MetierScreen({setLoading, setError}) {
 
     const handleDeleteRow = useCallback(
         (row) => {
-            datatable.splice(row.index, 1);
-            setTableData([...datatable]);
             setLoading(true);
             deletemetier(row.original.id)
             .then((data) => {
@@ -116,7 +113,7 @@ function MetierScreen({setLoading, setError}) {
                 setLoading(false);
             });
         },
-        [datatable],
+        [setLoading, setError],
     );
     
     const columns = useMemo(
@@ -140,9 +137,9 @@ function MetierScreen({setLoading, setError}) {
                 }}
                 disablePortal
                 options={metiercodedata}
-                onChange={(e, value) =>
-                    setNewnode({ ...selectedmetier, nom: value.label })
-                }
+                onChange={(e, value) =>{
+                    if (value != null) setNewnode({ ...selectedmetier, code: value.label })
+                }}
                 renderInput={(params) => (
                     <TextField
                         {...params}
@@ -165,9 +162,9 @@ function MetierScreen({setLoading, setError}) {
                 }}
                 disablePortal
                 options={metierlistdata}
-                onChange={(e, value) =>
-                    setNewnode({ ...selectedmetier, code: value.label })
-                }
+                onChange={(e, value) =>{
+                    if (value != null) setNewnode({ ...selectedmetier, nom: value.label })
+                }}
                 renderInput={(params) => (
                     <TextField
                         {...params}
@@ -247,6 +244,7 @@ function MetierScreen({setLoading, setError}) {
                 enableColumnOrdering
                 enableEditing
                 onEditingRowSave={handleSaveRowEdits}
+                onEditingRowCancel={handleCancelRowEdits}
                 muiBottomToolbarProps = {{
                     sx: {
                         backgroundColor: 'unset'

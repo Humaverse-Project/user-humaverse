@@ -18,10 +18,10 @@ const CreateNewMetierModal = ({ open, onClose, onSubmit, metierlist, codelist })
         code: ""
     });
     const handleChangeMetier = (event, value) => {
-      setNewnode({ ...newmetier, nom: value.label });
+      if (value != null) setNewnode({ ...newmetier, nom: value.label });
     };
     const handleChangeCode = (event, value) => {
-        setNewnode({ ...newmetier, code: value.label });
+      if (value != null)  setNewnode({ ...newmetier, code: value.label });
     };
   
     const handleSubmit = () => {
@@ -75,7 +75,7 @@ const CreateNewMetierModal = ({ open, onClose, onSubmit, metierlist, codelist })
                         name="nom"
                         variant="outlined"
                         onChange={(e) =>
-                            setNewnode({ ...newmetier, [e.target.name]: e.target.value })
+                           setNewnode({ ...newmetier, [e.target.name]: e.target.value })
                         }
                     />
                 )}
@@ -85,7 +85,7 @@ const CreateNewMetierModal = ({ open, onClose, onSubmit, metierlist, codelist })
                 label="description courte"
                 name="description_c"
                 onChange={(e) =>
-                    setNewnode({ ...newmetier, [e.target.name]: e.target.value })
+                  setNewnode({ ...newmetier, [e.target.name]: e.target.value })
                 }
                 sx={{
                     m: 2,
