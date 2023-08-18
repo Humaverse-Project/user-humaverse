@@ -68,32 +68,32 @@ function CompetanceScreen({setLoading, setError}) {
         setNewnode({})
     };
     const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-        // if(selectedmetier.code === undefined){
-        //     selectedmetier.code = values.code
-        // }
-        // if(selectedmetier.class === undefined){
-        //     selectedmetier.class = values.class
-        // }
-        // if(selectedmetier.descriptionC === undefined){
-        //     selectedmetier.descriptionC = values.descriptionC
-        // }
-        // if(selectedmetier.descriptionL === undefined){
-        //     selectedmetier.descriptionL = values.descriptionL
-        // }
-        // selectedmetier.id = values.id
+        if(selectedmetier.code === undefined){
+            selectedmetier.code = values.code
+        }
+        if(selectedmetier.class === undefined){
+            selectedmetier.class = values.class
+        }
+        if(selectedmetier.descriptionC === undefined){
+            selectedmetier.descriptionC = values.descriptionC
+        }
+        if(selectedmetier.descriptionL === undefined){
+            selectedmetier.descriptionL = values.descriptionL
+        }
+        selectedmetier.id = values.id
         console.log(values,selectedmetier, values)
         setLoading(true);
-        // updatecompetance(selectedmetier)
-        // .then((data) => {
-        //     setTableData([...data]);
-        //     setLoading(false);
-        //     handleCancelRowEdits()
-        // })
-        // .catch((error) => {
-        //     setError('bakend error');
-        //     console.error('bakend error:', error.message);
-        //     setLoading(false);
-        // });
+        updatecompetance(selectedmetier)
+        .then((data) => {
+            setTableData([...data]);
+            setLoading(false);
+            handleCancelRowEdits()
+        })
+        .catch((error) => {
+            setError('bakend error');
+            console.error('bakend error:', error.message);
+            setLoading(false);
+        });
     };
 
     const handleDeleteRow = useCallback(
