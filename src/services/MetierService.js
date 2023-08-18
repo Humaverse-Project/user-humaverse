@@ -1,4 +1,5 @@
-const base_url = "http://humaverse.local/index.php"
+import { base_url } from './BaseUrl'
+
 export async function listmetier() {
     const url = `${base_url}/metier`;
 
