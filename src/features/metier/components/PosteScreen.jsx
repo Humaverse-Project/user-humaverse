@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { listcompetance, postcompetance, updatecompetance, deletecompetance } from '../../../services/CompetanceService';
+import { listcompetance } from '../../../services/CompetanceService';
+import { listmetier } from '../../../services/MetierService';
+import { listpost, postPoste, updatePoste, deletPoste } from '../../../services/PosteService';
 import MaterialReactTable from 'material-react-table';
 import Paper from '@mui/material/Paper';
-import CreateNewCompetanceModal from './NewCompetanceModal';
+import CreateNewPosteModal from './NewPosteModal';
 import {
     Box,
     Button,
@@ -16,17 +18,29 @@ import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 
 function PosteScreen({setLoading, setError}) {
     const [datatable, setTableData] = useState([]);
-    const [metiercodedata, setMetiercodedata] = useState([]);
-    const [selectedmetier, setNewnode] = useState({
-        code: "",
-        class: ""
-    });
+    const [metierdata, setMetierdata] = useState([]);
+    const [competancedata, setCompetancedata] = useState([]);
+    const [selectedmetier, setNewnode] = useState({});
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchData = async (setLoading, setError) => {
             try {
-                const datametierexistant = await listcompetance();
-                const reponsemetie = await datametierexistant;
-                setTableData(reponsemetie);
+                const datacompetanceexistant = await listcompetance();
+                const reponsecompetance = await datacompetanceexistant;
+                const formattedDatacompet = reponsecompetance.map((item) => ({
+                    label: item.code,
+                    id: item.id
+                }));
+                setCompetancedata(formattedDatacompet);
+                const datametierexistant = await listmetier();
+                const metierdataapi = await datametierexistant;
+                const formattedDatametier = metierdataapi.map((item) => ({
+                    label: item.code,
+                    id: item.id
+                }));
+                setMetierdata(formattedDatametier);
+                const dataposteexistant = await listpost();
+                const reponseposte = await dataposteexistant;
+                setTableData(reponseposte);
                 setLoading(false);
             } catch (error) {
                 console.error('Une erreur s\'est produite :', error);
@@ -34,17 +48,17 @@ function PosteScreen({setLoading, setError}) {
                 setLoading(false);
             }
         };
-        fetchData();
-    }, [setLoading, setLoading]);
+        fetchData(setLoading, setError);
+    }, [setLoading, setError]);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
 
     const handleCreateNewRow = (values) => {
-        console.log(values)
         setLoading(true);
-        postcompetance(values)
+        console.log(values)
+        postPoste(values)
         .then((data) => {
-            setTableData([...data]);
+            setTableData(data);
             setLoading(false);
         })
         .catch((error) => {
@@ -54,27 +68,26 @@ function PosteScreen({setLoading, setError}) {
         });
         
     };
-
+    const handleCancelRowEdits = () => {
+        setNewnode({})
+    };
     const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-        if(selectedmetier.code !== ""){
-            selectedmetier.code = values.code
+        if(selectedmetier.metier_id === undefined){
+            selectedmetier.metier_id = values["metier.id"]
         }
-        if(selectedmetier.class !== ""){
-            selectedmetier.class = values.class
+        if(selectedmetier.competance_id === undefined){
+            selectedmetier.competance_id = values["competance.id"]
         }
-        if(selectedmetier.descriptionC !== ""){
-            selectedmetier.descriptionC = values.descriptionC
-        }
-        if(selectedmetier.descriptionL !== ""){
-            selectedmetier.descriptionL = values.descriptionL
+        if(selectedmetier.niveau_competance === undefined){
+            selectedmetier.niveau_competance = values.niveauCompetance
         }
         selectedmetier.id = values.id
-        console.log(values,selectedmetier)
         setLoading(true);
-        updatecompetance(selectedmetier)
+        updatePoste(selectedmetier)
         .then((data) => {
-            setTableData([...data]);
+            setTableData(data);
             setLoading(false);
+            handleCancelRowEdits()
         })
         .catch((error) => {
             setError('bakend error');
@@ -85,12 +98,10 @@ function PosteScreen({setLoading, setError}) {
 
     const handleDeleteRow = useCallback(
         (row) => {
-            datatable.splice(row.index, 1);
-            setTableData([...datatable]);
             setLoading(true);
-            deletecompetance(row.original.id)
+            deletPoste(row.original.id)
             .then((data) => {
-                setTableData([...data]);
+                setTableData(data);
                 setLoading(false);
             })
             .catch((error) => {
@@ -99,124 +110,126 @@ function PosteScreen({setLoading, setError}) {
                 setLoading(false);
             });
         },
-        [datatable],
+        [setLoading, setError],
     );
-    
     const columns = useMemo(
-        () => [
-          {
-            accessorKey: 'id',
-            header: 'ID',
-            enableColumnOrdering: true,
-            enableEditing: false,
-            enableSorting: true,
-            size: 80,
-          },
-          {
-            accessorKey: 'code',
-            header: 'Source',
-            size: 140,
-            Edit: ({ cell, column, table }) => <Autocomplete
-                defaultValue={cell.getValue()}
-                sx={{
-                    width: '100%',
-                }}
-                freeSolo
-                disablePortal
-                options={metiercodedata}
-                onChange={(e, value) =>
-                    setNewnode({ ...selectedmetier, code: value.label })
-                }
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
+        () => {
+            const isOptionEqualToValue = (option, value) => option.label === value;
+            return [
+                {
+                    accessorKey: 'id',
+                    header: 'ID',
+                    enableColumnOrdering: true,
+                    enableEditing: false,
+                    enableSorting: true,
+                    size: 80,
+                },
+                {
+                    accessorKey: 'metier.id',
+                    header: 'Metier ID',
+                    enableColumnOrdering: true,
+                    enableEditing: false,
+                    enableSorting: true
+                },
+                {
+                    accessorKey: 'competance.id',
+                    header: 'Competance ID',
+                    enableColumnOrdering: true,
+                    enableEditing: false,
+                    enableSorting: true
+                },
+                {
+                    accessorKey: 'metier.code',
+                    header: 'Code metier',
+                    size: 140,
+                    Edit: ({ cell, column, table }) => <Autocomplete
+                        defaultValue={cell.getValue()}
+                        sx={{
+                            width: '100%',
+                        }}
+                        disablePortal
+                        options={metierdata}
+                        onChange={(e, value) =>{
+                            if (value != null) setNewnode({ ...selectedmetier, metier_id: value.id })
+                        }}
+                        isOptionEqualToValue={isOptionEqualToValue}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                required
+                                label="Code metier" 
+                                name="metier_id"
+                                variant="outlined"
+                            />
+                        )}
+                    />,
+                },
+                {
+                    accessorKey: 'competance.code',
+                    header: 'Code competance',
+                    size: 140,
+                    Edit: ({ cell, column, table }) => <Autocomplete
+                        defaultValue={cell.getValue()}
+                        sx={{
+                            width: '100%',
+                        }}
+                        disablePortal
                         required
-                        label="Source" 
-                        name="code"
-                        variant="outlined"
-                        onChange={(e) =>
-                            setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                        options={competancedata}
+                        isOptionEqualToValue={isOptionEqualToValue}
+                        onChange={(e, value) =>{
+                            if (value != null) setNewnode({ ...selectedmetier, competance_id: value.id })
+                        }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                required
+                                label="Code Competance" 
+                                name="competance_id"
+                                variant="outlined"
+                            />
+                        )}
+                    />,
+                },
+                {
+                    accessorKey: 'niveauCompetance',
+                    header: 'Niveau',
+                    size: 140,
+                    Edit: ({ cell, column, table }) => <Autocomplete
+                        defaultValue={cell.getValue().toString()}
+                        sx={{
+                            width: '100%',
+                        }}
+                        disablePortal
+                        options={["0", "1", "2", "3", "4", "5"]}
+                        onChange={(e, value) =>
+                            setNewnode({ ...selectedmetier, niveau_competance: value })
                         }
-                    />
-                )}
-            />,
-          },
-          {
-            accessorKey: 'class',
-            header: 'Classe',
-            size: 140,
-            Edit: ({ cell, column, table }) => <Autocomplete
-                defaultValue={cell.getValue()}
-                sx={{
-                    width: '100%',
-                }}
-                disablePortal
-                options={["Savoirs", "Savoirs Faire", "Savoirs Être", "Accrédidations"]}
-                onChange={(e, value) =>
-                    setNewnode({ ...selectedmetier, class: value })
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                required
+                                label="Classe" 
+                                name="class"
+                                variant="outlined"
+                            />
+                        )}
+                    />,
+                },
+                {
+                    accessorKey: 'creation',
+                    header: 'Date création',
+                    enableColumnOrdering: true,
+                    enableEditing: false,
+                    enableSorting: true,
                 }
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        required
-                        label="Classe" 
-                        name="class"
-                        variant="outlined"
-                    />
-                )}
-            />,
-          },
-          {
-            accessorKey: 'descriptionC',
-            header: 'Decription courte',
-            size: 140,
-            enableHiding: true,
-            Edit: ({ cell, column, table }) => <TextField
-                defaultValue={cell.getValue()}
-                key="descriptionC"
-                label="description courte"
-                name="descriptionC"
-                onChange={(e) =>
-                    setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
-                }
-                sx={{
-                    width: '100%',
-                }}
-            />
-          },
-          {
-            accessorKey: 'descriptionL',
-            header: 'Decription longue',
-            size: 140,
-            enableHiding: true,
-            Edit: ({ cell, column, table }) => <TextField
-                defaultValue={cell.getValue()}
-                key="descriptionL"
-                label="description longue"
-                name="descriptionL"
-                onChange={(e) =>
-                    setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
-                }
-                sx={{
-                    width: '100%',
-                }}
-            />
-          },
-          {
-            accessorKey: 'creation',
-            header: 'Date création',
-            enableColumnOrdering: true,
-            enableEditing: false,
-            enableSorting: true,
-          }
-        ],
-        [metiercodedata, selectedmetier],
+            ]},[competancedata, selectedmetier, metierdata]
     );
-    // Affichez les données récupérées
+
     return (
         <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
             <MaterialReactTable
-                initialState={{ columnVisibility: { descriptionL: false} }}
+                initialState={{ columnVisibility: { "competance.id": false, "metier.id": false} }}
                 displayColumnDefOptions={{
                 'mrt-row-actions': {
                     muiTableHeadCellProps: {
@@ -231,6 +244,7 @@ function PosteScreen({setLoading, setError}) {
                 enableColumnOrdering
                 enableEditing
                 onEditingRowSave={handleSaveRowEdits}
+                onEditingRowCancel={handleCancelRowEdits}
                 muiBottomToolbarProps = {{
                     sx: {
                         backgroundColor: 'unset'
@@ -298,11 +312,12 @@ function PosteScreen({setLoading, setError}) {
                 )}
                 localization={MRT_Localization_FR}
             />
-            <CreateNewCompetanceModal
+            <CreateNewPosteModal
                 open={createModalOpen}
                 onClose={() => setCreateModalOpen(false)}
                 onSubmit={handleCreateNewRow}
-                codelist={metiercodedata}
+                metierlist={metierdata}
+                competancelist={competancedata}
             />
         </Paper>
     );

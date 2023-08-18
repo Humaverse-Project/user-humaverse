@@ -10,25 +10,28 @@ import {
     Autocomplete
 } from '@mui/material';
 
-const CreateNewCompetanceModal = ({ open, onClose, onSubmit, codelist }) => {
-    const formattedDatacode = codelist
+const CreateNewPosteModal = ({ open, onClose, onSubmit, metierlist, competancelist }) => {
+    const formattedData = metierlist
+    const formattedDatacode = competancelist
     const [newmetier, setNewnode] = useState({
-        class: "",
+        nom: "",
         code: ""
     });
+    const handleChangeMetier = (event, value) => {
+      setNewnode({ ...newmetier, metier_id: value.id });
+    };
+    const handleChangeCode = (event, value) => {
+        setNewnode({ ...newmetier, competance_id: value.id });
+    };
   
     const handleSubmit = () => {
       onSubmit(newmetier);
       onClose();
     };
-
-    const handleChangeCode = (event, value) => {
-      if (value != null) setNewnode({ ...newmetier, code: value.label });
-    };
-    
+  
     return (
       <Dialog open={open} maxWidth={'md'}>
-        <DialogTitle textAlign="center">Crée une competance</DialogTitle>
+        <DialogTitle textAlign="center">Crée un Poste</DialogTitle>
         <DialogContent  dividers={true}>
           <form onSubmit={(e) => e.preventDefault()}>
             <Stack
@@ -43,19 +46,15 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, codelist }) => {
                     width: '90%',
                 }}
                 disablePortal
-                freeSolo
-                onChange={handleChangeCode}
-                options={formattedDatacode}
+                options={formattedData}
+                onChange={handleChangeMetier}
                 renderInput={(params) => (
                     <TextField
                         {...params}
                         required
-                        label="Source" 
-                        name="code"
+                        label="Code Métier" 
+                        name="metier_id"
                         variant="outlined"
-                        onChange={(e) =>
-                          setNewnode({ ...newmetier, [e.target.name]: e.target.value })
-                        }
                     />
                 )}
               />
@@ -65,43 +64,38 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, codelist }) => {
                     width: '90%',
                 }}
                 disablePortal
-                options={["Savoirs", "Savoirs Faire", "Savoirs Être", "Accrédidations"]}
-                onChange={(e, value) =>{
-                  if (value != null) setNewnode({ ...newmetier, class: value })
-                }}
+                options={formattedDatacode}
+                onChange={handleChangeCode}
                 renderInput={(params) => (
                     <TextField
                         {...params}
                         required
-                        label="Classe" 
-                        name="class"
+                        label="Code competance" 
+                        name="competance_id"
                         variant="outlined"
                     />
                 )}
               />
-              <TextField
-                key="description_c"
-                label="description courte"
-                name="description_c"
-                onChange={(e) =>
-                    setNewnode({ ...newmetier, [e.target.name]: e.target.value })
-                }
+              <Autocomplete
                 sx={{
                     m: 2,
                     width: '90%',
                 }}
-              />
-              <TextField
-                key="description_l"
-                label="description long"
-                name="description_l"
-                onChange={(e) =>
-                    setNewnode({ ...newmetier, [e.target.name]: e.target.value })
+                disablePortal
+                options={["0", "1", "2", "3", "4", "5"]}
+                onChange={(e, value) =>
+                    setNewnode({ ...newmetier, niveau_competance: value })
                 }
-                sx={{
-                    m: 2,
-                    width: '90%',
-                }}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        required
+                        label="Niveau Competance" 
+                        name="niveau_competance"
+                        variant="outlined"
+                        
+                    />
+                )}
               />
             </Stack>
           </form>
@@ -109,11 +103,11 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, codelist }) => {
         <DialogActions sx={{ p: '1.25rem' }}>
           <Button onClick={onClose}>Annuler</Button>
           <Button color="secondary" onClick={handleSubmit} variant="contained">
-            Crée le competance
+            Crée un poste
           </Button>
         </DialogActions>
       </Dialog>
     );
 };
 
-export default CreateNewCompetanceModal
+export default CreateNewPosteModal
