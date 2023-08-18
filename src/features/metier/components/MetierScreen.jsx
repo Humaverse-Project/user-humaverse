@@ -8,15 +8,11 @@ import MaterialReactTable from 'material-react-table';
 import { useTheme } from '@mui/material/styles'
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
+import CreateNewMetierModal from './NewMetierModal';
 import {
     Box,
     Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
     IconButton,
-    Stack,
     TextField,
     Tooltip,
     Autocomplete
@@ -33,18 +29,21 @@ function MetierScreen() {
     const [metiercodedata, setMetiercodedata] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [accessToken, setAccessToken] = useState(null);
     const [selectedmetier, setNewnode] = useState({
         nom: "",
         code: ""
     });
     useEffect(() => {
-      authenticateClient()
-        .then((data) => {
-          setAccessToken(data.access_token);
-          getFicheMetierData(data.access_token)
-            .then((data) => {
-                const formattedData = data.map((item) => ({
+        const fetchData = async () => {
+            try {
+                const access = await authenticateClient();
+                const datametierexistant = await listmetier();
+                const dataaccess = await access;
+                const reponsemetie = await datametierexistant;
+                setTableData(reponsemetie);
+                const metier = await getFicheMetierData(dataaccess.access_token);
+                const datametier = await metier;
+                const formattedData = datametier.map((item) => ({
                     code: item.code,
                     libelle: item.metier.libelle,
                 }));
@@ -53,44 +52,26 @@ function MetierScreen() {
                     'label': item.libelle
                 }));
                 setMetierlistdata(formattedmetier)
-                const formattedDatacode = data.map((item) => ({
+                const formattedDatacode = formattedData.map((item) => ({
                     'label': item.code
                 }));
                 setMetiercodedata(formattedDatacode)
-                console.log()
               setLoading(false);
-            })
-            .catch((error) => {
-              setError(error.message);
+            } catch (error) {
+              console.error('Une erreur s\'est produite :', error);
+              setError("Une erreur s'est produite lors de l'appele serveur");
               setLoading(false);
-            });
-        })
-        .catch((error) => {
-          console.error('Authentication error:', error.message);
-          setLoading(false);
-        });
-        listmetier()
-            .then((data) => {
-                console.log(data)
-                setTableData(data);
-                setLoading(false);
-        })
-        .catch((error) => {
-          console.error('bakend error:', error.message);
-          setError('bakend error');
-          setLoading(false);
-        });
+            }
+        };
+        fetchData();
     }, []);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
-    const [validationErrors, setValidationErrors] = useState({});
 
     const handleCreateNewRow = (values) => {
         setLoading(true);
         postmetier(values)
         .then((data) => {
-            console.log(data)
-            // setTableData(data);
             setTableData([...data]);
             setLoading(false);
         })
@@ -113,15 +94,13 @@ function MetierScreen() {
             selectedmetier.descriptionC = values.descriptionC
         }
         if(values.descriptionP !== ""){
-            selectedmetier.descriptionC = values.descriptionP
+            selectedmetier.descriptionP = values.descriptionP
         }
         selectedmetier.id = values.id
         console.log(selectedmetier)
         setLoading(true);
         updatemetier(selectedmetier)
         .then((data) => {
-            console.log(data)
-            // setTableData(data);
             setTableData([...data]);
             setLoading(false);
         })
@@ -130,27 +109,15 @@ function MetierScreen() {
             console.error('bakend error:', error.message);
             setLoading(false);
         });
-        // if (!Object.keys(validationErrors).length) {
-        //     datatable[row.index] = values;
-        //     setTableData([...datatable]);
-        //     exitEditingMode();
-        // }
-    };
-
-    const handleCancelRowEdits = () => {
-        setValidationErrors({});
     };
 
     const handleDeleteRow = useCallback(
         (row) => {
             datatable.splice(row.index, 1);
             setTableData([...datatable]);
-            console.log(row.original.id)
             setLoading(true);
             deletemetier(row.original.id)
             .then((data) => {
-                console.log(data)
-                // setTableData(data);
                 setTableData([...data]);
                 setLoading(false);
             })
@@ -267,7 +234,7 @@ function MetierScreen() {
             enableSorting: true,
           }
         ],
-        [],
+        [metiercodedata, metierlistdata, selectedmetier],
     );
 
     if (loading || error) {
@@ -316,7 +283,7 @@ function MetierScreen() {
                     </Box>
                     <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
                         <MaterialReactTable
-                            initialState={{ columnVisibility: { description_c: false,  description_l: false} }}
+                            initialState={{ columnVisibility: { descriptionC: false,  descriptionL: false} }}
                             displayColumnDefOptions={{
                             'mrt-row-actions': {
                                 muiTableHeadCellProps: {
@@ -331,7 +298,6 @@ function MetierScreen() {
                             enableColumnOrdering
                             enableEditing
                             onEditingRowSave={handleSaveRowEdits}
-                            onEditingRowCancel={handleCancelRowEdits}
                             muiBottomToolbarProps = {{
                                 sx: {
                                     backgroundColor: 'unset'
@@ -400,7 +366,6 @@ function MetierScreen() {
                             localization={MRT_Localization_FR}
                         />
                         <CreateNewMetierModal
-                            columns={columns}
                             open={createModalOpen}
                             onClose={() => setCreateModalOpen(false)}
                             onSubmit={handleCreateNewRow}
@@ -414,107 +379,5 @@ function MetierScreen() {
     </Fragment>
     );
 }
-export const CreateNewMetierModal = ({ open, columns, onClose, onSubmit, metierlist, codelist }) => {
-    const formattedData = metierlist
-    const formattedDatacode = codelist
-    const [newmetier, setNewnode] = useState({
-        nom: "",
-        code: ""
-    });
-    const handleChangeMetier = (event, value) => {
-      setNewnode({ ...newmetier, nom: value.label });
-    };
-    const handleChangeCode = (event, value) => {
-        setNewnode({ ...newmetier, code: value.label });
-    };
-  
-    const handleSubmit = () => {
-      onSubmit(newmetier);
-      onClose();
-    };
-  
-    return (
-      <Dialog open={open} maxWidth={'md'}>
-        <DialogTitle textAlign="center">Crée un métier</DialogTitle>
-        <DialogContent  dividers={true}>
-          <form onSubmit={(e) => e.preventDefault()}>
-            <Stack
-              sx={{
-                minWidth: { xs: '300px', sm: '360px', md: '400px' },
-                gap: '1.5rem',
-              }}
-            >
-              <Autocomplete
-                sx={{
-                    m: 2,
-                    width: '90%',
-                }}
-                disablePortal
-                options={formattedDatacode}
-                onChange={handleChangeCode}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        required
-                        label="Code" 
-                        name="code"
-                        variant="outlined"
-                    />
-                )}
-              />
-              <Autocomplete
-                sx={{
-                    m: 2,
-                    width: '90%',
-                }}
-                freeSolo
-                disablePortal
-                options={formattedData}
-                onChange={handleChangeMetier}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        required
-                        label="Nom" 
-                        name="nom"
-                        variant="outlined"
-                    />
-                )}
-              />
-              <TextField
-                key="description_c"
-                label="description courte"
-                name="description_c"
-                onChange={(e) =>
-                    setNewnode({ ...newmetier, [e.target.name]: e.target.value })
-                }
-                sx={{
-                    m: 2,
-                    width: '90%',
-                }}
-              />
-              <TextField
-                key="description_l"
-                label="description long"
-                name="description_l"
-                onChange={(e) =>
-                    setNewnode({ ...newmetier, [e.target.name]: e.target.value })
-                }
-                sx={{
-                    m: 2,
-                    width: '90%',
-                }}
-              />
-            </Stack>
-          </form>
-        </DialogContent>
-        <DialogActions sx={{ p: '1.25rem' }}>
-          <Button onClick={onClose}>Annuler</Button>
-          <Button color="secondary" onClick={handleSubmit} variant="contained">
-            Crée un métier
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-};
+
 export default MetierScreen
