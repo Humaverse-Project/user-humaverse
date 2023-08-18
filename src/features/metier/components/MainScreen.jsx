@@ -4,6 +4,7 @@ import HeaderInScreen from '../../header/HeaderInScreen'
 import { LeftMenu } from '../../../shared'
 import MetierScreen from './MetierScreen'
 import CompetanceScreen from './CompetanceScreen'
+import PosteScreen from './PosteScreen'
 import { useTheme } from '@mui/material/styles'
 import {
     Box,
@@ -65,7 +66,7 @@ export default function MainScreen() {
                             size='large'
                             onClick={(e)=> setScreen(1)}
                             sx={{ color: 'black.main', fontWeight: 'bold'}}>
-                            Metier
+                            Metiers
                         </Button>
                         <Button 
                             key="competance"
@@ -76,6 +77,15 @@ export default function MainScreen() {
                             sx={{ color: 'black.main', fontWeight: 'bold', mx: 2 }}>
                             Skills
                         </Button>
+                        <Button 
+                            key="competance"
+                            variant="contained"
+                            color={'green'}
+                            size='large'
+                            onClick={(e)=> setScreen(3)}
+                            sx={{ color: 'black.main', fontWeight: 'bold', mx: 2 }}>
+                            Postes
+                        </Button>
                     </Box>
                     {screen === 1 && 
                         <MetierScreen 
@@ -84,6 +94,11 @@ export default function MainScreen() {
                         />}
                     {screen === 2 && 
                         <CompetanceScreen
+                            setError={setError}
+                            setLoading={setLoading}
+                        />}
+                    {screen === 3 && 
+                        <PosteScreen
                             setError={setError}
                             setLoading={setLoading}
                         />}
