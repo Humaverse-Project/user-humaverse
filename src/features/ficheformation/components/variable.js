@@ -28,7 +28,6 @@ export const columns = [
       field: 'competences',
       headerName: 'Compétences',
       width: 200,
-      valueGetter: (params) => params.row.competences.join(', '),
       editable: true
     },
     { field: 'niveau', headerName: 'Niveau', width: 150, editable: true },

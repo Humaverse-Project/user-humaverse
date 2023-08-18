@@ -79,6 +79,7 @@ const theme = createTheme({
     },
     typography: {
         ...typo,
+        fontFamily: 'Montserrat, sans-serif',
         button: {
             textTransform: 'none',
         },
