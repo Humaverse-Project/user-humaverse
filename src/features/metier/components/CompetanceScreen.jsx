@@ -1,43 +1,34 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { authenticateClient, getListeCompetance } from '../../../services/PoleEmploisService';
-import { listcompetance, postcompetance, updatecompetance, deletecompetance } from '../../../services/CompetanceService';
+import React, { useState, useEffect, useMemo } from 'react';
+import { listcompetance, postcompetance, loadcompetanceglobal } from '../../../services/CompetanceService';
 import MaterialReactTable from 'material-react-table';
 import Paper from '@mui/material/Paper';
 import CreateNewCompetanceModal from './NewCompetanceModal';
 import {
     Box,
     Button,
-    IconButton,
-    TextField,
-    Tooltip,
-    Autocomplete
+    List,
+    ListItem,
+    ThemeProvider,
+    Typography
 } from '@mui/material';
-import { Delete, Edit } from '@mui/icons-material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
-
+import theme from './theme';
 function CompetanceScreen({setLoading, setError}) {
-    const [datatable, setTableData] = useState([]);
-    const [metiercodedata, setMetiercodedata] = useState([]);
-    const [selectedmetier, setNewnode] = useState({});
+    const [fichecompetance, setfichecompetance] = useState([]);
+    const [acreditationlist, setacreditationlist] = useState([]);
+    const [competanceGlobal, setcompetanceGlobal] = useState([]);
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const access = await authenticateClient();
                 const datametierexistant = await listcompetance();
-                const dataaccess = await access;
                 const reponsemetie = await datametierexistant;
-                setTableData(reponsemetie);
-                const metier = await getListeCompetance(dataaccess.access_token);
-                const datametier = await metier;
-                const formattedData = datametier.map((item) => ({
-                    code: item.code,
-                    libelle: item.libelle,
-                }));
-                const formattedDatacode = formattedData.map((item) => ({
-                    'label': item.code
-                }));
-                setMetiercodedata(formattedDatacode)
-              setLoading(false);
+                setfichecompetance(reponsemetie.fiche_competance);
+                let acreditation = reponsemetie.accreditation.map(acredit=>{return {label: acredit.accreTitre, id: acredit.id}})
+                let competancegloblist = reponsemetie.compglobal.map(acredit=>{return {label: acredit.compGbTitre, id: acredit.id, type: acredit.compGbCategorie}})
+                console.log(reponsemetie)
+                setacreditationlist(acreditation);
+                setcompetanceGlobal(competancegloblist);
+                setLoading(false);
             } catch (error) {
               console.error('Une erreur s\'est produite :', error);
               setError("Une erreur s'est produite lors de l'appele serveur");
@@ -45,16 +36,36 @@ function CompetanceScreen({setLoading, setError}) {
             }
         };
         fetchData();
-    }, [setLoading, setError]);
+    }, [setLoading, setError, setfichecompetance, setacreditationlist, setcompetanceGlobal]);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
-
-    const handleCreateNewRow = (values) => {
-        console.log(values)
+    const supprimerDoublons = (liste) => {
+        const doublons = new Set();
+        return liste.filter((objet) => {
+          if (doublons.has(objet.brqCompTitre)) {
+            return false;
+          }
+          doublons.add(objet.brqCompTitre);
+          return true;
+        });
+    }
+    const loadlistbrique = async (value)=>{
+        try {
+            const datametierexistant = await loadcompetanceglobal(value);
+            setLoading(false);
+            return supprimerDoublons(await datametierexistant);
+        } catch (error) {
+          console.error('Une erreur s\'est produite :', error);
+          setError("Une erreur s'est produite lors de l'appele serveur");
+          setLoading(false);
+          return []
+        }
+    }
+    const handleCreateNewRow = (values, elementsCoches) => {
         setLoading(true);
-        postcompetance(values)
+        postcompetance(values, elementsCoches)
         .then((data) => {
-            setTableData([...data]);
+            setfichecompetance([...data]);
             setLoading(false);
         })
         .catch((error) => {
@@ -64,258 +75,181 @@ function CompetanceScreen({setLoading, setError}) {
         });
         
     };
-    const handleCancelRowEdits = () => {
-        setNewnode({})
-    };
-    const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-        if(selectedmetier.code === undefined){
-            selectedmetier.code = values.code
-        }
-        if(selectedmetier.class === undefined){
-            selectedmetier.class = values.class
-        }
-        if(selectedmetier.descriptionC === undefined){
-            selectedmetier.descriptionC = values.descriptionC
-        }
-        if(selectedmetier.descriptionL === undefined){
-            selectedmetier.descriptionL = values.descriptionL
-        }
-        selectedmetier.id = values.id
-        console.log(values,selectedmetier, values)
-        setLoading(true);
-        updatecompetance(selectedmetier)
-        .then((data) => {
-            setTableData([...data]);
-            setLoading(false);
-            handleCancelRowEdits()
-        })
-        .catch((error) => {
-            setError('bakend error');
-            console.error('bakend error:', error.message);
-            setLoading(false);
-        });
-    };
-
-    const handleDeleteRow = useCallback(
-        (row) => {
-            setLoading(true);
-            deletecompetance(row.original.id)
-            .then((data) => {
-                setTableData([...data]);
-                setLoading(false);
-            })
-            .catch((error) => {
-                setError('bakend error');
-                console.error('bakend error:', error.message);
-                setLoading(false);
-            });
-        },
-        [setLoading, setError],
-    );
     
     const columns = useMemo(
         () => [
-          {
-            accessorKey: 'id',
-            header: 'ID',
-            enableColumnOrdering: true,
-            enableEditing: false,
-            enableSorting: true,
-            size: 80,
-          },
-          {
-            accessorKey: 'code',
-            header: 'Source',
-            size: 140,
-            Edit: ({ cell, column, table }) => <Autocomplete
-                defaultValue={cell.getValue()}
-                sx={{
-                    width: '100%',
-                }}
-                freeSolo
-                disablePortal
-                options={metiercodedata}
-                onChange={(e, value) =>{
-                    if (value != null) setNewnode({ ...selectedmetier, code: value.label })
-                }}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        required
-                        label="Source" 
-                        name="code"
-                        variant="outlined"
-                        onChange={(e) =>
-                            setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
-                        }
-                    />
-                )}
-            />,
-          },
-          {
-            accessorKey: 'class',
-            header: 'Classe',
-            size: 140,
-            Edit: ({ cell, column, table }) => <Autocomplete
-                defaultValue={cell.getValue()}
-                sx={{
-                    width: '100%',
-                }}
-                disablePortal
-                options={["Savoirs", "Savoirs Faire", "Savoirs Être", "Accrédidations"]}
-                onChange={(e, value) =>{
-                    if (value != null) setNewnode({ ...selectedmetier, class: value })
-                }}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        required
-                        label="Classe" 
-                        name="class"
-                        variant="outlined"
-                    />
-                )}
-            />,
-          },
-          {
-            accessorKey: 'descriptionC',
-            header: 'Decription courte',
-            size: 140,
-            enableHiding: true,
-            Edit: ({ cell, column, table }) => <TextField
-                defaultValue={cell.getValue()}
-                key="descriptionC"
-                label="description courte"
-                name="descriptionC"
-                onChange={(e) =>
-                    setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                {
+                    accessorKey: 'id',
+                    header: 'ID',
+                    enableColumnOrdering: true,
+                    enableEditing: false,
+                    enableSorting: true,
+                },
+                {
+                    accessorKey: 'ficCompTitreEmploi',
+                    header: 'Titre',
+                    enableColumnOrdering: true,
+                    enableEditing: false,
+                    enableSorting: true,
+                },
+                {
+                    accessorKey: 'ficCompCompetencesNiveau',
+                    header: 'Niveau',
+                    enableColumnOrdering: true,
+                    enableEditing: false,
+                    enableSorting: true,
+                },
+                {
+                    accessorKey: 'ficCompVersion',
+                    header: 'Version',
+                    enableColumnOrdering: true,
+                    enableEditing: false,
+                    enableSorting: true,
+                },
+                {
+                    accessorKey: 'createdAt',
+                    header: 'Date création',
+                    enableColumnOrdering: true,
+                    enableEditing: false,
+                    enableSorting: true,
                 }
-                sx={{
-                    width: '100%',
-                }}
-            />
-          },
-          {
-            accessorKey: 'descriptionL',
-            header: 'Decription longue',
-            size: 140,
-            enableHiding: true,
-            Edit: ({ cell, column, table }) => <TextField
-                defaultValue={cell.getValue()}
-                key="descriptionL"
-                label="description longue"
-                name="descriptionL"
-                onChange={(e) =>
-                    setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
-                }
-                sx={{
-                    width: '100%',
-                }}
-            />
-          },
-          {
-            accessorKey: 'creation',
-            header: 'Date création',
-            enableColumnOrdering: true,
-            enableEditing: false,
-            enableSorting: true,
-          }
-        ],
-        [metiercodedata, selectedmetier],
+            ],
+        [],
     );
     // Affichez les données récupérées
     return (
         <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
-            <MaterialReactTable
-                initialState={{ columnVisibility: { descriptionL: false} }}
-                displayColumnDefOptions={{
-                'mrt-row-actions': {
-                    muiTableHeadCellProps: {
-                    align: 'center',
-                    },
-                    size: 120,
-                },
-                }}
-                columns={columns}
-                data={datatable}
-                editingMode="modal"
-                enableColumnOrdering
-                enableEditing
-                onEditingRowSave={handleSaveRowEdits}
-                onEditingRowCancel={handleCancelRowEdits}
-                muiBottomToolbarProps = {{
-                    sx: {
-                        backgroundColor: 'unset'
-                    },
-                }}
-                muiTopToolbarProps = {{
-                    sx: {
-                        backgroundColor: 'unset'
-                    },
-                }}
-                muiTableBodyProps={{
-                    sx: {
-                        '& tr:nth-of-type(odd)': {
-                            backgroundColor: '#f5f5f5',
+            <ThemeProvider theme={theme}>
+                <MaterialReactTable
+                    renderDetailPanel={({ row }) => {
+                        let donnees = row.original.ficCompCompetences
+                        // Créer un objet pour regrouper les éléments par compGb
+                        const groupedData = donnees.reduce((acc, element) => {
+                            const { compGb } = element;
+                            const compGbId = compGb.id;
+                            const compGbCategorie = compGb.compGbCategorie;
+                            const compGbTitre = compGb.compGbTitre;
+                        
+                            // Si la clé compGbId n'existe pas encore, créez-la avec un tableau vide
+                            if (!acc[compGbId]) {
+                            acc[compGbId] = {
+                                compGbCategorie,
+                                compGbTitre,
+                                elements: [],
+                            };
+                            }
+                        
+                            // Ajoutez l'élément à la clé compGbId correspondante
+                            acc[compGbId].elements.push(element);
+                        
+                            return acc;
+                        }, {});
+                        
+                        // Transformez l'objet en tableau de groupes
+                        const groupes = Object.keys(groupedData).map((compGbId) => {
+                            return {
+                            compGbId: parseInt(compGbId, 10), // convertir en nombre si nécessaire
+                            compGbCategorie: groupedData[compGbId].compGbCategorie,
+                            compGbTitre: groupedData[compGbId].compGbTitre,
+                            elements: groupedData[compGbId].elements,
+                            };
+                        });
+                        return (
+                            <Box
+                                sx={{
+                                    margin: 'auto',
+                                    gridTemplateColumns: '1fr 1fr',
+                                    width: '100%',
+                                }}
+                            >
+                                {groupes.map((element) => (
+                                    <div key={"div"+element.compGbId}>
+                                        <Typography key={"type1"+element.compGbId}><b>{element.compGbCategorie}</b></Typography>
+                                        <Typography key={"type2"+element.compGbId}>{element.compGbTitre}</Typography>
+                                        <List key={element.compGbId}>
+                                            {element.elements.map((data) => (
+                                                <ListItem key={data.id}>{data.brqCompTitre}</ListItem>
+                                            ))}
+                                        </List>
+                                    </div>
+                                ))}
+                            </Box>
+                        )
+                    }}
+                    initialState={{ columnVisibility: { id: false} }}
+                    displayColumnDefOptions={{
+                    'mrt-row-actions': {
+                        muiTableHeadCellProps: {
+                        align: 'center',
                         },
+                        size: 120,
                     },
-                }}
-                muiTableBodyCellProps={{
-                    sx: {
-                        color: 'black.main'
-                    },
-                }}
-                muiTableBodyRowProps={{
-                    sx: {
-                        ':hover td': {
-                            backgroundColor: '#f5f5f5',
+                    }}
+                    columns={columns}
+                    data={fichecompetance}
+                    enableColumnOrdering
+                    muiBottomToolbarProps = {{
+                        sx: {
+                            backgroundColor: 'unset'
                         },
-                        backgroundColor: 'unset',
-                    },
-                }}
-                muiTableHeadRowProps={{
-                    sx: {
-                        color: 'black.main',
-                        backgroundColor: 'unset'
-                    },
-                }}
-                muiTableHeadCellProps={{
-                    sx: {
-                        color: 'black.main',
-                        backgroundColor: 'unset'
-                    },
-                }}
-                renderRowActions={({ row, table }) => (
-                <Box sx={{ display: 'flex', gap: '1rem' }}>
-                    <Tooltip arrow placement="left" title="Edit">
-                    <IconButton onClick={() => table.setEditingRow(row)}>
-                        <Edit />
-                    </IconButton>
-                    </Tooltip>
-                    <Tooltip arrow placement="right" title="Delete">
-                    <IconButton color="error" onClick={() => handleDeleteRow(row)}>
-                        <Delete />
-                    </IconButton>
-                    </Tooltip>
-                </Box>
-                )}
-                renderTopToolbarCustomActions={() => (
-                <Button
-                    color="secondary"
-                    onClick={() => setCreateModalOpen(true)}
-                    variant="contained"
-                >
-                    Ajouté nouveau competance
-                </Button>
-                )}
-                localization={MRT_Localization_FR}
-            />
-            <CreateNewCompetanceModal
-                open={createModalOpen}
-                onClose={() => setCreateModalOpen(false)}
-                onSubmit={handleCreateNewRow}
-                codelist={metiercodedata}
-            />
+                    }}
+                    muiTopToolbarProps = {{
+                        sx: {
+                            backgroundColor: 'unset'
+                        },
+                    }}
+                    muiTableBodyProps={{
+                        sx: {
+                            '& tr:nth-of-type(odd)': {
+                                backgroundColor: '#f5f5f5',
+                            },
+                        },
+                    }}
+                    muiTableBodyCellProps={{
+                        sx: {
+                            color: 'black.main'
+                        },
+                    }}
+                    muiTableBodyRowProps={{
+                        sx: {
+                            ':hover td': {
+                                backgroundColor: '#f5f5f5',
+                            },
+                            backgroundColor: 'unset',
+                        },
+                    }}
+                    muiTableHeadRowProps={{
+                        sx: {
+                            color: 'black.main',
+                            backgroundColor: 'unset'
+                        },
+                    }}
+                    muiTableHeadCellProps={{
+                        sx: {
+                            color: 'black.main',
+                            backgroundColor: 'unset'
+                        },
+                    }}
+                    renderTopToolbarCustomActions={() => (
+                    <Button
+                        color="success"
+                        onClick={() => setCreateModalOpen(true)}
+                        variant="outlined"
+                    >
+                        Ajouté nouveau fiches competance
+                    </Button>
+                    )}
+                    localization={MRT_Localization_FR}
+                />
+                <CreateNewCompetanceModal
+                    open={createModalOpen}
+                    onClose={() => setCreateModalOpen(false)}
+                    onSubmit={handleCreateNewRow}
+                    acreditation={acreditationlist}
+                    competanceGlobal={competanceGlobal}
+                    loadlistbrique={loadlistbrique}
+                />
+            </ThemeProvider>
         </Paper>
     );
 }
