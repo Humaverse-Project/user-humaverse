@@ -11,3 +11,25 @@ export async function listrome() {
     }
     return await response.json();
 }
+
+export async function updaterome(formdata) {
+  const url = `${base_url}/rome/${formdata.id}/edit`;
+
+  const body = new URLSearchParams();
+  body.append('nom', formdata.nom);
+  body.append('rome_definition', formdata.rome_definition);
+  body.append('rome_acces_metier', formdata.rome_acces_metier);
+
+  const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+  });
+
+  if (!response.ok) {
+    throw new Error('erreur backend');
+  }
+  return await response.json();
+}

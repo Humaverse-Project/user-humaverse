@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { listrome } from '../../../services/RomeService';
+import { listrome, updaterome } from '../../../services/RomeService';
 import MaterialReactTable from 'material-react-table';
 import Paper from '@mui/material/Paper';
 import {
@@ -7,9 +7,7 @@ import {
     IconButton,
     TextField,
     Tooltip,
-    Typography,
-    TextareaAutosize,
-    OutlinedInput
+    Typography
 } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
@@ -24,7 +22,6 @@ function MetierScreen({setLoading, setError}) {
             try {
                 const datametierexistant = await listrome();
                 const reponsemetie = await datametierexistant;
-                console.log(reponsemetie)
                 setlistrome(reponsemetie);
                 setLoading(false);
             } catch (error) {
@@ -35,38 +32,41 @@ function MetierScreen({setLoading, setError}) {
         };
         fetchData();
     }, [setLoading, setError]);
-    
-    const [createModalOpen, setCreateModalOpen] = useState(false);
 
     const handleCancelRowEdits = () => {
         setNewnode({})
     };
+    const handleChange = useCallback(
+        (event) => {
+            const { name, value } = event.target;
+            setNewnode({ ...selectedmetier, [name]: value });
+        },
+        [setNewnode, selectedmetier],
+    );
+    
     const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-        if(selectedmetier.code === undefined){
-            selectedmetier.code = values.code
-        }
         if(selectedmetier.nom  === undefined){
             selectedmetier.nom = values.nom
         }
-        if(selectedmetier.descriptionC  === undefined){
-            selectedmetier.descriptionC = values.descriptionC
+        if(selectedmetier.rome_definition  === undefined){
+            selectedmetier.rome_definition = values.rome_definition
         }
-        if(selectedmetier.descriptionL  === undefined){
-            selectedmetier.descriptionL = values.descriptionL
+        if(selectedmetier.rome_acces_metier  === undefined){
+            selectedmetier.rome_acces_metier = values.rome_acces_metier
         }
         selectedmetier.id = values.id
-        // setLoading(true);
-        // updatemetier(selectedmetier)
-        // .then((data) => {
-        //     setTableData([...data]);
-        //     setLoading(false);
-        //     handleCancelRowEdits()
-        // })
-        // .catch((error) => {
-        //     setError('bakend error');
-        //     console.error('bakend error:', error.message);
-        //     setLoading(false);
-        // });
+        setLoading(true);
+        updaterome(selectedmetier)
+        .then((data) => {
+            setlistrome([...data]);
+            setLoading(false);
+            handleCancelRowEdits()
+        })
+        .catch((error) => {
+            setError('bakend error');
+            console.error('bakend error:', error.message);
+            setLoading(false);
+        });
     };
     
     const columns = useMemo(
@@ -97,9 +97,8 @@ function MetierScreen({setLoading, setError}) {
                     key="nom"
                     label="Nom"
                     name="nom"
-                    onChange={(e) =>
-                        setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
-                    }
+                    variant="outlined"
+                    onChange={handleChange}
                     sx={{
                         width: '100%',
                     }}
@@ -113,19 +112,15 @@ function MetierScreen({setLoading, setError}) {
             enableClickToCopy: true,
             Edit: ({ cell, column, table }) =>
                 <TextField
+                    key="rome_definition"
                     variant="outlined"
                     label="Définition"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{
-                        height:"75px"
-                    }}
-                    value={cell.getValue()}
+                    name='rome_definition'
+                    defaultValue={cell.getValue()}
                     InputProps={{
                         multiline: true
                     }}
-                    onChange={(e) =>
-                        setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
-                    }
+                    onChange={handleChange}
                 />
           },
           {
@@ -144,9 +139,7 @@ function MetierScreen({setLoading, setError}) {
                     InputProps={{
                         multiline: true
                     }}
-                    onChange={(e) =>
-                        setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
-                    }
+                    onChange={handleChange}
                     sx={{
                         width: '100%',
                         my: 2
@@ -161,7 +154,7 @@ function MetierScreen({setLoading, setError}) {
             enableSorting: true,
           }
         ],
-        [listromedata],
+        [handleChange],
     );
     // Affichez les données récupérées
     return (
@@ -176,10 +169,10 @@ function MetierScreen({setLoading, setError}) {
                                 width: '100%',
                             }}
                         >
-                            <Typography>Définition: </Typography>
+                            <Typography><b>Définition:</b> </Typography>
                             <Typography sx={{color: 'black.main'}} dangerouslySetInnerHTML={{ __html:row.original.rome_definition.replaceAll("\\n", '<br>')}}>
                             </Typography>
-                            <Typography>Access metier: </Typography>
+                            <Typography><b>Access metier: </b></Typography>
                             <Typography sx={{color: 'black.main'}} dangerouslySetInnerHTML={{ __html:row.original.rome_acces_metier.replaceAll("\\n", '<br>')}}>
                             </Typography>
                         </Box>
