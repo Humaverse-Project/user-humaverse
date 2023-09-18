@@ -66,7 +66,7 @@ export default function MainScreen() {
                             size='large'
                             onClick={(e)=> setScreen(1)}
                             sx={{ color: 'black.main', fontWeight: 'bold'}}>
-                            Metiers
+                            Fiches ROME
                         </Button>
                         <Button 
                             key="competance"
@@ -75,10 +75,10 @@ export default function MainScreen() {
                             size='large'
                             onClick={(e)=> setScreen(2)}
                             sx={{ color: 'black.main', fontWeight: 'bold', mx: 2 }}>
-                            Skills
+                            Fiches Compétences
                         </Button>
                         <Button 
-                            key="competance"
+                            key="Postes"
                             variant="contained"
                             color={'green'}
                             size='large'

@@ -2,17 +2,19 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { listrome } from '../../../services/RomeService';
 import MaterialReactTable from 'material-react-table';
 import Paper from '@mui/material/Paper';
-import CreateNewMetierModal from './NewMetierModal';
 import {
     Box,
-    Button,
     IconButton,
     TextField,
     Tooltip,
-    Autocomplete
+    Typography,
+    TextareaAutosize,
+    OutlinedInput
 } from '@mui/material';
-import { Delete, Edit } from '@mui/icons-material';
+import { Edit } from '@mui/icons-material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './theme';
 
 function MetierScreen({setLoading, setError}) {
     const [listromedata, setlistrome] = useState([]);
@@ -82,11 +84,13 @@ function MetierScreen({setLoading, setError}) {
             header: 'Code Rome',
             size: 140,
             enableEditing: false,
+            enableClickToCopy: true,
           },
           {
             accessorKey: 'nom',
             header: 'Nom',
             size: 140,
+            enableClickToCopy: true,
             Edit: ({ cell, column, table }) => 
                 <TextField
                     defaultValue={cell.getValue()}
@@ -106,18 +110,22 @@ function MetierScreen({setLoading, setError}) {
             header: 'Définition',
             Cell: ({ cell }) => (<div dangerouslySetInnerHTML={{ __html:cell.getValue().replaceAll("\\n", '<br>')}}></div>),
             size: 140,
-            Edit: ({ cell, column, table }) => 
+            enableClickToCopy: true,
+            Edit: ({ cell, column, table }) =>
                 <TextField
-                    defaultValue={cell.getValue()}
-                    key="rome_definition"
+                    variant="outlined"
                     label="Définition"
-                    name="rome_definition"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{
+                        height:"75px"
+                    }}
+                    value={cell.getValue()}
+                    InputProps={{
+                        multiline: true
+                    }}
                     onChange={(e) =>
                         setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
                     }
-                    sx={{
-                        width: '100%',
-                    }}
                 />
           },
           {
@@ -125,19 +133,25 @@ function MetierScreen({setLoading, setError}) {
             header: 'Access metier',
             size: 140,
             enableHiding: true,
+            enableClickToCopy: true,
             Cell: ({ cell }) => (<div dangerouslySetInnerHTML={{ __html:cell.getValue().replaceAll("\\n", '<br>')}}></div>),
-            Edit: ({ cell, column, table }) => <TextField
-                defaultValue={cell.getValue()}
-                key="rome_acces_metier"
-                label="Access metier"
-                name="rome_acces_metier"
-                onChange={(e) =>
-                    setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
-                }
-                sx={{
-                    width: '100%',
-                }}
-            />
+            Edit: ({ cell, column, table }) =>
+                <TextField
+                    defaultValue={cell.getValue()}
+                    key="rome_acces_metier"
+                    label="Access metier"
+                    name="rome_acces_metier"
+                    InputProps={{
+                        multiline: true
+                    }}
+                    onChange={(e) =>
+                        setNewnode({ ...selectedmetier, [e.target.name]: e.target.value })
+                    }
+                    sx={{
+                        width: '100%',
+                        my: 2
+                    }}
+                />
           },
           {
             accessorKey: 'created_at.date',
@@ -152,33 +166,50 @@ function MetierScreen({setLoading, setError}) {
     // Affichez les données récupérées
     return (
         <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
-            <MaterialReactTable
-                initialState={{ columnVisibility: { id: false, rome_acces_metier: false} }}
-                displayColumnDefOptions={{
-                'mrt-row-actions': {
-                    muiTableHeadCellProps: {
-                    align: 'center',
-                    },
-                    size: 120,
-                },
-                }}
-                columns={columns}
-                data={listromedata}
-                editingMode="modal"
-                enableColumnOrdering
-                enableEditing
-                onEditingRowSave={handleSaveRowEdits}
-                onEditingRowCancel={handleCancelRowEdits}
-                muiBottomToolbarProps = {{
-                    sx: {
-                        backgroundColor: 'unset'
-                    },
-                }}
-                muiTopToolbarProps = {{
-                    sx: {
-                        backgroundColor: 'unset'
-                    },
-                }}
+            <ThemeProvider theme={theme}>
+                <MaterialReactTable
+                    renderDetailPanel={({ row }) => (
+                        <Box
+                            sx={{
+                                margin: 'auto',
+                                gridTemplateColumns: '1fr 1fr',
+                                width: '100%',
+                            }}
+                        >
+                            <Typography>Définition: </Typography>
+                            <Typography sx={{color: 'black.main'}} dangerouslySetInnerHTML={{ __html:row.original.rome_definition.replaceAll("\\n", '<br>')}}>
+                            </Typography>
+                            <Typography>Access metier: </Typography>
+                            <Typography sx={{color: 'black.main'}} dangerouslySetInnerHTML={{ __html:row.original.rome_acces_metier.replaceAll("\\n", '<br>')}}>
+                            </Typography>
+                        </Box>
+                    )}
+                    initialState={{ columnVisibility: { id: false, rome_acces_metier: false, rome_definition: false} }}
+                    displayColumnDefOptions={{
+                        'mrt-row-actions': {
+                            muiTableHeadCellProps: {
+                            align: 'center',
+                            },
+                            size: 120,
+                        },
+                    }}
+                    columns={columns}
+                    data={listromedata}
+                    editingMode="modal"
+                    enableColumnOrdering
+                    enableEditing
+                    onEditingRowSave={handleSaveRowEdits}
+                    onEditingRowCancel={handleCancelRowEdits}
+                    muiBottomToolbarProps = {{
+                        sx: {
+                            backgroundColor: 'unset'
+                        },
+                    }}
+                    muiTopToolbarProps = {{
+                        sx: {
+                            backgroundColor: 'unset'
+                        },
+                    }}
                 muiTableBodyProps={{
                     sx: {
                         '& tr:nth-of-type(odd)': {
@@ -212,16 +243,17 @@ function MetierScreen({setLoading, setError}) {
                     },
                 }}
                 renderRowActions={({ row, table }) => (
-                <Box sx={{ display: 'flex', gap: '1rem' }}>
-                    <Tooltip arrow placement="left" title="Edit">
-                    <IconButton onClick={() => table.setEditingRow(row)}>
-                        <Edit />
-                    </IconButton>
-                    </Tooltip>
-                </Box>
-                )}
+                    <Box sx={{ display: 'flex', gap: '1rem' }}>
+                        <Tooltip arrow placement="left" title="Edit">
+                            <IconButton onClick={() => table.setEditingRow(row)}>
+                                <Edit />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+              )}
                 localization={MRT_Localization_FR}
             />
+            </ThemeProvider>
         </Paper>
     );
 }
