@@ -25,7 +25,6 @@ function CompetanceScreen({setLoading, setError}) {
                 setfichecompetance(reponsemetie.fiche_competance);
                 let acreditation = reponsemetie.accreditation.map(acredit=>{return {label: acredit.accreTitre, id: acredit.id}})
                 let competancegloblist = reponsemetie.compglobal.map(acredit=>{return {label: acredit.compGbTitre, id: acredit.id, type: acredit.compGbCategorie}})
-                console.log(reponsemetie)
                 setacreditationlist(acreditation);
                 setcompetanceGlobal(competancegloblist);
                 setLoading(false);
@@ -65,7 +64,11 @@ function CompetanceScreen({setLoading, setError}) {
         setLoading(true);
         postcompetance(values, elementsCoches)
         .then((data) => {
-            setfichecompetance([...data]);
+            setfichecompetance(data.fiche_competance);
+            let acreditation = data.accreditation.map(acredit=>{return {label: acredit.accreTitre, id: acredit.id}})
+            let competancegloblist = data.compglobal.map(acredit=>{return {label: acredit.compGbTitre, id: acredit.id, type: acredit.compGbCategorie}})
+            setacreditationlist(acreditation);
+            setcompetanceGlobal(competancegloblist);
             setLoading(false);
         })
         .catch((error) => {

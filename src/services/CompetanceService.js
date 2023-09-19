@@ -16,6 +16,7 @@ export async function postcompetance(formdata, brique) {
     const url = `${base_url}/fiches/competences/new`;
 
     const body = new URLSearchParams();
+    body.append('accreid', formdata.accreid);
     body.append('accretitre', formdata.accretitre);
     body.append('niveau', formdata.niveau);
     body.append('titre', formdata.titre);
