@@ -18,13 +18,16 @@ import {
     Box
 } from '@mui/material';
 
-const CreateNewCompetanceModal = ({ open, onClose, onSubmit, acreditationlist, competanceGlobal, loadlistbrique }) => {
+const CreateNewCompetanceModal = ({ open, onClose, onSubmit, acreditation, competanceGlobal, loadlistbrique }) => {
     const [compet, setCompet] = useState([]);
     const [newmetier, setNewnode] = useState({});
     const [donnees, setDonnees] = useState([]);
+    const [elementsCoches, setelementsCoches] = useState([]);
+    const [elementsNonCoches, setelementsNonCoches] = useState([]);
     const handleSubmit = () => {
-      console.log(newmetier, elementsCoches)
       onSubmit(newmetier, elementsCoches);
+      setelementsCoches([])
+      setelementsNonCoches([])
       onClose();
     };
     const handlebriquecompetance = async (event, value) => {
@@ -34,8 +37,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, acreditationlist, c
     };
     const [filtre, setFiltre] = useState('');
     
-    const [elementsCoches, setelementsCoches] = useState([]);
-    const [elementsNonCoches, setelementsNonCoches] = useState([]);
+    
 
     const handleFiltreChange = (e) => {
       setFiltre(e.target.value.toLowerCase());
@@ -131,7 +133,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, acreditationlist, c
                         width: '90%',
                     }}
                     disablePortal
-                    options={acreditationlist || []}
+                    options={acreditation}
                     freeSolo
                     onChange={(e, value) =>{
                       if (value != null) setNewnode({ ...newmetier, accretitre: value.label, accreid: value.id })
