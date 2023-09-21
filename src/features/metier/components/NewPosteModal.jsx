@@ -1,113 +1,333 @@
-import React, {useState } from 'react';
-import {
+import React, { useState } from 'react';
+import { 
     Button,
+    Box,
     Dialog,
-    DialogActions,
-    DialogContent,
     DialogTitle,
+    DialogContent,
     Stack,
+    DialogActions,
+    FormControl,
+    InputLabel,
+    OutlinedInput,
+    Autocomplete,
     TextField,
-    Autocomplete
-} from '@mui/material';
+    Grid
+} from '@mui/material'
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './theme';
+import { LoadingButton } from '@mui/lab';
 
-const CreateNewPosteModal = ({ open, onClose, onSubmit, metierlist, competancelist }) => {
-    const formattedData = metierlist
-    const formattedDatacode = competancelist
-    const [newmetier, setNewnode] = useState({
-        nom: "",
-        code: ""
-    });
+const NewPosteModal = ({ open, onClose, onSubmit, datametier, datacompetance  }) => {
+  console.log(datametier, datacompetance)
+    const [loading, setLoading] = useState(false)
+    const [newnode, setNewnode] = useState({});
     const handleChangeMetier = (event, value) => {
-      setNewnode({ ...newmetier, metier_id: value.id });
+        if(value != null){setNewnode({ ...newnode, metier: value.nom, metierid: value.id })}
+        else {setNewnode({ ...newnode, metier: "", nodeId: "", metierid: 0})}
     };
-    const handleChangeCode = (event, value) => {
-        setNewnode({ ...newmetier, competance_id: value.id });
+    const handleChangePoste = (event, value) => {
+        if(value != null){setNewnode({ ...newnode, competance: value.titre, competanceid: value.id, nodeId: value.id+"_"+Math.floor(Math.random() * 999999999999), })}
+        else {setNewnode({ ...newnode, competance: "", competanceid: 0, nodeId: "" })}
     };
-  
-    const handleSubmit = () => {
-      onSubmit(newmetier);
-      onClose();
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setNewnode({ ...newnode, [name]: value });
     };
-  
+    const submitdata = async (e)=> {
+        setLoading(true)
+        await onSubmit(newnode)
+        setLoading(false)
+        onClose()
+    }
     return (
-      <Dialog open={open} maxWidth={'md'}>
-        <DialogTitle textAlign="center">Crée un Poste</DialogTitle>
-        <DialogContent  dividers={true}>
-          <form onSubmit={(e) => e.preventDefault()}>
-            <Stack
-              sx={{
-                minWidth: { xs: '300px', sm: '360px', md: '400px' },
-                gap: '1.5rem',
-              }}
-            >
-              <Autocomplete
+        <ThemeProvider theme={theme}>
+            <Dialog  open={open} onClose={onClose}>
+                <DialogTitle textAlign="center"  color={"black.main"}>Formulaire de création poste</DialogTitle>
+                <DialogContent dividers={true}>
+                <Stack
                 sx={{
-                    m: 2,
-                    width: '90%',
+                    minWidth: { xs: '300px', sm: '360px', md: '400px' },
+                    gap: '1.5rem',
                 }}
-                disablePortal
-                options={formattedData}
-                onChange={handleChangeMetier}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        required
-                        label="Code Métier" 
-                        name="metier_id"
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                        }}
+                    >
+                    <Grid
+                        item
+                        xs={4}
+                        sm={4}
+                        sx={{
+                            display: 'flex',
+                            marginRight: '5px',
+                        }}
+                    >
+                        <Autocomplete
+                        sx={{
+                            width: '100%',
+                        }}
+                        disablePortal
+                        options={datametier || []}
+                        onChange={handleChangeMetier}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                required
+                                label="Métier" 
+                                name="rome"
+                                variant="outlined"
+                            />
+                        )}
+                        />
+                    </Grid>
+                    <Grid
+                        item
+                        xs={4}
+                        sm={4}
+                        sx={{
+                            display: 'flex',
+                            marginRight: '5px',
+                        }}
+                    >
+                        <Autocomplete
+                        sx={{
+                            width: '100%',
+                        }}
+                        disablePortal
+                        options={datacompetance || []}
+                        onChange={handleChangePoste}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                required
+                                label="Fiche competance" 
+                                name="fiche_competance"
+                                variant="outlined"
+                            />
+                        )}
+                        />
+                    </Grid>
+                    <Grid
+                        item
+                        xs={4}
+                        sm={4}
+                        sx={{
+                            display: 'flex',
+                            marginRight: '5px',
+                        }}
+                    >
+                        <FormControl
                         variant="outlined"
-                    />
-                )}
-              />
-              <Autocomplete
-                sx={{
-                    m: 2,
-                    width: '90%',
-                }}
-                disablePortal
-                options={formattedDatacode}
-                onChange={handleChangeCode}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
+                        sx={{
+                            width: '100%',
+                        }}
                         required
-                        label="Code competance" 
-                        name="competance_id"
+                        >
+                        <InputLabel htmlFor="outlined-adornment-password">
+                            Titre
+                        </InputLabel>
+                        <OutlinedInput
+                            name="titre"
+                            onChange={handleChange}
+                            label="Titre"
+                        />
+                        </FormControl>
+                    </Grid>
+                    </Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                        }}
+                    >
+                    <Grid
+                        item
+                        xs={4}
+                        sm={4}
+                        sx={{
+                            display: 'flex',
+                            marginRight: '5px',
+                        }}
+                    >
+                        <FormControl
                         variant="outlined"
-                    />
-                )}
-              />
-              <Autocomplete
-                sx={{
-                    m: 2,
-                    width: '90%',
-                }}
-                disablePortal
-                options={["0", "1", "2", "3", "4", "5"]}
-                onChange={(e, value) =>
-                    setNewnode({ ...newmetier, niveau_competance: value })
-                }
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
+                        sx={{
+                            width: '100%',
+                        }}
                         required
-                        label="Niveau Competance" 
-                        name="niveau_competance"
+                        >
+                        <TextField
+                            name="activite"
+                            onChange={handleChange}
+                            InputProps={{
+                            multiline: true
+                            }}
+                            label="Activité"
+                        />
+                        </FormControl>
+                    </Grid>
+                    <Grid
+                        item
+                        xs={4}
+                        sm={4}
+                        sx={{
+                            display: 'flex',
+                            marginRight: '5px',
+                        }}
+                    >
+                        <FormControl
                         variant="outlined"
-                        
-                    />
-                )}
-              />
-            </Stack>
-          </form>
-        </DialogContent>
-        <DialogActions sx={{ p: '1.25rem' }}>
-          <Button onClick={onClose}>Annuler</Button>
-          <Button color="secondary" onClick={handleSubmit} variant="contained">
-            Crée un poste
-          </Button>
-        </DialogActions>
-      </Dialog>
-    );
-};
-
-export default CreateNewPosteModal
+                        sx={{
+                            width: '100%',
+                        }}
+                        required
+                        >
+                        <TextField
+                            name="definition"
+                            onChange={handleChange}
+                            InputProps={{
+                                multiline: true
+                            }}
+                            label="Définition"
+                        />
+                        </FormControl>
+                    </Grid>
+                    <Grid
+                        item
+                        xs={4}
+                        sm={4}
+                        sx={{
+                            display: 'flex',
+                            marginRight: '5px',
+                        }}
+                    >
+                        <FormControl
+                        variant="outlined"
+                        sx={{
+                            width: '100%',
+                        }}
+                        required
+                        >
+                        <TextField
+                            name="agrement"
+                            onChange={handleChange}
+                            InputProps={{
+                                multiline: true
+                            }}
+                            label="Agrement"
+                        />
+                        </FormControl>
+                    </Grid>
+                    </Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                        }}
+                    >
+                    <Grid
+                        item
+                        xs={4}
+                        sm={4}
+                        sx={{
+                            display: 'flex',
+                            marginRight: '5px',
+                        }}
+                    >
+                        <FormControl
+                        variant="outlined"
+                        sx={{
+                            width: '100%',
+                        }}
+                        required
+                        >
+                        <TextField
+                            name="condition_general"
+                            onChange={handleChange}
+                            InputProps={{
+                                multiline: true
+                            }}
+                            label="Condition Génerale"
+                        />
+                        </FormControl>
+                    </Grid>
+                    <Grid
+                        item
+                        xs={4}
+                        sm={4}
+                        sx={{
+                            display: 'flex',
+                            marginRight: '5px',
+                        }}
+                    >
+                        <FormControl
+                        variant="outlined"
+                        sx={{
+                            width: '100%',
+                        }}
+                        required
+                        >
+                        <TextField
+                            name="instruction"
+                            onChange={handleChange}
+                            InputProps={{
+                                multiline: true
+                            }}
+                            label="Instruction"
+                        />
+                        </FormControl>
+                    </Grid>
+                    <Grid
+                        item
+                        xs={4}
+                        sm={4}
+                        sx={{
+                            display: 'flex',
+                            marginRight: '5px',
+                        }}
+                    >
+                        <FormControl
+                        variant="outlined"
+                        sx={{
+                            width: '100%',
+                        }}
+                        required
+                        >
+                        <TextField
+                            name="version"
+                            type="number"
+                            onChange={handleChange}
+                            InputProps={{
+                                multiline: false
+                            }}
+                            label="Version"
+                        />
+                        </FormControl>
+                    </Grid>
+                  </Box>
+                </Stack>
+                </DialogContent>
+                <DialogActions>
+                <Button
+                    variant="contained"
+                    onClick={onClose}
+                >
+                Annuler
+                </Button>
+                <LoadingButton
+                    loading={loading}
+                    sx={{ width: 'auto' }}
+                    variant="contained"
+                    fullWidth
+                    onClick={submitdata}
+                    color="success"
+                >
+                    Enregistrer
+                </LoadingButton>
+              </DialogActions>
+            </Dialog>
+        </ThemeProvider>
+    )
+}
+export default NewPosteModal

@@ -8,6 +8,7 @@
     "@emotion/styled": "^11.11.0",
     "@fontsource/montserrat": "^5.0.6",
     "@mui/icons-material": "^5.14.1",
+    "@mui/lab": "^5.0.0-alpha.145",
     "@mui/material": "^5.14.1",
     "@mui/x-charts": "^6.0.0-alpha.5",
     "@mui/x-data-grid": "^6.10.2",

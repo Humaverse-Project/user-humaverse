@@ -17,12 +17,14 @@ import theme from './theme';
 function MetierScreen({setLoading, setError}) {
     const [listromedata, setlistrome] = useState([]);
     const [selectedmetier, setNewnode] = useState({});
+    const [tableloagin, settableloagin ] = useState({isLoading: true})
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const datametierexistant = await listrome();
                 const reponsemetie = await datametierexistant;
                 setlistrome(reponsemetie);
+                settableloagin({isLoading: false})
                 setLoading(false);
             } catch (error) {
               console.error('Une erreur s\'est produite :', error);
@@ -161,6 +163,7 @@ function MetierScreen({setLoading, setError}) {
         <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
             <ThemeProvider theme={theme}>
                 <MaterialReactTable
+                    state={tableloagin}
                     renderDetailPanel={({ row }) => (
                         <Box
                             sx={{

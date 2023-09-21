@@ -17,6 +17,7 @@ function CompetanceScreen({setLoading, setError}) {
     const [fichecompetance, setfichecompetance] = useState([]);
     const [acreditationlist, setacreditationlist] = useState([]);
     const [competanceGlobal, setcompetanceGlobal] = useState([]);
+    const [tableloagin, settableloagin ] = useState({isLoading: true})
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -28,6 +29,7 @@ function CompetanceScreen({setLoading, setError}) {
                 setacreditationlist(acreditation);
                 setcompetanceGlobal(competancegloblist);
                 setLoading(false);
+                settableloagin({isLoading: false})
             } catch (error) {
               console.error('Une erreur s\'est produite :', error);
               setError("Une erreur s'est produite lors de l'appele serveur");
@@ -124,6 +126,7 @@ function CompetanceScreen({setLoading, setError}) {
         <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
             <ThemeProvider theme={theme}>
                 <MaterialReactTable
+                    state={tableloagin}
                     renderDetailPanel={({ row }) => {
                         let donnees = row.original.ficCompCompetences
                         // Créer un objet pour regrouper les éléments par compGb

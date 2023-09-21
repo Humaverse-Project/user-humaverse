@@ -84,7 +84,7 @@ export default function MainScreen() {
                             size='large'
                             onClick={(e)=> setScreen(3)}
                             sx={{ color: 'black.main', fontWeight: 'bold', mx: 2 }}>
-                            Postes
+                            Fiche Poste
                         </Button>
                     </Box>
                     {screen === 1 && 
