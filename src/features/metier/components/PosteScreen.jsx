@@ -10,6 +10,7 @@ import {
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 import theme from './theme';
 import { ThemeProvider } from '@mui/material/styles';
+import {datefonctionun} from "../../../services/DateFormat"
 
 function PosteScreen({setLoading, setError}) {
     const [datacompetance, setdatacompetance] = useState([]);
@@ -102,6 +103,7 @@ function PosteScreen({setLoading, setError}) {
                     enableColumnOrdering: true,
                     enableEditing: false,
                     enableSorting: true,
+                    Cell: ({ cell }) => datefonctionun(cell.getValue())
                 }
             ],[]
     );

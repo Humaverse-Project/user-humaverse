@@ -13,6 +13,8 @@ import { Edit } from '@mui/icons-material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
+import { Link } from 'react-router-dom';
+import {datefonctionun} from "../../../services/DateFormat"
 
 function MetierScreen({setLoading, setError}) {
     const [listromedata, setlistrome] = useState([]);
@@ -87,6 +89,9 @@ function MetierScreen({setLoading, setError}) {
             size: 140,
             enableEditing: false,
             enableClickToCopy: true,
+            Cell: ({ cell, column }) => (
+                <Link to={`/metierdetail/${cell.getValue()}`}>{cell.getValue()}</Link>
+            ),
           },
           {
             accessorKey: 'nom',
@@ -154,9 +159,10 @@ function MetierScreen({setLoading, setError}) {
             enableColumnOrdering: true,
             enableEditing: false,
             enableSorting: true,
+            Cell: ({ cell }) => datefonctionun(cell.getValue())
           }
         ],
-        [handleChange],
+        [handleChange, datefonctionun],
     );
     // Affichez les données récupérées
     return (

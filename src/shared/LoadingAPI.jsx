@@ -17,7 +17,7 @@ function LoadingAPI(loading, error, page) {
             minHeight="80vh"
         >
             <Grid container spacing={2}>
-                <Grid item xs={12} md={3}>
+                <Grid item xs={12} md={3} elevation={3}>
                     {LeftMenu(page)}
                 </Grid>
                 <Grid item xs={12} md={9}

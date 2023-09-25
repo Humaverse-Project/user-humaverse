@@ -13,6 +13,8 @@ import {
 } from '@mui/material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 import theme from './theme';
+import {datefonctionun} from "../../../services/DateFormat"
+
 function CompetanceScreen({setLoading, setError}) {
     const [fichecompetance, setfichecompetance] = useState([]);
     const [acreditationlist, setacreditationlist] = useState([]);
@@ -117,6 +119,7 @@ function CompetanceScreen({setLoading, setError}) {
                     enableColumnOrdering: true,
                     enableEditing: false,
                     enableSorting: true,
+                    Cell: ({ cell }) => datefonctionun(cell.getValue())
                 }
             ],
         [],
