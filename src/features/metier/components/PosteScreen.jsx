@@ -10,7 +10,7 @@ import {
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 import theme from './theme';
 import { ThemeProvider } from '@mui/material/styles';
-import {datefonctionun} from "../../../services/DateFormat"
+import {datefonctionun, datefonctiondeux} from "../../../services/DateFormat"
 
 function PosteScreen({setLoading, setError}) {
     const [datacompetance, setdatacompetance] = useState([]);
@@ -121,8 +121,8 @@ function PosteScreen({setLoading, setError}) {
                                 width: '100%',
                             }}
                         >
-                            <Typography><b>validation:</b> {row.original.validation.date}</Typography>
-                            <Typography><b>visa:</b> {row.original.visa.date}</Typography>
+                            <Typography><b>validation:</b> {datefonctiondeux(row.original.validation.date)}</Typography>
+                            <Typography><b>visa:</b> {datefonctiondeux(row.original.visa.date)}</Typography>
                             <Typography><b>instruction:</b> {row.original.instruction}</Typography>
                             <Typography><b>definition:</b> {row.original.definition}</Typography>
                             <Typography><b>agrement:</b> {row.original.agrement}</Typography>
