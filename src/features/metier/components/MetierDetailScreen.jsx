@@ -95,7 +95,6 @@ function MetierDetailScreen() {
             justifyContent="center"
             alignItems="center"
             height={'auto'}
-            minHeight="90vh"
         >
             <Grid container spacing={2} color={"black.main"}>
                 <Grid item xs={12} md={3}>
@@ -111,6 +110,7 @@ function MetierDetailScreen() {
                             mx: 0,
                         },
                         maxHeight: "85vh",
+                        height: "85vh",
                         overflowX: "hidden"
                     }}
                 >
