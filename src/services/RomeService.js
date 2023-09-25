@@ -33,3 +33,23 @@ export async function updaterome(formdata) {
   }
   return await response.json();
 }
+
+export async function getdatarome(code) {
+  const url = `${base_url}/rome/detail`;
+
+  const body = new URLSearchParams();
+  body.append('code', code);
+
+  const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+  });
+
+  if (!response.ok) {
+    throw new Error('erreur backend');
+  }
+  return await response.json();
+}

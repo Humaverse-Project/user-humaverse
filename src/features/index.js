@@ -6,6 +6,7 @@ import LoginScreen from './Login/components/LoginScreen'
 import FicheRHScreen from './ficherh/components/FicheRHScreen'
 import FicheFormationScreen from './ficheformation/components/FicheFormationScreen'
 import MainScreen from './metier/components/MainScreen'
+import MetierDetailScreen from './metier/components/MetierDetailScreen'
 //import COMPONENTS REUSABLES
 
 export {
@@ -15,6 +16,7 @@ export {
     NotFoundScreen,
     FicheRHScreen,
     FicheFormationScreen,
-    MainScreen
+    MainScreen,
+    MetierDetailScreen
     //components reusables
 }
