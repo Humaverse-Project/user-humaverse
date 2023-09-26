@@ -26,6 +26,7 @@ function MetierDetailScreen() {
     const [error, setError] = useState(null);
     const [context, setcontext] = useState({});
     const [mobilite, setmobilite] = useState({});
+    const [titre, settitre] = useState({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -35,6 +36,7 @@ function MetierDetailScreen() {
                 setemplois(reponsemetie.appelation)
                 setdefinition(reponsemetie.rome.rome_definition.split("\\n"))
                 setaccess(reponsemetie.rome.rome_acces_metier.split("\\n"))
+                settitre(reponsemetie.rome.nom)
                 setmobilite({romeevolution: reponsemetie.rome.romeevolution, romeproche: reponsemetie.rome.romeproche})
                 const data = reponsemetie.briquecompetance
                 const groupedData = {};
@@ -75,7 +77,7 @@ function MetierDetailScreen() {
         return (
           <Fragment>
               <HeaderInScreen
-                  title={'Détail métier '+code}
+                  title={'Fiche ROME: '+code}
               />
               { LoadingAPI (loading, error, page)}
           </Fragment>
@@ -86,7 +88,7 @@ function MetierDetailScreen() {
     return (
       <Fragment>
         <HeaderInScreen
-            title={'Détail métier '+code}
+            title={'Fiche ROME: '+code+' '+titre}
         />
         <Box
             backgroundColor="background.paper"
