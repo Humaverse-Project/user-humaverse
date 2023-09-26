@@ -1,35 +1,49 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { listcompetance, postcompetance, loadcompetanceglobal } from '../../../services/CompetanceService';
+import { listcompetance, postcompetance } from '../../../services/CompetanceService';
 import MaterialReactTable from 'material-react-table';
 import Paper from '@mui/material/Paper';
 import CreateNewCompetanceModal from './NewCompetanceModal';
+import {getdatarome} from '../../../services/RomeService'
 import {
+    Autocomplete,
     Box,
     Button,
-    List,
-    ListItem,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    TextField,
     ThemeProvider,
-    Typography
+    Backdrop,
+    CircularProgress
 } from '@mui/material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 import theme from './theme';
 import {datefonctionun} from "../../../services/DateFormat"
+import PartCompetanceShow from './partie/PartCompetanceShow';
 
 function CompetanceScreen({setLoading, setError}) {
     const [fichecompetance, setfichecompetance] = useState([]);
-    const [acreditationlist, setacreditationlist] = useState([]);
-    const [competanceGlobal, setcompetanceGlobal] = useState([]);
+    const [matierselectionner, setmatierselectionner] = useState({});
+    const [listrome, setlistrome] = useState([]);
+    const [open, setOpen] = useState(false);
+    const [competance, setcompetance] = useState({});
+    const [loadingrome, setloadingrome] = useState(false);
     const [tableloagin, settableloagin ] = useState({isLoading: true})
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const datametierexistant = await listcompetance();
                 const reponsemetie = await datametierexistant;
+                console.log(reponsemetie)
                 setfichecompetance(reponsemetie.fiche_competance);
-                let acreditation = reponsemetie.accreditation.map(acredit=>{return {label: acredit.accreTitre, id: acredit.id}})
-                let competancegloblist = reponsemetie.compglobal.map(acredit=>{return {label: acredit.compGbTitre, id: acredit.id, type: acredit.compGbCategorie}})
-                setacreditationlist(acreditation);
-                setcompetanceGlobal(competancegloblist);
+                setlistrome(reponsemetie.rome.map(rome=>{
+                    return {
+                        label: rome.rome_coderome+" "+rome.nom,
+                        code: rome.rome_coderome,
+                        id: rome.id
+                    }
+                }))
                 setLoading(false);
                 settableloagin({isLoading: false})
             } catch (error) {
@@ -39,40 +53,44 @@ function CompetanceScreen({setLoading, setError}) {
             }
         };
         fetchData();
-    }, [setLoading, setError, setfichecompetance, setacreditationlist, setcompetanceGlobal]);
+    }, [setLoading, setError, setfichecompetance, setlistrome]);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
-    const supprimerDoublons = (liste) => {
-        const doublons = new Set();
-        return liste.filter((objet) => {
-          if (doublons.has(objet.brqCompTitre)) {
-            return false;
-          }
-          doublons.add(objet.brqCompTitre);
-          return true;
+
+    const handleselectionrome = (e) => {
+        setloadingrome(true);
+        getdatarome(matierselectionner.code)
+        .then((reponsemetie) => {
+            const data = reponsemetie.briquecompetance
+            const groupedData = {};
+            data.forEach((item) => {
+                const categorie = item.compGb.compGbCategorie;
+                if (!groupedData[categorie]) {
+                    groupedData[categorie] = [];
+                }
+                item.niveau = 0
+                groupedData[categorie].push(item);
+            });
+            console.log(groupedData)
+            console.log(reponsemetie)
+            setcompetance(groupedData)
+            setloadingrome(false);
+            setCreateModalOpen(true)
+            setOpen(false)
+        })
+        .catch((error) => {
+            console.error('bakend error:', error.message);
+            setloadingrome(false);
+            setOpen(false)
         });
-    }
-    const loadlistbrique = async (value)=>{
-        try {
-            const datametierexistant = await loadcompetanceglobal(value);
-            setLoading(false);
-            return supprimerDoublons(await datametierexistant);
-        } catch (error) {
-          console.error('Une erreur s\'est produite :', error);
-          setError("Une erreur s'est produite lors de l'appele serveur");
-          setLoading(false);
-          return []
-        }
+        
     }
     const handleCreateNewRow = (values, elementsCoches) => {
+        console.log(values, elementsCoches)
         setLoading(true);
         postcompetance(values, elementsCoches)
         .then((data) => {
             setfichecompetance(data.fiche_competance);
-            let acreditation = data.accreditation.map(acredit=>{return {label: acredit.accreTitre, id: acredit.id}})
-            let competancegloblist = data.compglobal.map(acredit=>{return {label: acredit.compGbTitre, id: acredit.id, type: acredit.compGbCategorie}})
-            setacreditationlist(acreditation);
-            setcompetanceGlobal(competancegloblist);
             setLoading(false);
         })
         .catch((error) => {
@@ -100,13 +118,6 @@ function CompetanceScreen({setLoading, setError}) {
                     enableSorting: true,
                 },
                 {
-                    accessorKey: 'ficCompCompetencesNiveau',
-                    header: 'Niveau',
-                    enableColumnOrdering: true,
-                    enableEditing: false,
-                    enableSorting: true,
-                },
-                {
                     accessorKey: 'ficCompVersion',
                     header: 'Version',
                     enableColumnOrdering: true,
@@ -127,42 +138,66 @@ function CompetanceScreen({setLoading, setError}) {
     // Affichez les données récupérées
     return (
         <Paper sx={{ mt: 2, width: '100%', color:'black.main' }}>
+             <Backdrop
+                sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                open={loadingrome}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
+            <Dialog
+                    sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435, overflow: "hidden" } }}
+                    maxWidth="xs"
+                    open={open}
+                >
+                <DialogTitle>Selectionner le fiche metier</DialogTitle>
+                <DialogContent dividers>
+                    <Autocomplete
+                        sx={{
+                            m: 2,
+                            width: '90%',
+                        }}
+                        disablePortal
+                        options={listrome}
+                        onChange={(e, value) =>{
+                            if (value != null) setmatierselectionner(value)
+                            else setmatierselectionner({})
+                        }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                required
+                                label="Rome" 
+                                name="rome"
+                                variant="outlined"
+                            />
+                        )}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button autoFocus onClick={(e)=>setOpen(false)}>
+                        Annuler
+                    </Button>
+                    <Button onClick={handleselectionrome}>Valider</Button>
+                </DialogActions>
+            </Dialog>
             <ThemeProvider theme={theme}>
                 <MaterialReactTable
                     state={tableloagin}
                     renderDetailPanel={({ row }) => {
-                        let donnees = row.original.ficCompCompetences
-                        // Créer un objet pour regrouper les éléments par compGb
-                        const groupedData = donnees.reduce((acc, element) => {
-                            const { compGb } = element;
-                            const compGbId = compGb.id;
-                            const compGbCategorie = compGb.compGbCategorie;
-                            const compGbTitre = compGb.compGbTitre;
-                        
-                            // Si la clé compGbId n'existe pas encore, créez-la avec un tableau vide
-                            if (!acc[compGbId]) {
-                            acc[compGbId] = {
-                                compGbCategorie,
-                                compGbTitre,
-                                elements: [],
-                            };
+                        let donnees = row.original.briquesCompetencesNiveaux
+                        const groupedData = {};
+                        donnees.forEach((item) => {
+                            const categorie = item.briquescompetances.compGb.compGbCategorie;
+                            const titre = item.briquescompetances.compGb.compGbTitre;
+                            if (!groupedData[categorie]) {
+                                groupedData[categorie] = {};
                             }
-                        
-                            // Ajoutez l'élément à la clé compGbId correspondante
-                            acc[compGbId].elements.push(element);
-                        
-                            return acc;
-                        }, {});
-                        
-                        // Transformez l'objet en tableau de groupes
-                        const groupes = Object.keys(groupedData).map((compGbId) => {
-                            return {
-                            compGbId: parseInt(compGbId, 10), // convertir en nombre si nécessaire
-                            compGbCategorie: groupedData[compGbId].compGbCategorie,
-                            compGbTitre: groupedData[compGbId].compGbTitre,
-                            elements: groupedData[compGbId].elements,
-                            };
+                            if (!groupedData[categorie][titre]) {
+                                groupedData[categorie][titre] = [];
+                            }
+                            groupedData[categorie][titre].push(item);
                         });
+                        console.log(groupedData)
                         return (
                             <Box
                                 sx={{
@@ -171,17 +206,33 @@ function CompetanceScreen({setLoading, setError}) {
                                     width: '100%',
                                 }}
                             >
-                                {groupes.map((element) => (
-                                    <div key={"div"+element.compGbId}>
-                                        <Typography key={"type1"+element.compGbId}><b>{element.compGbCategorie}</b></Typography>
-                                        <Typography key={"type2"+element.compGbId}>{element.compGbTitre}</Typography>
-                                        <List key={element.compGbId}>
-                                            {element.elements.map((data) => (
-                                                <ListItem key={data.id}>{data.brqCompTitre}</ListItem>
-                                            ))}
-                                        </List>
-                                    </div>
-                                ))}
+                                { "SAVOIRS FAIRE" in groupedData ? (
+                                        <PartCompetanceShow
+                                            groupedData={groupedData}
+                                            type={"SAVOIRS FAIRE"}
+                                            titre={"Savoir-faire"}
+                                        />
+                                    ):
+                                    (null)
+                                }
+                                { "SAVOIRS" in groupedData ? (
+                                        <PartCompetanceShow
+                                            groupedData={groupedData}
+                                            type={"SAVOIRS"}
+                                            titre={"Savoirs"}
+                                        />
+                                    ):
+                                    (null)
+                                }
+                                { "SAVOIR ÊTRE" in groupedData ? (
+                                    <PartCompetanceShow
+                                        groupedData={groupedData}
+                                        type={"SAVOIR ÊTRE"}
+                                        titre={"Savoirs être"}
+                                    />
+                                    ):
+                                    (null)
+                                }
                             </Box>
                         )
                     }}
@@ -242,10 +293,10 @@ function CompetanceScreen({setLoading, setError}) {
                     renderTopToolbarCustomActions={() => (
                     <Button
                         color="success"
-                        onClick={() => setCreateModalOpen(true)}
+                        onClick={() => setOpen(true)}
                         variant="outlined"
                     >
-                        Ajouté nouveau fiches competance
+                        Générer les fiches de competénces
                     </Button>
                     )}
                     localization={MRT_Localization_FR}
@@ -254,9 +305,8 @@ function CompetanceScreen({setLoading, setError}) {
                     open={createModalOpen}
                     onClose={() => setCreateModalOpen(false)}
                     onSubmit={handleCreateNewRow}
-                    acreditation={acreditationlist}
-                    competanceGlobal={competanceGlobal}
-                    loadlistbrique={loadlistbrique}
+                    rome={matierselectionner}
+                    competance={competance}
                 />
             </ThemeProvider>
         </Paper>

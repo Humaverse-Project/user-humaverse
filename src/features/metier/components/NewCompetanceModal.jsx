@@ -7,76 +7,36 @@ import {
     DialogTitle,
     Stack,
     TextField,
-    Autocomplete,
     Typography,
-    Grid,
-    Checkbox,
-    FormControlLabel,
-    List,
-    ListItem,
-    ListItemText,
-    Box
+    Grid
 } from '@mui/material';
-
-const CreateNewCompetanceModal = ({ open, onClose, onSubmit, acreditation, competanceGlobal, loadlistbrique }) => {
-    const [compet, setCompet] = useState([]);
+import PartCompetanceCreation from "./partie/PartCompetanceCreation";
+const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance }) => {
+  console.log(rome)
     const [newmetier, setNewnode] = useState({});
-    const [donnees, setDonnees] = useState([]);
-    const [elementsCoches, setelementsCoches] = useState([]);
-    const [elementsNonCoches, setelementsNonCoches] = useState([]);
     const handleSubmit = () => {
-      onSubmit(newmetier, elementsCoches);
-      setelementsCoches([])
-      setelementsNonCoches([])
+      let data = [];
+      if ("SAVOIRS FAIRE" in competance) {
+        data = data.concat(competance["SAVOIRS FAIRE"])
+      }
+      if ("SAVOIRS" in competance) {
+        data = data.concat(competance["SAVOIRS"])
+      }
+      if ("SAVOIR ÊTRE" in competance) {
+        data = data.concat(competance["SAVOIR ÊTRE"])
+      }
+      onSubmit(newmetier, data );
       onClose();
     };
-    const handlebriquecompetance = async (event, value) => {
-      let data = await loadlistbrique(value)
-      setDonnees(data)
-      setelementsNonCoches(data)
-    };
-    const [filtre, setFiltre] = useState('');
-    
-    
-
-    const handleFiltreChange = (e) => {
-      setFiltre(e.target.value.toLowerCase());
-      let filtres = donnees.filter((element) =>
-        element.brqCompTitre.toLowerCase().includes(filtre)
-      );
-      setelementsNonCoches(filtres)
-    };
-    
-    const handleSelection = (element, type) => {
-      if (type === "add") {
-        let remo = elementsNonCoches.indexOf(element);
-        elementsNonCoches.splice(remo, 1)
-        setelementsNonCoches(elementsNonCoches)
-        setelementsCoches([...elementsCoches, element])
-      } else {
-        let index = elementsCoches.indexOf(element)
-        elementsCoches.splice(index, 1)
-        setelementsCoches(elementsCoches)
-        setelementsNonCoches([...elementsCoches, element])
-      }
-    };
-
-    const handleChangecategorie = (event, value) => {
-        let categ = competanceGlobal.filter(category=> {
-          if(category.type === value){
-            return true
-          }
-          return false
-        })
-        setCompet(categ)
-    };
-    
+    const handleSliderChange = (newValue, accessitem)=>{
+      accessitem.niveau = newValue
+    }
     const changetexarea = (e)=>{
       setNewnode({ ...newmetier, [e.target.name]: e.target.value })
     }
     return (
       <Dialog open={open} maxWidth={'md'}>
-        <DialogTitle textAlign="center">Crée une fiche competance</DialogTitle>
+        <DialogTitle textAlign="center">Crée une fiche competance à partier de fiche rome <b>{rome.code}</b></DialogTitle>
         <DialogContent  dividers={true}>
           <form onSubmit={(e) => e.preventDefault()}>
             <Stack
@@ -84,7 +44,38 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, acreditation, compe
                 minWidth: { xs: '300px', sm: '360px', md: '400px' }
               }}
             >
-              <Typography>Competance</Typography>
+              <Typography variant='h6'> <b>Définition niveau</b></Typography>
+              { "SAVOIRS FAIRE" in competance ? (
+                < PartCompetanceCreation
+                  competance={competance}
+                  type={"SAVOIRS FAIRE"}
+                  handleSliderChange={handleSliderChange}
+                  titre={"Savoir-faire"}
+                />
+              ):
+              (null)
+              }
+              { "SAVOIRS" in competance ? (
+                < PartCompetanceCreation
+                  competance={competance}
+                  type={"SAVOIRS"}
+                  handleSliderChange={handleSliderChange}
+                  titre={"Savoirs"}
+                />
+              ):
+              (null)
+              }
+              { "SAVOIR ÊTRE" in competance ? (
+                < PartCompetanceCreation
+                  competance={competance}
+                  type={"SAVOIR ÊTRE"}
+                  handleSliderChange={handleSliderChange}
+                  titre={"Savoir être"}
+                />
+              ):
+              (null)
+              }
+              <Typography sx={{ mt:2,ml:2 }} variant='h6'><b>Proprieté competance</b></Typography>
               <Grid
                 item
                 xs={12}
@@ -93,166 +84,41 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, acreditation, compe
                     display: 'flex',
                 }}
               >
-                  <TextField
-                    key="titre"
-                    label="Titre"
-                    name="titre"
-                    onChange={changetexarea}
-                    required
-                    sx={{
-                        m: 2,
-                        width: '100%',
-                    }}
-                  />
-                  <TextField
-                    key="niveau"
-                    label="Niveau"
-                    name="niveau"
-                    required
-                    onChange={changetexarea}
-                    sx={{
-                        m: 2,
-                        width: '100%',
-                    }}
-                  />
-                  <TextField
-                    key="version"
-                    label="Version"
-                    name="version"
-                    type='number'
-                    required
-                    onChange={changetexarea}
-                    sx={{
-                        m: 2,
-                        width: '100%',
-                    }}
-                  />
-                  <Autocomplete
-                    sx={{
-                        m: 2,
-                        width: '90%',
-                    }}
-                    disablePortal
-                    options={acreditation}
-                    freeSolo
-                    onChange={(e, value) =>{
-                      if (value != null) setNewnode({ ...newmetier, accretitre: value.label, accreid: value.id })
-                    }}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            required
-                            label="Accredition" 
-                            name="accretitre"
-                            variant="outlined"
-                            onChange={changetexarea}
-                        />
-                    )}
-                  />
-              </Grid>
-              <Typography>Brique competance</Typography>
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                sx={{
-                    display: 'flex',
-                }}
-              >
-                <Autocomplete
+                
+                <TextField
+                  key="titre"
+                  label="Titre"
+                  name="titre"
+                  onChange={changetexarea}
+                  required
                   sx={{
                       m: 2,
                       width: '100%',
                   }}
-                  disablePortal
-                  options={["SAVOIRS", "SAVOIRS FAIRE", "SAVOIR ÊTRE"]}
-                  onChange={handleChangecategorie}
-                  renderInput={(params) => (
-                      <TextField
-                          {...params}
-                          required
-                          label="Categorie" 
-                          name="categorie"
-                          variant="outlined"
-                      />
-                  )}
                 />
-                <Autocomplete
+                <TextField
+                  key="version"
+                  label="Version"
+                  name="version"
+                  type='number'
+                  required
+                  onChange={changetexarea}
                   sx={{
                       m: 2,
                       width: '100%',
                   }}
-                  disablePortal
-                  options={compet || []}
-                  onChange={handlebriquecompetance}
-                  renderInput={(params) => (
-                      <TextField
-                          {...params}
-                          required
-                          label="Titre" 
-                          name="titre"
-                          variant="outlined"
-                      />
-                  )}
                 />
-              </Grid>
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                sx={{
-                    display: 'flex',
-                }}
-              >
-                <Box flex="1"
-                  sx={{
-                      m: 2,
-                      width: '100%',
-                  }}>
-                  <TextField
-                    variant="outlined"
-                    label="Filtrer"
-                    fullWidth
-                    value={filtre}
-                    onChange={handleFiltreChange}
-                    style={{ marginBottom: '5px' }}
-                  />
-                  <List sx={{maxHeight: "30vh", height: "30vh", overflow: "auto"}}>
-                    {elementsNonCoches.map((element) => (
-                      <ListItem key={element.id}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              onChange={() => handleSelection(element, "add")}
-                            />
-                          }
-                          label={<ListItemText primary={element.brqCompTitre} />}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
-                <Box flex="1"
+                <TextField
+                  required
+                  label="Accredition" 
+                  name="accretitre"
+                  variant="outlined"
+                  onChange={changetexarea}
                   sx={{
                     m: 2,
                     width: '100%',
-                }}>
-                  <List sx={{maxHeight: "40vh", height: "40vh", overflow: "auto"}}>
-                    {elementsCoches.map((element) => (
-                      <ListItem key={element.id}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked = {true}
-                              onChange={() => handleSelection(element, "remove")}
-                            />
-                          }
-                          label={<ListItemText primary={element.brqCompTitre} />}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Box>
+                  }}
+                />
               </Grid>
             </Stack>
           </form>

@@ -18,12 +18,12 @@ export async function postcompetance(formdata, brique) {
     const body = new URLSearchParams();
     body.append('accreid', formdata.accreid);
     body.append('accretitre', formdata.accretitre);
-    body.append('niveau', formdata.niveau);
     body.append('titre', formdata.titre);
     body.append('version', formdata.version);
     for (let index = 0; index < brique.length; index++) {
         const element = brique[index];
         body.append('brique[]', element.id);
+        body.append('niveau[]', element.niveau);
     }
     const response = await fetch(url, {
         method: 'POST',
