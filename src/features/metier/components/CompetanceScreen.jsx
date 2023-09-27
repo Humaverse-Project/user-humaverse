@@ -28,6 +28,7 @@ function CompetanceScreen({setLoading, setError}) {
     const [listrome, setlistrome] = useState([]);
     const [open, setOpen] = useState(false);
     const [competance, setcompetance] = useState({});
+    const [appelationlist, setappelationlist] = useState([]);
     const [loadingrome, setloadingrome] = useState(false);
     const [tableloagin, settableloagin ] = useState({isLoading: true})
     useEffect(() => {
@@ -35,7 +36,6 @@ function CompetanceScreen({setLoading, setError}) {
             try {
                 const datametierexistant = await listcompetance();
                 const reponsemetie = await datametierexistant;
-                console.log(reponsemetie)
                 setfichecompetance(reponsemetie.fiche_competance);
                 setlistrome(reponsemetie.rome.map(rome=>{
                     return {
@@ -59,6 +59,7 @@ function CompetanceScreen({setLoading, setError}) {
 
     const handleselectionrome = (e) => {
         setloadingrome(true);
+        setOpen(false)
         getdatarome(matierselectionner.code)
         .then((reponsemetie) => {
             const data = reponsemetie.briquecompetance
@@ -71,11 +72,11 @@ function CompetanceScreen({setLoading, setError}) {
                 item.niveau = 0
                 groupedData[categorie].push(item);
             });
-            console.log(groupedData)
             console.log(reponsemetie)
             setcompetance(groupedData)
             setloadingrome(false);
             setCreateModalOpen(true)
+            setappelationlist(reponsemetie.appelation.map(x=>{return {...x, label: x.emploiTitre}}))
             setOpen(false)
         })
         .catch((error) => {
@@ -86,7 +87,6 @@ function CompetanceScreen({setLoading, setError}) {
         
     }
     const handleCreateNewRow = (values, elementsCoches) => {
-        console.log(values, elementsCoches)
         setLoading(true);
         postcompetance(values, elementsCoches)
         .then((data) => {
@@ -149,7 +149,7 @@ function CompetanceScreen({setLoading, setError}) {
                     maxWidth="xs"
                     open={open}
                 >
-                <DialogTitle>Selectionner le fiche metier</DialogTitle>
+                <DialogTitle color="button.main">Selectionner le fiche metier</DialogTitle>
                 <DialogContent dividers>
                     <Autocomplete
                         sx={{
@@ -177,7 +177,7 @@ function CompetanceScreen({setLoading, setError}) {
                     <Button autoFocus onClick={(e)=>setOpen(false)}>
                         Annuler
                     </Button>
-                    <Button onClick={handleselectionrome}>Valider</Button>
+                    <Button onClick={handleselectionrome} color='button' variant='contained' sx={{color:'black.main'}}>Valider</Button>
                 </DialogActions>
             </Dialog>
             <ThemeProvider theme={theme}>
@@ -197,7 +197,6 @@ function CompetanceScreen({setLoading, setError}) {
                             }
                             groupedData[categorie][titre].push(item);
                         });
-                        console.log(groupedData)
                         return (
                             <Box
                                 sx={{
@@ -307,6 +306,7 @@ function CompetanceScreen({setLoading, setError}) {
                     onSubmit={handleCreateNewRow}
                     rome={matierselectionner}
                     competance={competance}
+                    appelationlist={appelationlist}
                 />
             </ThemeProvider>
         </Paper>

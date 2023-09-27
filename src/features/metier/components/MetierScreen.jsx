@@ -162,7 +162,7 @@ function MetierScreen({setLoading, setError}) {
             Cell: ({ cell }) => datefonctionun(cell.getValue())
           }
         ],
-        [handleChange, datefonctionun],
+        [handleChange],
     );
     // Affichez les données récupérées
     return (
