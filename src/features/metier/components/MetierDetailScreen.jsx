@@ -77,7 +77,7 @@ function MetierDetailScreen() {
         return (
           <Fragment>
               <HeaderInScreen
-                  title={'Fiche ROME: '+code}
+                  title={'Fiche ROME - '+code}
               />
               { LoadingAPI (loading, error, page)}
           </Fragment>
@@ -88,7 +88,7 @@ function MetierDetailScreen() {
     return (
       <Fragment>
         <HeaderInScreen
-            title={'Fiche ROME: '+code+' '+titre}
+            title={'Fiche ROME - '+code+' '+titre}
         />
         <Box
             backgroundColor="background.paper"
