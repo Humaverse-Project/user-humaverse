@@ -8,11 +8,11 @@ import {
     Stack,
     TextField,
     Typography,
-    Grid
+    Grid,
+    Autocomplete
 } from '@mui/material';
 import PartCompetanceCreation from "./partie/PartCompetanceCreation";
-const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance }) => {
-  console.log(rome)
+const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, appelationlist }) => {
     const [newmetier, setNewnode] = useState({});
     const handleSubmit = () => {
       let data = [];
@@ -25,6 +25,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance })
       if ("SAVOIR ÊTRE" in competance) {
         data = data.concat(competance["SAVOIR ÊTRE"])
       }
+      console.log(data,newmetier)
       onSubmit(newmetier, data );
       onClose();
     };
@@ -46,32 +47,44 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance })
             >
               <Typography variant='h6'> <b>Définition niveau</b></Typography>
               { "SAVOIRS FAIRE" in competance ? (
-                < PartCompetanceCreation
-                  competance={competance}
-                  type={"SAVOIRS FAIRE"}
-                  handleSliderChange={handleSliderChange}
-                  titre={"Savoir-faire"}
-                />
+                <><Typography variant='h5' sx={{ mt:2,ml:2 }}>Savoir-faire</Typography>
+                {
+                  competance["SAVOIRS FAIRE"].map((accessitem) => (
+                    < PartCompetanceCreation
+                      handleSliderChange={handleSliderChange}
+                      accessitem= {accessitem}
+                    />
+                  ))
+                }
+                </>
               ):
               (null)
               }
               { "SAVOIRS" in competance ? (
-                < PartCompetanceCreation
-                  competance={competance}
-                  type={"SAVOIRS"}
-                  handleSliderChange={handleSliderChange}
-                  titre={"Savoirs"}
-                />
+                <><Typography variant='h5' sx={{ mt:2,ml:2 }}>Savoirs</Typography>
+                  {
+                    competance["SAVOIRS"].map((accessitem) => (
+                      < PartCompetanceCreation
+                        handleSliderChange={handleSliderChange}
+                        accessitem= {accessitem}
+                      />
+                    ))
+                  }
+                </>
               ):
               (null)
               }
               { "SAVOIR ÊTRE" in competance ? (
-                < PartCompetanceCreation
-                  competance={competance}
-                  type={"SAVOIR ÊTRE"}
-                  handleSliderChange={handleSliderChange}
-                  titre={"Savoir être"}
-                />
+                <><Typography variant='h5' sx={{ mt:2,ml:2 }}>Savoirs être</Typography>
+                  {
+                    competance["SAVOIR ÊTRE"].map((accessitem) => (
+                      < PartCompetanceCreation
+                        handleSliderChange={handleSliderChange}
+                        accessitem= {accessitem}
+                      />
+                    ))
+                  }
+                </>
               ):
               (null)
               }
@@ -85,7 +98,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance })
                 }}
               >
                 
-                <TextField
+                {/* <TextField
                   key="titre"
                   label="Titre"
                   name="titre"
@@ -95,8 +108,29 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance })
                       m: 2,
                       width: '100%',
                   }}
+                /> */}
+                <Autocomplete
+                    sx={{
+                        m: 2,
+                        width: '100%',
+                    }}
+                    disablePortal
+                    options={appelationlist}
+                    onChange={(e, value) =>{
+                      if (value != null) setNewnode({ ...newmetier, emploistitre: value.label, emploisid: value.id, titre: value.label })
+                    }}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            required
+                            label="Appelation emplois" 
+                            name="apemp"
+                            variant="outlined"
+                            onChange={changetexarea}
+                        />
+                    )}
                 />
-                <TextField
+                {/* <TextField
                   key="version"
                   label="Version"
                   name="version"
@@ -107,7 +141,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance })
                       m: 2,
                       width: '100%',
                   }}
-                />
+                /> */}
                 <TextField
                   required
                   label="Accredition" 
@@ -125,7 +159,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance })
         </DialogContent>
         <DialogActions sx={{ p: '1.25rem' }}>
           <Button onClick={onClose}>Annuler</Button>
-          <Button color="secondary" onClick={handleSubmit} variant="contained">
+          <Button color="success" onClick={handleSubmit} variant="contained">
             Crée le competance
           </Button>
         </DialogActions>

@@ -17,6 +17,7 @@ export async function postcompetance(formdata, brique) {
 
     const body = new URLSearchParams();
     body.append('accreid', formdata.accreid);
+    body.append('emploisid', formdata.emploisid);
     body.append('accretitre', formdata.accretitre);
     body.append('titre', formdata.titre);
     body.append('version', formdata.version);

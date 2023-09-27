@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles'
 
 const palette = {
-    red: '#A7001E',
+    red: '#ea5459',
     black: '#000000',
     blue: '#317AC1',
     grey: '#E5E7E6',
@@ -9,6 +9,7 @@ const palette = {
     greyCard: '#CACACA',
     logocolor: '#ff2600',
     green: '#00f900',
+    button: '#004d80'
 }
 
 const typo = {
@@ -67,6 +68,9 @@ const theme = createTheme({
         },
         green: {
             main: palette.green,
+        },
+        button: {
+            main: palette.button,
         },
         /*custom: {
       light: '#ffa726',

@@ -33,7 +33,7 @@ function LeftMenu(active){
                     key={item.nom}
                     variant="contained"
                     href={item.url}
-                    color={active === item.nom ? 'logocolor' : 'blue'}
+                    color={active === item.nom ? 'primary' : 'button'}
                     style={buttonStyle}
                     size='large'>
                 {item.nom}

@@ -70,7 +70,7 @@ function MetierDetailScreen() {
             setLoading(false)
         };
         fetchData();
-    }, []);
+    }, [code]);
     
 
     if (loading || error) {
