@@ -13,9 +13,18 @@ const PartCompetanceCreation = ({ handleSliderChange, accessitem, value }) => {
   };
 
   const handleInputChange = (event, accessitem) => {
-    setValueInterne(Number(event.target.value));
+    const inputValue = Number(event.target.value);
+
+    if (inputValue < 0) {
+      setValueInterne(0);
+    } else if (inputValue > 100) {
+      setValueInterne(100);
+    } else {
+      setValueInterne(inputValue);
+    }
+
     handleSliderChange(
-      event.target.value === "" ? 0 : Number(event.target.value),
+      inputValue < 0 ? 0 : inputValue > 100 ? 100 : inputValue,
       accessitem
     );
   };
