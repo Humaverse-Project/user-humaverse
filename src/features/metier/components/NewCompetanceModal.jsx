@@ -36,7 +36,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance })
     }
     return (
       <Dialog open={open} maxWidth={'md'}>
-        <DialogTitle textAlign="center">Crée une fiche competance à partier de fiche rome <b>{rome.code}</b></DialogTitle>
+        <DialogTitle textAlign="center">Créer une fiche de compétences à partir d'une fiche ROME <b>{rome.code}</b></DialogTitle>
         <DialogContent  dividers={true}>
           <form onSubmit={(e) => e.preventDefault()}>
             <Stack

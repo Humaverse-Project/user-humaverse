@@ -94,7 +94,7 @@ function MetierScreen({setLoading, setError}) {
             ),
           },
           {
-            accessorKey: 'Libellé Rome',
+            accessorKey: 'nom',
             header: 'Nom',
             size: 140,
             enableClickToCopy: true,
@@ -102,7 +102,7 @@ function MetierScreen({setLoading, setError}) {
                 <TextField
                     defaultValue={cell.getValue()}
                     key="nom"
-                    label="Libellé Rome"
+                    label="Nom"
                     name="nom"
                     variant="outlined"
                     onChange={handleChange}
