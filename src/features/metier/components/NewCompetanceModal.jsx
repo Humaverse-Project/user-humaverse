@@ -50,7 +50,10 @@ const CreateNewCompetanceModal = ({
     accessitem.niveau = newValue;
   };
   const changetexarea = (e) => {
-    setNewnode({ ...newmetier, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    let parsedValue = parseInt(value, 10);
+    parsedValue = isNaN(parsedValue) ? 0 : Math.max(0, Math.min(parsedValue, 100));
+    setNewnode({ ...newmetier, [name]: parsedValue });
   };
   return (
     <Dialog open={open} maxWidth={"md"}>
@@ -62,7 +65,7 @@ const CreateNewCompetanceModal = ({
         <form onSubmit={(e) => e.preventDefault()}>
           <Typography variant="h6">
             {" "}
-            <b>Appelation</b>
+            <b>Métiers</b>
           </Typography>
           {/* <Typography sx={{ mt: 2, ml: 2 }} variant="h6">
           <b>Proprieté competance</b>
@@ -112,7 +115,7 @@ const CreateNewCompetanceModal = ({
                 <TextField
                   {...params}
                   required
-                  label="Appelation emplois"
+                  label="Métiers"
                   name="apemp"
                   variant="outlined"
                   onChange={changetexarea}
@@ -135,7 +138,7 @@ const CreateNewCompetanceModal = ({
               <TextField
                 required
                 type="number"
-                label="Valeur"
+                label="Niveau global de compétences"
                 name="accretitre"
                 variant="outlined"
                 onChange={changeNumber}
@@ -153,7 +156,7 @@ const CreateNewCompetanceModal = ({
           >
             <Typography variant="h6">
               {" "}
-              <b>Définition niveau</b>
+              <b>Définition niveaux</b>
             </Typography>
             {"SAVOIRS FAIRE" in competance ? (
               <>
@@ -276,7 +279,7 @@ const CreateNewCompetanceModal = ({
       <DialogActions sx={{ p: "1.25rem" }}>
         <Button onClick={onClose}>Annuler</Button>
         <Button color="success" onClick={handleSubmit} variant="contained">
-          Crée le compétence
+          Créer les compétences
         </Button>
       </DialogActions>
     </Dialog>
