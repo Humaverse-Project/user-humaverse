@@ -70,9 +70,6 @@ const PartCompetanceCreation = ({ handleSliderChange, accessitem }) => {
                     </Grid>
                 </Grid>
             </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
       <Divider variant="middle" />
     </>
   );
