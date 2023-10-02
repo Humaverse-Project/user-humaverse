@@ -32,7 +32,7 @@ const Input = styled(MuiInput)`
   width: 42px;
 `;
 
-const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, appelationlist, setcompetance }) => {
+const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance, setcompetance, competanceglobal, accreditationlist, setAccreditationlist }) => {
   const generateRandomid = () => {
     const length = 10;
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=[]{};:,.<>?";
@@ -44,8 +44,13 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
     }
     return password;
   }
-  const [newmetier, setNewnode] = useState({});
-  const [accreditationlist, setAccreditationlist] = useState([{accreditaiontitre: '', acrreditationvalue: '', id: generateRandomid()}])
+  const [newmetier, setNewnode] = useState({
+    emploistitre: activeeditrow.emploiTitre,
+    emploisid: activeeditrow.id,
+    titre: activeeditrow.emploiTitre
+  });
+  const [nouvellecompetancelist, setnouvellecompetancelist] = useState([]);
+  const [affichecgb, setaffichecgb] = useState([]);
   const handleSubmit = () => {
     let data = [];
     if ("SAVOIRS FAIRE" in competance) {
@@ -79,12 +84,18 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
   const handleSliderChange = (newValue, accessitem)=>{
     accessitem.niveau = newValue
   }
-  const changetexarea = (e)=>{
-    setNewnode({ ...newmetier, [e.target.name]: e.target.value })
+  const handleajoutcompetance = (e)=> {
+    setnouvellecompetancelist([...nouvellecompetancelist, {
+        globaltitre: "",
+        globalid: null,
+        compettitre: "",
+        globalcategorie: "",
+        cahrt: generateRandomid()
+      }])
   }
     return (
       <Dialog open={open} maxWidth={'md'}>
-        <DialogTitle textAlign="center">Créer une fiche de compétences à partir d'une fiche ROME <b>{rome.code}</b></DialogTitle>
+        <DialogTitle textAlign="center">Modifier le competance métier <b>{activeeditrow.emploiTitre}</b></DialogTitle>
         <DialogContent  dividers={true}>
           <form onSubmit={(e) => e.preventDefault()}>
             <Stack
@@ -93,28 +104,15 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
               }}
             >
               <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={6}>
-                    <Autocomplete
-                      sx={{
-                          width: '100%',
-                      }}
-                      disablePortal
-                      options={appelationlist}
-                      onChange={(e, value) =>{
-                        if (value != null) setNewnode({ ...newmetier, emploistitre: value.label, emploisid: value.id, titre: value.label })
-                      }}
-                      renderInput={(params) => (
-                          <TextField
-                              {...params}
-                              required
-                              label="Appelation emplois" 
-                              name="apemp"
-                              variant="outlined"
-                              onChange={changetexarea}
-                          />
-                      )}
-                    />
-                  </Grid>
+                    <Grid item xs={6}>
+                        <TextField
+                            sx={{
+                                width: '100%',
+                            }}
+                            aria-readonly
+                            value={activeeditrow.emploiTitre}
+                        ></TextField>
+                    </Grid>
                   <Grid item xs={6}>
                     <TextField
                         sx={{
@@ -127,28 +125,6 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
                         variant="outlined"
                         onChange={handleSliderChangeglobal}
                     />
-                  </Grid>
-              </Grid>
-              <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={6}>
-                    <FormControlLabel
-                      control={
-                          <Checkbox
-                              onChange={(event) => {
-                                  const isChecked = event.target.checked;
-                                  if (isChecked) {
-                                    setNewnode({ ...newmetier, applicationall: "ok" })
-                                  } else {
-                                    setNewnode({ ...newmetier, applicationall: "ko" })
-                                  }
-                              }}
-                          />
-                      }
-                      label={<ListItemText primary={"Appliquer le parametre sur tous les emplois"} />}
-                      sx={{
-                          width: '100%',
-                      }}
-                      />
                   </Grid>
               </Grid>
               <Typography variant='h6'> <b>Définition niveau</b></Typography>
@@ -194,21 +170,137 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
               ):
               (null)
               }
-                <Box
-                  sx={{
-                      display: 'flex',
-                  }}>
-                    <Typography sx={{ mt:2,ml:2 }} variant='h6'><b>Accreditations</b></Typography>
-                
-                    <IconButton
-                      onClick={(e)=>
-                        setAccreditationlist([...accreditationlist, {accreditaiontitre: '', acrreditationvalue: '', id: generateRandomid()}])
-                      }
-                      sx={{color: "green", mt:2}}
+              <Button onClick={handleajoutcompetance}>Ajouter plus de competances</Button>
+              <Grid container spacing={2} alignItems="center">
+                {
+                  nouvellecompetancelist.map((list) => (
+                    <><Grid
+                      item
+                      xs={4}
+                      sm={4}
+                      sx={{
+                        display: 'flex',
+                      }}
+                      key={list.cahrt}
                     >
-                      <AddCircleIcon />
-                    </IconButton>
-                  </Box>
+                        <Autocomplete
+                            sx={{
+                                width: '100%',
+                            }}
+                            disablePortal
+                            options={["SAVOIRS", "SAVOIRS FAIRE", "SAVOIR ÊTRE"]}
+                            onChange={(e, value) =>{
+                                if (value != null) {
+                                    list.globalcategorie = value
+                                    setnouvellecompetancelist([...nouvellecompetancelist])
+                                    let com = competanceglobal.filter(cgb=>{
+                                        if (cgb.compGbCategorie == value) {
+                                            return true
+                                        } return false
+                                    })
+                                    setaffichecgb(com.map(comps=>{
+                                        return {
+                                            label: comps.compGbTitre,
+                                            id: comps.id
+                                        }
+                                    }))
+                                }
+                                else {
+                                    list.globalcategorie = ''
+                                    setnouvellecompetancelist([...nouvellecompetancelist])
+                                    setaffichecgb([])
+                                }
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    required
+                                    label="Categorie" 
+                                    name="apemp"
+                                    variant="outlined"
+                                />
+                            )}
+                        />
+                        </Grid>
+                        <Grid
+                            item
+                            xs={4}
+                            sm={4}
+                            sx={{
+                                display: 'flex',
+                            }}
+                            key={list.cahrt+"ss"}
+                            >
+                        <Autocomplete
+                            sx={{
+                                width: '100%',
+                            }}
+                            disablePortal
+                            options={affichecgb}
+                            freeSolo
+                            onChange={(e, value) =>{
+                                if (value != null) {
+                                    list.globaltitre = value.label
+                                    list.globalid = value.globalid
+                                    setnouvellecompetancelist([...nouvellecompetancelist])
+                                }
+                                else {
+                                    list.globaltitre = ''
+                                    list.globalid = null
+                                    setnouvellecompetancelist([...nouvellecompetancelist])
+                                }
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    required
+                                    label="titre Competance global" 
+                                    name="apemp"
+                                    onChange={(e)=> {list.globaltitre = e.target.value; list.globalid = "nouveau"; setnouvellecompetancelist([...nouvellecompetancelist])}}
+                                    variant="outlined"
+                                />
+                            )}
+                        />
+                        </Grid>
+                        <Grid
+                            item
+                            xs={4}
+                            sm={4}
+                            sx={{
+                                display: 'flex',
+                            }}
+                            key={list.cahrt+"ssfff"}
+                            >
+                            <TextField
+                                sx={{
+                                    width: '100%',
+                                }}
+                                required
+                                label="Titre brique competance" 
+                                name="apemp"
+                                onChange={(e)=> {list.compettitre = e.target.value; setnouvellecompetancelist([...nouvellecompetancelist])}}
+                                variant="outlined"
+                            />
+                        </Grid>
+                    </>
+                  ))
+                }
+              </Grid>
+              <Box
+                sx={{
+                    display: 'flex',
+                }}>
+                <Typography sx={{ mt:2,ml:2 }} variant='h6'><b>Accreditations</b></Typography>
+            
+                <IconButton
+                    onClick={(e)=>
+                    setAccreditationlist([...accreditationlist, {accreditaiontitre: '', acrreditationvalue: '', id: generateRandomid()}])
+                    }
+                    sx={{color: "green", mt:2}}
+                >
+                    <AddCircleIcon />
+                </IconButton>
+              </Box>
                   
               <Grid container spacing={2} alignItems="center">
                 {
@@ -238,6 +330,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
                           label="Titre"
                           key={accreditation.id+"iuc"}
                           id="outlined-adornment-password"
+                          value={accreditation.accreditaiontitre}
                           onChange = {(e)=>{ if(e.target.value){
                               accreditation.accreditaiontitre = e.target.value;
                               setAccreditationlist([...accreditationlist])
@@ -311,4 +404,4 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
     );
 };
 
-export default CreateNewCompetanceModal
+export default EditCompetanceModal

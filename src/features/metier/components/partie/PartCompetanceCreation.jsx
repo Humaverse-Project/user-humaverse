@@ -6,27 +6,32 @@ const Input = styled(MuiInput)`
   width: 42px;
 `;
 const PartCompetanceCreation = ({ handleSliderChange, accessitem }) => {
-    const [value, setValue] = React.useState(0);
+    const [value, setValue] = React.useState(typeof accessitem.niveau === 'number' ? accessitem.niveau : 0);
 
     const handleSliderChangeinterne = (newValue, accessitem) => {
         setValue(newValue);
+        accessitem.niveau = newValue
         handleSliderChange(newValue, accessitem)
     };
-
     const handleInputChange = (event, accessitem) => {
         setValue(event.target.value === '' ? 0 : Number(event.target.value));
+        accessitem.niveau = event.target.value === '' ? 0 : Number(event.target.value)
         handleSliderChange(event.target.value === '' ? 0 : Number(event.target.value), accessitem)
     };
 
     const handleBlur = (accessitem) => {
         if (value < 0) {
             setValue(0);
+            accessitem.niveau = 0
             handleSliderChange(0, accessitem)
         } else if (value > 100) {
             setValue(100);
+            accessitem.niveau = 100
             handleSliderChange(100, accessitem)
         }
+        
     };
+
     return (
         <>
             <Grid sx={{ flexGrow: 1, mt: 1, pl: 3 }} container spacing={2} key={accessitem.id+"2"}>
@@ -38,8 +43,7 @@ const PartCompetanceCreation = ({ handleSliderChange, accessitem }) => {
                         <Grid item xs={9} key={accessitem.id+"gridslide"}>
                             <Slider
                                 key={accessitem.id+"slide"}
-                                defaultValue={0}
-                                value={typeof value === 'number' ? value : 0}
+                                value={typeof accessitem.niveau === 'number' ? accessitem.niveau : 0}
                                 onChange={(event, newValue)=>handleSliderChangeinterne(newValue, accessitem)}
                                 valueLabelDisplay="auto"
                                 step={1}
@@ -50,7 +54,7 @@ const PartCompetanceCreation = ({ handleSliderChange, accessitem }) => {
                         <Grid item xs={3} key={accessitem.id+"gridinput"}>
                             <Input
                                 key={accessitem.id+"input"}
-                                value={value}
+                                value={typeof accessitem.niveau === 'number' ? accessitem.niveau : 0}
                                 size="small"
                                 onChange={(e)=> handleInputChange(e,accessitem )}
                                 onBlur={()=> handleBlur(accessitem)}
