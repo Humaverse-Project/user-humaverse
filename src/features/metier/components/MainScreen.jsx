@@ -9,7 +9,9 @@ import { useTheme } from '@mui/material/styles'
 import {
     Box,
     Grid,
-    Button
+    Button,
+    Breadcrumbs,
+    Typography
 } from '@mui/material';
 
 export default function MainScreen() {
@@ -62,7 +64,7 @@ export default function MainScreen() {
                         <Button 
                             key="metier"
                             variant="contained"
-                            color={'green'}
+                            color={screen === 1 ? 'primary': 'green'}
                             size='large'
                             onClick={(e)=> setScreen(1)}
                             sx={{ color: 'black.main', fontWeight: 'bold'}}>
@@ -71,7 +73,7 @@ export default function MainScreen() {
                         <Button 
                             key="competance"
                             variant="contained"
-                            color={'green'}
+                            color={screen === 2 ? 'primary': 'green'}
                             size='large'
                             onClick={(e)=> setScreen(2)}
                             sx={{ color: 'black.main', fontWeight: 'bold', mx: 2 }}>
@@ -80,7 +82,7 @@ export default function MainScreen() {
                         <Button 
                             key="Postes"
                             variant="contained"
-                            color={'green'}
+                            color={screen === 3 ? 'primary': 'green'}
                             size='large'
                             onClick={(e)=> setScreen(3)}
                             sx={{ color: 'black.main', fontWeight: 'bold', mx: 2 }}>

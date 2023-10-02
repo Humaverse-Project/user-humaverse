@@ -252,7 +252,7 @@ function MetierScreen({setLoading, setError}) {
                             </IconButton>
                         </Tooltip>
                     </Box>
-              )}
+                )}
                 localization={MRT_Localization_FR}
             />
             </ThemeProvider>

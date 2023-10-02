@@ -1,5 +1,5 @@
 import HeaderInScreen from '../../header/HeaderInScreen'
-import { LeftMenu } from '../../../shared'
+import { LeftMenu, Text } from '../../../shared'
 import { LoadingAPI } from '../../../shared'
 import React, { Fragment, useState, useEffect } from 'react';
 import { getdatarome } from '../../../services/RomeService'
@@ -8,8 +8,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import { useParams } from 'react-router-dom'; // Importez useParams pour récupérer les paramètres d'URL
-import { ListItem, Typography } from '@mui/material';
+import { Link, NavLink, useParams } from 'react-router-dom'; // Importez useParams pour récupérer les paramètres d'URL
+import { Button, ListItem, Typography } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -116,6 +116,22 @@ function MetierDetailScreen() {
                         overflowX: "hidden"
                     }}
                 >
+                    <NavLink
+                            to="/competences"
+                            style={{
+                                textDecoration: 'none',
+                                color: 'black'
+                            }}
+                        >
+                        <Button 
+                            key="metier"
+                            variant="contained"
+                            color={'green'}
+                            size='large'
+                            sx={{ color: 'black.main', fontWeight: 'bold', mb:2}}>
+                            RETOUR
+                        </Button>
+                    </NavLink>
                     <ThemeProvider theme={theme}>
                     <Accordion>
                         <AccordionSummary

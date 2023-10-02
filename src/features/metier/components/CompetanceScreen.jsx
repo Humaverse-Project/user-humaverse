@@ -3,6 +3,7 @@ import { listcompetance, postcompetance } from '../../../services/CompetanceServ
 import MaterialReactTable from 'material-react-table';
 import Paper from '@mui/material/Paper';
 import CreateNewCompetanceModal from './NewCompetanceModal';
+import EditCompetanceModal from './EditCompetanceModal';
 import {getdatarome} from '../../../services/RomeService'
 import {
     Autocomplete,
@@ -15,12 +16,15 @@ import {
     TextField,
     ThemeProvider,
     Backdrop,
-    CircularProgress
+    CircularProgress,
+    Tooltip,
+    IconButton
 } from '@mui/material';
 import { MRT_Localization_FR } from 'material-react-table/locales/fr';
 import theme from './theme';
 import {datefonctionun} from "../../../services/DateFormat"
 import PartCompetanceShow from './partie/PartCompetanceShow';
+import { Edit } from '@mui/icons-material';
 
 function CompetanceScreen({setLoading, setError}) {
     const [fichecompetance, setfichecompetance] = useState([]);
@@ -28,14 +32,19 @@ function CompetanceScreen({setLoading, setError}) {
     const [listrome, setlistrome] = useState([]);
     const [open, setOpen] = useState(false);
     const [competance, setcompetance] = useState({});
+    const [activeeditrow, setactiveeditrow] = useState({});
     const [appelationlist, setappelationlist] = useState([]);
+    const [competanceglobal, setcompetanceglobal] = useState([]);
     const [loadingrome, setloadingrome] = useState(false);
     const [tableloagin, settableloagin ] = useState({isLoading: true})
+    
+    const [accreditationlist, setAccreditationlist] = useState([])
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const datametierexistant = await listcompetance();
                 const reponsemetie = await datametierexistant;
+                console.log(reponsemetie)
                 setfichecompetance(reponsemetie.fiche_competance);
                 setlistrome(reponsemetie.rome.map(rome=>{
                     return {
@@ -44,6 +53,7 @@ function CompetanceScreen({setLoading, setError}) {
                         id: rome.id
                     }
                 }))
+                setcompetanceglobal(reponsemetie.fiche_competance_global)
                 setLoading(false);
                 settableloagin({isLoading: false})
             } catch (error) {
@@ -56,7 +66,35 @@ function CompetanceScreen({setLoading, setError}) {
     }, [setLoading, setError, setfichecompetance, setlistrome]);
     
     const [createModalOpen, setCreateModalOpen] = useState(false);
-
+    const [EditModalOpen, setEditModalOpen] = useState(false);
+    const setEditingRow = (row)=>{
+        console.log(row)
+        const data = row.original.briquesCompetencesNiveaux
+        const groupedData = {};
+        data.forEach((item) => {
+            let topush = {}
+            const categorie = item.briquescompetances.compGb.compGbCategorie;
+            if (!groupedData[categorie]) {
+                groupedData[categorie] = [];
+            }
+            topush.niveau = item.niveau
+            topush.brqCompTitre = item.briquescompetances.brqCompTitre
+            topush.id = item.briquescompetances.id
+            topush.etat = "non"
+            groupedData[categorie].push(topush);
+        });
+        console.log(groupedData)
+        let accredit = row.original.accreditation.map(acc=>{
+            return {
+                accreditaiontitre: acc.accreTitre, acrreditationvalue: acc.value, id: acc.id
+            }
+        })
+        setAccreditationlist(accredit)
+        setappelationlist([row.original.appelation])
+        setcompetance(groupedData)
+        setactiveeditrow(row.original.appelation)
+        setEditModalOpen(true)
+    }
     const handleselectionrome = (e) => {
         setloadingrome(true);
         setOpen(false)
@@ -72,7 +110,6 @@ function CompetanceScreen({setLoading, setError}) {
                 item.niveau = 0
                 groupedData[categorie].push(item);
             });
-            console.log(reponsemetie)
             setcompetance(groupedData)
             setloadingrome(false);
             setCreateModalOpen(true)
@@ -86,10 +123,11 @@ function CompetanceScreen({setLoading, setError}) {
         });
         
     }
-    const handleCreateNewRow = (values, elementsCoches) => {
+    const handleCreateNewRow = (values, elementsCoches, accreditationlist) => {
         setLoading(true);
-        postcompetance(values, elementsCoches)
+        postcompetance(values, elementsCoches, accreditationlist, matierselectionner.id)
         .then((data) => {
+            setcompetanceglobal(data.fiche_competance_global)
             setfichecompetance(data.fiche_competance);
             setLoading(false);
         })
@@ -114,7 +152,7 @@ function CompetanceScreen({setLoading, setError}) {
                     accessorKey: 'ficCompTitreEmploi',
                     header: 'Titre',
                     enableColumnOrdering: true,
-                    enableEditing: false,
+                    enableEditing: true,
                     enableSorting: true,
                 },
                 {
@@ -298,6 +336,19 @@ function CompetanceScreen({setLoading, setError}) {
                         Générer les fiches de competénces
                     </Button>
                     )}
+                    enableEditing
+                    onEditingRowSave={(e)=>console.log(e)}
+                    onEditingRowCancel={(e)=>console.log(e)}
+                    editingMode="modal"
+                    renderRowActions={({ row, table }) => (
+                        <Box sx={{ display: 'flex', gap: '1rem' }}>
+                            <Tooltip arrow placement="left" title="Edit">
+                                <IconButton onClick={(e) => setEditingRow(row)}>
+                                    <Edit />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                    )}
                     localization={MRT_Localization_FR}
                 />
                 <CreateNewCompetanceModal
@@ -307,6 +358,18 @@ function CompetanceScreen({setLoading, setError}) {
                     rome={matierselectionner}
                     competance={competance}
                     appelationlist={appelationlist}
+                    setcompetance={setcompetance}
+                />
+                <EditCompetanceModal
+                    open={EditModalOpen}
+                    onClose={() => setEditModalOpen(false)}
+                    onSubmit={handleCreateNewRow}
+                    activeeditrow={activeeditrow}
+                    competance={competance}
+                    setcompetance={setcompetance}
+                    competanceglobal = {competanceglobal}
+                    accreditationlist = {accreditationlist}
+                    setAccreditationlist = {setAccreditationlist}
                 />
             </ThemeProvider>
         </Paper>
