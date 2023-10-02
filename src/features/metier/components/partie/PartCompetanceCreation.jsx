@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { Divider, Grid, ListItem, Slider } from "@mui/material"
-import MuiInput from '@mui/material/Input';
-import { styled } from '@mui/material/styles';
+import * as React from "react";
+import { Divider, Grid, ListItem, Slider } from "@mui/material";
+import MuiInput from "@mui/material/Input";
+import { styled } from "@mui/material/styles";
 const Input = styled(MuiInput)`
   width: 42px;
 `;
@@ -70,9 +70,12 @@ const PartCompetanceCreation = ({ handleSliderChange, accessitem }) => {
                     </Grid>
                 </Grid>
             </Grid>
-            <Divider variant="middle" />
-        </>
-    )
-}
+          </Grid>
+        </Grid>
+      </Grid>
+      <Divider variant="middle" />
+    </>
+  );
+};
 
-export default PartCompetanceCreation
+export default PartCompetanceCreation;

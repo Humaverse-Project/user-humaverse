@@ -49,7 +49,7 @@ function LoadingAPI(loading, error, page) {
                                 autoHideDuration={6000}
                                 anchorOrigin={{ vertical:'top', horizontal:'right' }}
                             >
-                                <Alert severity="warning" >
+                                <Alert severity="info" >
                                     chargement de donné depuis l'API.
                                 </Alert>
                             </Snackbar>

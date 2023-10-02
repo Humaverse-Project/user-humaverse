@@ -187,7 +187,7 @@ function CompetanceScreen({setLoading, setError}) {
                     maxWidth="xs"
                     open={open}
                 >
-                <DialogTitle color="button.main">Selectionner le fiche metier</DialogTitle>
+                <DialogTitle color="button.main">Sélectionner le code Rome</DialogTitle>
                 <DialogContent dividers>
                     <Autocomplete
                         sx={{

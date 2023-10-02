@@ -1,4 +1,4 @@
-import React, {useState } from 'react';
+import React, { useState } from "react";
 import {
     Button,
     Dialog,
@@ -311,4 +311,4 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
     );
 };
 
-export default CreateNewCompetanceModal
+export default CreateNewCompetanceModal;
