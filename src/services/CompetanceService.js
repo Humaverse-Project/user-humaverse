@@ -12,7 +12,7 @@ export async function listcompetance() {
     return await response.json();
 }
 
-export async function postcompetance(formdata, brique, accreditationlist, romeid) {
+export async function postcompetance(formdata, brique, accreditationlist, romeid, nouvellecompetance=[]) {
     const url = `${base_url}/fiches/competences/new`;
 
     const body = new URLSearchParams();
@@ -31,6 +31,14 @@ export async function postcompetance(formdata, brique, accreditationlist, romeid
         body.append('accreditationname[]', element.accreditaiontitre);
         body.append('accreditationvalue[]', element.acrreditationvalue);
     }
+    for (let index = 0; index < nouvellecompetance.length; index++) {
+        const element = nouvellecompetance[index];
+        body.append('globaltitre[]', element.globaltitre);
+        body.append('globalid[]', element.globalid);
+        body.append('compettitre[]', element.compettitre);
+        body.append('globalcategorie[]', element.globalcategorie);
+        body.append('niveauvaovao[]', element.niveau);
+    }
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -45,6 +53,25 @@ export async function postcompetance(formdata, brique, accreditationlist, romeid
     return await response.json();
 }
 
+export async function getdatacompetance(code) {
+    const url = `${base_url}/fiches/competences/detail`;
+
+    const body = new URLSearchParams();
+    body.append('code', code);
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: body.toString(),
+    });
+
+    if (!response.ok) {
+        throw new Error('erreur backend');
+    }
+    return await response.json();
+}
 export async function loadcompetanceglobal(formdata) {
     const url = `${base_url}/briques/competences/load`;
 

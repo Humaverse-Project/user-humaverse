@@ -25,6 +25,7 @@ import theme from './theme';
 import {datefonctionun} from "../../../services/DateFormat"
 import PartCompetanceShow from './partie/PartCompetanceShow';
 import { Edit } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 
 function CompetanceScreen({setLoading, setError}) {
     const [fichecompetance, setfichecompetance] = useState([]);
@@ -138,6 +139,28 @@ function CompetanceScreen({setLoading, setError}) {
         });
         
     };
+
+    const handleSaveEditRow = (elementsCoches, accreditationlist, nouvellecompetance) => {
+        console.log(activeeditrow)
+        setLoading(true);
+        const values = {
+            emploistitre: activeeditrow.emploiTitre,
+            emploisid: activeeditrow.id,
+            titre: activeeditrow.emploiTitre
+        }
+        postcompetance(values, elementsCoches, accreditationlist, activeeditrow.romeData.id, nouvellecompetance)
+        .then((data) => {
+            setcompetanceglobal(data.fiche_competance_global)
+            setfichecompetance(data.fiche_competance);
+            setLoading(false);
+        })
+        .catch((error) => {
+            setError('bakend error');
+            console.error('bakend error:', error.message);
+            setLoading(false);
+        });
+        
+    };
     
     const columns = useMemo(
         () => [
@@ -154,6 +177,9 @@ function CompetanceScreen({setLoading, setError}) {
                     enableColumnOrdering: true,
                     enableEditing: true,
                     enableSorting: true,
+                    Cell: ({ cell, column, row }) => (
+                        <Link to={`/competancedetail/${row.original.id}`}>{cell.getValue()}</Link>
+                    ),
                 },
                 {
                     accessorKey: 'ficCompVersion',
@@ -339,10 +365,9 @@ function CompetanceScreen({setLoading, setError}) {
                     enableEditing
                     onEditingRowSave={(e)=>console.log(e)}
                     onEditingRowCancel={(e)=>console.log(e)}
-                    editingMode="modal"
                     renderRowActions={({ row, table }) => (
                         <Box sx={{ display: 'flex', gap: '1rem' }}>
-                            <Tooltip arrow placement="left" title="Edit">
+                            <Tooltip arrow placement="right" title="Edit">
                                 <IconButton onClick={(e) => setEditingRow(row)}>
                                     <Edit />
                                 </IconButton>
@@ -363,10 +388,10 @@ function CompetanceScreen({setLoading, setError}) {
                 <EditCompetanceModal
                     open={EditModalOpen}
                     onClose={() => setEditModalOpen(false)}
-                    onSubmit={handleCreateNewRow}
-                    activeeditrow={activeeditrow}
+                    onSubmit={handleSaveEditRow}
                     competance={competance}
                     setcompetance={setcompetance}
+                    activeeditrow={activeeditrow}
                     competanceglobal = {competanceglobal}
                     accreditationlist = {accreditationlist}
                     setAccreditationlist = {setAccreditationlist}
