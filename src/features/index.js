@@ -7,6 +7,7 @@ import FicheRHScreen from './ficherh/components/FicheRHScreen'
 import FicheFormationScreen from './ficheformation/components/FicheFormationScreen'
 import MainScreen from './metier/components/MainScreen'
 import MetierDetailScreen from './metier/components/MetierDetailScreen'
+import CompetanceDetailScreen from './metier/components/CompetanceDetailScreen'
 //import COMPONENTS REUSABLES
 
 export {
@@ -17,6 +18,7 @@ export {
     FicheRHScreen,
     FicheFormationScreen,
     MainScreen,
-    MetierDetailScreen
+    MetierDetailScreen,
+    CompetanceDetailScreen
     //components reusables
 }

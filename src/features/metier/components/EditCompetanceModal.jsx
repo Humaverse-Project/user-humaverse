@@ -11,28 +11,21 @@ import {
     Grid,
     Autocomplete,
     FormControlLabel,
-    ListItemText,
-    Checkbox,
     OutlinedInput,
     InputAdornment,
     IconButton,
     Box,
     FormControl,
     InputLabel,
-    FormLabel,
     RadioGroup,
     Radio
 } from '@mui/material';
-import MuiInput from '@mui/material/Input';
-import { styled } from '@mui/material/styles';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import PartCompetanceCreation from "./partie/PartCompetanceCreation";
-const Input = styled(MuiInput)`
-  width: 42px;
-`;
 
-const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance, setcompetance, competanceglobal, accreditationlist, setAccreditationlist }) => {
+
+const EditCompetanceModal = ({ open, onClose, onSubmit, competance, setcompetance, activeeditrow, competanceglobal, accreditationlist, setAccreditationlist }) => {
   const generateRandomid = () => {
     const length = 10;
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=[]{};:,.<>?";
@@ -44,11 +37,6 @@ const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance
     }
     return password;
   }
-  const [newmetier, setNewnode] = useState({
-    emploistitre: activeeditrow.emploiTitre,
-    emploisid: activeeditrow.id,
-    titre: activeeditrow.emploiTitre
-  });
   const [nouvellecompetancelist, setnouvellecompetancelist] = useState([]);
   const [affichecgb, setaffichecgb] = useState([]);
   const handleSubmit = () => {
@@ -62,9 +50,9 @@ const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance
     if ("SAVOIR ÊTRE" in competance) {
       data = data.concat(competance["SAVOIR ÊTRE"])
     }
-    console.log(data,newmetier, accreditationlist)
-    onSubmit(newmetier, data, accreditationlist );
-    onClose();
+    // console.log(data, accreditationlist, nouvellecompetancelist)
+    onSubmit(data, accreditationlist, nouvellecompetancelist );
+    // onClose();
   };
   const deletethiselement = (e, accreditation)=>{
     var index = accreditationlist.indexOf(accreditation);
@@ -90,6 +78,7 @@ const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance
         globalid: null,
         compettitre: "",
         globalcategorie: "",
+        niveau: 0,
         cahrt: generateRandomid()
       }])
   }
@@ -176,8 +165,8 @@ const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance
                   nouvellecompetancelist.map((list) => (
                     <><Grid
                       item
-                      xs={4}
-                      sm={4}
+                      xs={3}
+                      sm={3}
                       sx={{
                         display: 'flex',
                       }}
@@ -194,7 +183,7 @@ const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance
                                     list.globalcategorie = value
                                     setnouvellecompetancelist([...nouvellecompetancelist])
                                     let com = competanceglobal.filter(cgb=>{
-                                        if (cgb.compGbCategorie == value) {
+                                        if (cgb.compGbCategorie === value) {
                                             return true
                                         } return false
                                     })
@@ -224,8 +213,8 @@ const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance
                         </Grid>
                         <Grid
                             item
-                            xs={4}
-                            sm={4}
+                            xs={3}
+                            sm={3}
                             sx={{
                                 display: 'flex',
                             }}
@@ -241,7 +230,7 @@ const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance
                             onChange={(e, value) =>{
                                 if (value != null) {
                                     list.globaltitre = value.label
-                                    list.globalid = value.globalid
+                                    list.globalid = value.id
                                     setnouvellecompetancelist([...nouvellecompetancelist])
                                 }
                                 else {
@@ -264,8 +253,8 @@ const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance
                         </Grid>
                         <Grid
                             item
-                            xs={4}
-                            sm={4}
+                            xs={3}
+                            sm={3}
                             sx={{
                                 display: 'flex',
                             }}
@@ -280,6 +269,42 @@ const EditCompetanceModal = ({ open, onClose, onSubmit,activeeditrow, competance
                                 name="apemp"
                                 onChange={(e)=> {list.compettitre = e.target.value; setnouvellecompetancelist([...nouvellecompetancelist])}}
                                 variant="outlined"
+                            />
+                        </Grid>
+                        <Grid
+                            item
+                            xs={3}
+                            sm={3}
+                            sx={{
+                                display: 'flex',
+                            }}
+                            key={list.cahrt+"ddfdfdf"}
+                            >
+                            <TextField
+                                sx={{
+                                    width: '100%',
+                                }}
+                                type='number'
+                                required
+                                label="Niveau" 
+                                name="apemp"
+                                value={list.niveau}
+                                onChange={(e)=> {
+                                  if (e.target.value>100){
+                                    list.niveau = 100
+                                  } else if(e.target.value<0) {
+                                    list.niveau = 0
+                                  } else {
+                                    list.niveau = e.target.value
+                                  }
+                                  setnouvellecompetancelist([...nouvellecompetancelist])
+                                }}
+                                variant="outlined"
+                                inputProps={{
+                                  step: 1,
+                                  min: 0,
+                                  max: 100,
+                                }}
                             />
                         </Grid>
                     </>

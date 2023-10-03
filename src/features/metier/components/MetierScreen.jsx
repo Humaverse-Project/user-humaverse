@@ -246,7 +246,7 @@ function MetierScreen({setLoading, setError}) {
                 }}
                 renderRowActions={({ row, table }) => (
                     <Box sx={{ display: 'flex', gap: '1rem' }}>
-                        <Tooltip arrow placement="left" title="Edit">
+                        <Tooltip arrow placement="right" title="Edit">
                             <IconButton onClick={() => table.setEditingRow(row)}>
                                 <Edit />
                             </IconButton>
