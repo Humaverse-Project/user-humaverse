@@ -84,7 +84,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
   }
     return (
       <Dialog open={open} maxWidth={'md'}>
-        <DialogTitle textAlign="center">Créer une fiche de compétences à partir d'une fiche ROME <b>{rome.code}</b></DialogTitle>
+        <DialogTitle textAlign="center">Générer les compétences à partir d'une fiche ROME <b>{rome.code}</b> - {rome.titre}</DialogTitle>
         <DialogContent  dividers={true}>
           <form onSubmit={(e) => e.preventDefault()}>
             <Stack
@@ -144,14 +144,14 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
                               }}
                           />
                       }
-                      label={<ListItemText primary={"Appliquer le parametre sur tous les emplois"} />}
+                      label={<ListItemText primary={"Créer les compétences pour tous les métiers"} />}
                       sx={{
                           width: '100%',
                       }}
                       />
                   </Grid>
               </Grid>
-              <Typography variant='h6'> <b>Définition niveau</b></Typography>
+              <Typography variant='h6'> <b>Définition niveaux</b></Typography>
               { "SAVOIRS FAIRE" in competance ? (
                 <><Typography variant='h5' sx={{ mt:2,ml:2 }}>Savoir-faire</Typography>
                 {
@@ -304,7 +304,7 @@ const CreateNewCompetanceModal = ({ open, onClose, onSubmit, rome, competance, a
         <DialogActions sx={{ p: '1.25rem' }}>
           <Button onClick={onClose}>Annuler</Button>
           <Button color="success" onClick={handleSubmit} variant="contained">
-            Crée le competance
+            Créer le compétence
           </Button>
         </DialogActions>
       </Dialog>
