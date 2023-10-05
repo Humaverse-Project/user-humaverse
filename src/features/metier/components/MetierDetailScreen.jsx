@@ -126,10 +126,9 @@ function MetierDetailScreen() {
                         <Button 
                             key="metier"
                             variant="contained"
-                            color={'green'}
                             size='large'
-                            sx={{ color: 'black.main', fontWeight: 'bold', mb:2}}>
-                            RETOUR
+                            sx={{ fontWeight: 'bold', marginBottom: 2 }}>
+                            &lt;&lt;
                         </Button>
                     </NavLink>
                     <ThemeProvider theme={theme}>

@@ -84,7 +84,7 @@ const EditCompetanceModal = ({ open, onClose, onSubmit, competance, setcompetanc
   }
     return (
       <Dialog open={open} maxWidth={'md'}>
-        <DialogTitle textAlign="center">Modifier le competance métier <b>{activeeditrow.emploiTitre}</b></DialogTitle>
+        <DialogTitle textAlign="center">Modifier les compétences du métier de <b>{activeeditrow.emploiTitre}</b></DialogTitle>
         <DialogContent  dividers={true}>
           <form onSubmit={(e) => e.preventDefault()}>
             <Stack
@@ -116,7 +116,7 @@ const EditCompetanceModal = ({ open, onClose, onSubmit, competance, setcompetanc
                     />
                   </Grid>
               </Grid>
-              <Typography variant='h6'> <b>Définition niveau</b></Typography>
+              <Typography variant='h6'> <b>Définition niveaux</b></Typography>
               { "SAVOIRS FAIRE" in competance ? (
                 <><Typography variant='h5' sx={{ mt:2,ml:2 }}>Savoir-faire</Typography>
                 {
@@ -243,7 +243,7 @@ const EditCompetanceModal = ({ open, onClose, onSubmit, competance, setcompetanc
                                 <TextField
                                     {...params}
                                     required
-                                    label="titre Competance global" 
+                                    label="titre Compétence global" 
                                     name="apemp"
                                     onChange={(e)=> {list.globaltitre = e.target.value; list.globalid = "nouveau"; setnouvellecompetancelist([...nouvellecompetancelist])}}
                                     variant="outlined"
@@ -265,7 +265,7 @@ const EditCompetanceModal = ({ open, onClose, onSubmit, competance, setcompetanc
                                     width: '100%',
                                 }}
                                 required
-                                label="Titre brique competance" 
+                                label="Titre brique compétence" 
                                 name="apemp"
                                 onChange={(e)=> {list.compettitre = e.target.value; setnouvellecompetancelist([...nouvellecompetancelist])}}
                                 variant="outlined"
@@ -422,7 +422,7 @@ const EditCompetanceModal = ({ open, onClose, onSubmit, competance, setcompetanc
         <DialogActions sx={{ p: '1.25rem' }}>
           <Button onClick={onClose}>Annuler</Button>
           <Button color="success" onClick={handleSubmit} variant="contained">
-            Crée le competance
+            Créer le compétence
           </Button>
         </DialogActions>
       </Dialog>

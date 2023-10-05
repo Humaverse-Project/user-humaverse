@@ -103,7 +103,7 @@ const NewPosteModal = ({ open, onClose, onSubmit, datametier, datacompetance  })
                             <TextField
                                 {...params}
                                 required
-                                label="Fiche competance" 
+                                label="Fiche compétence" 
                                 name="fiche_competance"
                                 variant="outlined"
                             />
