@@ -21,7 +21,7 @@ function MetierScreen({ setLoading, setError }) {
       try {
         const datametierexistant = await listmetier();
         const reponsemetier = await datametierexistant;
-        console.log("reponsemetier", reponsemetier);
+
         setlistmetier(reponsemetier);
         settableloagin({ isLoading: false });
         setLoading(false);

@@ -64,9 +64,7 @@ function CompetanceDetailScreen() {
           groupedData[categorie][titre].push(itemtopush);
         });
         setcompetance(groupedData);
-        console.log(groupedData);
       } catch (error) {
-        console.error("Une erreur s'est produite :", error);
         setError(true);
       }
       setLoading(false);

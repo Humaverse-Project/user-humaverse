@@ -27,7 +27,6 @@ function RomeScreenScreen({ setLoading, setError }) {
         settableloagin({ isLoading: false });
         setLoading(false);
       } catch (error) {
-        console.error("Une erreur s'est produite :", error);
         setError("Une erreur s'est produite lors de l'appele serveur");
         setLoading(false);
       }
@@ -66,7 +65,6 @@ function RomeScreenScreen({ setLoading, setError }) {
       })
       .catch((error) => {
         setError("bakend error");
-        console.error("bakend error:", error.message);
         setLoading(false);
       });
   };
@@ -291,31 +289,6 @@ function RomeScreenScreen({ setLoading, setError }) {
               >
                 <IconButton onClick={() => table.setEditingRow(row)}>
                   <Edit />
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                arrow
-                placement="right"
-                title={`Supprimer -> ${row.original.rome_coderome}`}
-              >
-                <IconButton
-                  onClick={() => {
-                    MySwal.fire({
-                      title: "Suppression",
-                      text: `Etes-vous sûr de supprimer le code rome ${row.original.rome_coderome}?`,
-                      icon: "error",
-                      showCancelButton: true,
-                      confirmButtonText: "Oui, supprimez-le!",
-                      cancelButtonText: "Non, annuler!",
-                      reverseButtons: true,
-                    }).then((result) => {
-                      if (result.isConfirmed) {
-                        // logic is here
-                      }
-                    });
-                  }}
-                >
-                  <DeleteForever />
                 </IconButton>
               </Tooltip>
             </Box>

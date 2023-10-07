@@ -37,7 +37,6 @@ const EditCompetanceModal = ({
   accreditationlist,
   setAccreditationlist,
 }) => {
-  console.log("competance", competance);
   const generateRandomid = () => {
     const length = 10;
     const charset =
@@ -52,6 +51,7 @@ const EditCompetanceModal = ({
   };
   const [nouvellecompetancelist, setnouvellecompetancelist] = useState([]);
   const [affichecgb, setaffichecgb] = useState([]);
+  const allSavoirs = ["SAVOIRS FAIRE", "SAVOIR ÊTRE", "SAVOIRS"];
   const handleSubmit = () => {
     let data = [];
     if ("SAVOIRS FAIRE" in competance) {
@@ -63,9 +63,7 @@ const EditCompetanceModal = ({
     if ("SAVOIR ÊTRE" in competance) {
       data = data.concat(competance["SAVOIR ÊTRE"]);
     }
-    // console.log(data, accreditationlist, nouvellecompetancelist)
     onSubmit(data, accreditationlist, nouvellecompetancelist);
-    // onClose();
   };
   const deletethiselement = (e, accreditation) => {
     let index = accreditationlist.indexOf(accreditation);
@@ -101,6 +99,68 @@ const EditCompetanceModal = ({
       },
     ]);
   };
+
+  const reformatteDataCompetance = (competance) => {
+    const finalDataSF = [];
+    const finalDataSE = [];
+    const finalDataS = [];
+
+    if ("SAVOIRS FAIRE" in competance) {
+      const dataSF = competance["SAVOIRS FAIRE"];
+      for (let i = 0; i < dataSF.length; i++) {
+        const existingIndex = finalDataSF.findIndex(
+          (item) => item.titre === dataSF[i].compGb.compGbTitre
+        );
+        if (existingIndex !== -1) {
+          finalDataSF[existingIndex].data.push(dataSF[i]);
+        } else {
+          finalDataSF.push({
+            titre: dataSF[i].compGb.compGbTitre,
+            data: [dataSF[i]],
+          });
+        }
+      }
+    }
+
+    if ("SAVOIR ÊTRE" in competance) {
+      const dataSE = competance["SAVOIR ÊTRE"];
+      for (let i = 0; i < dataSE.length; i++) {
+        const existingIndex = finalDataSE.findIndex(
+          (item) => item.titre === dataSE[i].compGb.compGbTitre
+        );
+        if (existingIndex !== -1) {
+          finalDataSE[existingIndex].data.push(dataSE[i]);
+        } else {
+          finalDataSE.push({
+            titre: dataSE[i].compGb.compGbTitre,
+            data: [dataSE[i]],
+          });
+        }
+      }
+    }
+
+    if ("SAVOIRS" in competance) {
+      const dataS = competance["SAVOIRS"];
+      for (let i = 0; i < dataS.length; i++) {
+        const existingIndex = finalDataS.findIndex(
+          (item) => item.titre === dataS[i].compGb.compGbTitre
+        );
+        if (existingIndex !== -1) {
+          finalDataS[existingIndex].data.push(dataS[i]);
+        } else {
+          finalDataS.push({
+            titre: dataS[i].compGb.compGbTitre,
+            data: [dataS[i]],
+          });
+        }
+      }
+    }
+
+    return [finalDataSF, finalDataSE, finalDataS];
+  };
+
+  const res = reformatteDataCompetance(competance);
+
   return (
     <Dialog open={open} maxWidth={"md"}>
       <DialogTitle textAlign="center">
@@ -113,73 +173,91 @@ const EditCompetanceModal = ({
               minWidth: { xs: "300px", sm: "360px", md: "400px" },
             }}
           >
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={6}>
-                <TextField
-                  sx={{
-                    width: "100%",
-                  }}
-                  aria-readonly
-                  value={activeeditrow.emploiTitre}
-                ></TextField>
+            <Box>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={6}>
+                  <TextField
+                    sx={{
+                      width: "100%",
+                    }}
+                    aria-readonly
+                    value={activeeditrow.emploiTitre}
+                  ></TextField>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    sx={{
+                      width: "100%",
+                    }}
+                    aria-readonly
+                    value={activeeditrow.romeData.rome_coderome}
+                  ></TextField>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      mb: -3,
+                    }}
+                  >
+                    {" "}
+                    <b>Définition niveaux</b>
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    sx={{
+                      width: "50%",
+                      ml: 36,
+                      mt: 2,
+                      mb: -6,
+                    }}
+                    type="number"
+                    label="Niveau globlale"
+                    name="niveaugl"
+                    variant="outlined"
+                    onChange={handleSliderChangeglobal}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  sx={{
-                    m: 2,
-                    width: "90%",
-                  }}
-                  type="number"
-                  label="Niveau globlale"
-                  name="niveaugl"
-                  variant="outlined"
-                  onChange={handleSliderChangeglobal}
-                />
-              </Grid>
-            </Grid>
-            <Typography variant="h6">
-              {" "}
-              <b>Définition niveaux</b>
-            </Typography>
-            {"SAVOIRS FAIRE" in competance ? (
-              <>
-                <Typography variant="h5" sx={{ mt: 2, ml: 2 }}>
-                  Savoir-faire
+            </Box>
+
+            {res.map((item, index) => (
+              <div key={index}>
+                {" "}
+                {/* Add a unique key for each item */}
+                <Typography variant="h5" sx={{ mt: 2, ml: 0 }}>
+                  {allSavoirs[index].toLowerCase()}
                 </Typography>
-                {competance["SAVOIRS FAIRE"].map((accessitem) => (
-                  <PartCompetanceCreation
-                    handleSliderChange={handleSliderChange}
-                    accessitem={accessitem}
-                  />
-                ))}
-              </>
-            ) : null}
-            {"SAVOIRS" in competance ? (
-              <>
-                <Typography variant="h5" sx={{ mt: 2, ml: 2 }}>
-                  Savoirs
-                </Typography>
-                {competance["SAVOIRS"].map((accessitem) => (
-                  <PartCompetanceCreation
-                    handleSliderChange={handleSliderChange}
-                    accessitem={accessitem}
-                  />
-                ))}
-              </>
-            ) : null}
-            {"SAVOIR ÊTRE" in competance ? (
-              <>
-                <Typography variant="h5" sx={{ mt: 2, ml: 2 }}>
-                  Savoirs être
-                </Typography>
-                {competance["SAVOIR ÊTRE"].map((accessitem) => (
-                  <PartCompetanceCreation
-                    handleSliderChange={handleSliderChange}
-                    accessitem={accessitem}
-                  />
-                ))}
-              </>
-            ) : null}
+                <hr></hr>
+                {item.map(
+                  (
+                    item2,
+                    subIndex // Use subIndex as a unique key
+                  ) => (
+                    <div key={subIndex}>
+                      {" "}
+                      {/* Add a unique key for each item2 */}
+                      <Typography variant="h6" sx={{ mt: 2, ml: 2 }}>
+                        {item2.titre}
+                      </Typography>
+                      {item2.data.map(
+                        (
+                          accessitem,
+                          innerIndex // Use innerIndex as a unique key
+                        ) => (
+                          <PartCompetanceCreation
+                            key={innerIndex} // Add a unique key for each accessitem
+                            handleSliderChange={handleSliderChange}
+                            accessitem={accessitem}
+                          />
+                        )
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
+            ))}
             <Button onClick={handleajoutcompetance}>
               Ajouter plus de competances
             </Button>
@@ -474,7 +552,7 @@ const EditCompetanceModal = ({
       <DialogActions sx={{ p: "1.25rem" }}>
         <Button onClick={onClose}>Annuler</Button>
         <Button color="success" onClick={handleSubmit} variant="contained">
-          Créer le compétence
+          Modifier
         </Button>
       </DialogActions>
     </Dialog>

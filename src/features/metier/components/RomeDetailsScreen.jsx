@@ -65,9 +65,7 @@ function RomeDetailScreen() {
         });
         setcontext(groupedDataT);
         setcompetance(groupedData);
-        console.log(reponsemetie);
       } catch (error) {
-        console.error("Une erreur s'est produite :", error);
         setError(true);
       }
       setLoading(false);
