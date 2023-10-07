@@ -24,15 +24,9 @@ import {
   Radio,
 } from "@mui/material";
 
-import MuiInput from "@mui/material/Input";
-import { styled } from "@mui/material/styles";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import PartCompetanceCreation from "./partie/PartCompetanceCreation";
-import { fi } from "date-fns/locale";
-const Input = styled(MuiInput)`
-  width: 42px;
-`;
 
 const CreateNewCompetanceModal = ({
   open,
@@ -43,7 +37,6 @@ const CreateNewCompetanceModal = ({
   appelationlist,
   setcompetance,
 }) => {
-  console.log("competance", competance);
   const generateRandomid = () => {
     const length = 10;
     const charset =
@@ -90,7 +83,6 @@ const CreateNewCompetanceModal = ({
 
     if ("SAVOIRS FAIRE" in competance) {
       const dataSF = competance["SAVOIRS FAIRE"];
-      console.log("length dataSF", dataSF.length);
       for (let i = 0; i < dataSF.length; i++) {
         const existingIndex = finalDataSF.findIndex(
           (item) => item.titre === dataSF[i].compGb.compGbTitre
@@ -108,7 +100,6 @@ const CreateNewCompetanceModal = ({
 
     if ("SAVOIR ÊTRE" in competance) {
       const dataSE = competance["SAVOIR ÊTRE"];
-      console.log("length dataSE", dataSE.length);
       for (let i = 0; i < dataSE.length; i++) {
         const existingIndex = finalDataSE.findIndex(
           (item) => item.titre === dataSE[i].compGb.compGbTitre
@@ -126,7 +117,6 @@ const CreateNewCompetanceModal = ({
 
     if ("SAVOIRS" in competance) {
       const dataS = competance["SAVOIRS"];
-      console.log("length dataS", dataS.length);
       for (let i = 0; i < dataS.length; i++) {
         const existingIndex = finalDataS.findIndex(
           (item) => item.titre === dataS[i].compGb.compGbTitre
@@ -146,10 +136,9 @@ const CreateNewCompetanceModal = ({
   };
 
   const res = reformatteDataCompetance(competance);
-  console.log("res", res);
 
   const deletethiselement = (e, accreditation) => {
-    var index = accreditationlist.indexOf(accreditation);
+    let index = accreditationlist.indexOf(accreditation);
     accreditationlist.splice(index, 1);
     setAccreditationlist([...accreditationlist]);
   };
@@ -172,11 +161,14 @@ const CreateNewCompetanceModal = ({
   const changetexarea = (e) => {
     setNewnode({ ...newmetier, [e.target.name]: e.target.value });
   };
+
   return (
     <Dialog open={open} maxWidth={"md"}>
       <DialogTitle textAlign="center">
-        Générer les compétences à partir d'une fiche ROME <b>{rome.code}</b> -{" "}
-        {rome.titre}
+        Générer les compétences à partir d'une fiche ROME{" "}
+        <b>
+          {rome.code} - {rome.label.replace(`${rome.code}`, "")}
+        </b>
       </DialogTitle>
       <DialogContent dividers={true}>
         <form onSubmit={(e) => e.preventDefault()}>
@@ -235,7 +227,15 @@ const CreateNewCompetanceModal = ({
                 />
               </Grid>
             </Grid>
-            <Grid container spacing={2} alignItems="center">
+            <Grid
+              container
+              spacing={2}
+              alignItems="center"
+              sx={{
+                mb: 3,
+                mt: 2,
+              }}
+            >
               <Grid item xs={6}>
                 <FormControlLabel
                   control={
@@ -264,34 +264,35 @@ const CreateNewCompetanceModal = ({
                 />
               </Grid>
             </Grid>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <Typography
-                sx={{
-                  mt: 3,
-                }}
-                variant="h6"
-              >
-                <b>Définition niveaux</b>
-              </Typography>
 
-              <TextField
-                sx={{
-                  m: 2,
-                  width: "18%",
-                  mr: 11,
-                }}
-                type="number"
-                label="Niveau globlale"
-                name="niveaugl"
-                variant="outlined"
-                onChange={handleSliderChangeglobal}
-              />
-            </Box>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={6}>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    mb: -3,
+                  }}
+                >
+                  {" "}
+                  <b>Définition niveaux</b>
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  sx={{
+                    width: "50%",
+                    ml: 36,
+                    mt: 2,
+                    mb: -6,
+                  }}
+                  type="number"
+                  label="Niveau globlale"
+                  name="niveaugl"
+                  variant="outlined"
+                  onChange={handleSliderChangeglobal}
+                />
+              </Grid>
+            </Grid>
 
             {res.map((item, index) => (
               <div key={index}>

@@ -27,8 +27,12 @@ import { MRT_Localization_FR } from "material-react-table/locales/fr";
 import theme from "./theme";
 import { datefonctionun } from "../../../services/DateFormat";
 import PartCompetanceShow from "./partie/PartCompetanceShow";
-import { Edit } from "@mui/icons-material";
+import { DeleteForever, Deselect, Edit } from "@mui/icons-material";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 function CompetanceScreen({ setLoading, setError }) {
   const [fichecompetance, setfichecompetance] = useState([]);
@@ -48,7 +52,7 @@ function CompetanceScreen({ setLoading, setError }) {
       try {
         const datametierexistant = await listcompetance();
         const reponsemetie = await datametierexistant;
-        console.log(reponsemetie);
+
         setfichecompetance(reponsemetie.fiche_competance);
         setlistrome(
           reponsemetie.rome.map((rome) => {
@@ -63,7 +67,6 @@ function CompetanceScreen({ setLoading, setError }) {
         setLoading(false);
         settableloagin({ isLoading: false });
       } catch (error) {
-        console.error("Une erreur s'est produite :", error);
         setError("Une erreur s'est produite lors de l'appele serveur");
         setLoading(false);
       }
@@ -73,8 +76,9 @@ function CompetanceScreen({ setLoading, setError }) {
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [EditModalOpen, setEditModalOpen] = useState(false);
+
+  // Data competence eto izany dia data competence an'i edit
   const setEditingRow = (row) => {
-    console.log(row);
     const data = row.original.briquesCompetencesNiveaux;
     const groupedData = {};
     data.forEach((item) => {
@@ -87,9 +91,9 @@ function CompetanceScreen({ setLoading, setError }) {
       topush.brqCompTitre = item.briquescompetances.brqCompTitre;
       topush.id = item.briquescompetances.id;
       topush.etat = "non";
+      topush.compGb = item.briquescompetances.compGb;
       groupedData[categorie].push(topush);
     });
-    console.log("groupedData", groupedData);
     let accredit = row.original.accreditation.map((acc) => {
       return {
         accreditaiontitre: acc.accreTitre,
@@ -103,6 +107,8 @@ function CompetanceScreen({ setLoading, setError }) {
     setactiveeditrow(row.original.appelation);
     setEditModalOpen(true);
   };
+
+  // Data competence eto izany dia data competence an'i creation
   const handleselectionrome = (e) => {
     setloadingrome(true);
     setOpen(false);
@@ -129,7 +135,6 @@ function CompetanceScreen({ setLoading, setError }) {
         setOpen(false);
       })
       .catch((error) => {
-        console.error("bakend error:", error.message);
         setloadingrome(false);
         setOpen(false);
       });
@@ -149,7 +154,6 @@ function CompetanceScreen({ setLoading, setError }) {
       })
       .catch((error) => {
         setError("bakend error");
-        console.error("bakend error:", error.message);
         setLoading(false);
       });
   };
@@ -159,7 +163,6 @@ function CompetanceScreen({ setLoading, setError }) {
     accreditationlist,
     nouvellecompetance
   ) => {
-    console.log(activeeditrow);
     setLoading(true);
     const values = {
       emploistitre: activeeditrow.emploiTitre,
@@ -180,7 +183,6 @@ function CompetanceScreen({ setLoading, setError }) {
       })
       .catch((error) => {
         setError("bakend error");
-        console.error("bakend error:", error.message);
         setLoading(false);
       });
   };
@@ -207,6 +209,13 @@ function CompetanceScreen({ setLoading, setError }) {
         ),
       },
       {
+        accessorFn: (row) => row.appelation.romeData.rome_coderome,
+        header: "Code Rome",
+        enableColumnOrdering: true,
+        enableEditing: false,
+        enableSorting: true,
+      },
+      {
         accessorKey: "ficCompVersion",
         header: "Version",
         enableColumnOrdering: true,
@@ -224,6 +233,7 @@ function CompetanceScreen({ setLoading, setError }) {
     ],
     []
   );
+
   // Affichez les données récupérées
   return (
     <Paper sx={{ mt: 2, width: "100%", color: "black.main" }}>
@@ -233,58 +243,74 @@ function CompetanceScreen({ setLoading, setError }) {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-      <Dialog
-        sx={{
-          "& .MuiDialog-paper": {
-            width: "80%",
-            maxHeight: 435,
-            overflow: "hidden",
-          },
-        }}
-        maxWidth="xs"
-        open={open}
-      >
-        <DialogTitle color="button.main">Sélectionner le code Rome</DialogTitle>
-        <DialogContent dividers>
-          <Autocomplete
-            sx={{
-              m: 2,
-              width: "90%",
-            }}
-            disablePortal
-            options={listrome}
-            onChange={(e, value) => {
-              if (value != null) setmatierselectionner(value);
-              else setmatierselectionner({});
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                required
-                label="Rome"
-                name="rome"
-                variant="outlined"
-              />
-            )}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={(e) => setOpen(false)}>
-            Annuler
-          </Button>
-          <Button
-            onClick={handleselectionrome}
-            color="button"
-            variant="contained"
-            sx={{ color: "black.main" }}
-          >
-            Valider
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {open && (
+        <Dialog
+          sx={{
+            "& .MuiDialog-paper": {
+              width: "80%",
+              maxHeight: 435,
+              overflow: "hidden",
+            },
+          }}
+          maxWidth="xs"
+          open={open}
+        >
+          <DialogTitle color="button.main">
+            Sélectionner le code Rome
+          </DialogTitle>
+          <DialogContent dividers>
+            <Autocomplete
+              sx={{
+                m: 2,
+                width: "90%",
+              }}
+              disablePortal
+              options={listrome}
+              onChange={(e, value) => {
+                if (value != null) {
+                  setmatierselectionner(value);
+                } else {
+                  setmatierselectionner({});
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  required
+                  label="Rome"
+                  name="rome"
+                  variant="outlined"
+                />
+              )}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button autoFocus onClick={(e) => setOpen(false)}>
+              Annuler
+            </Button>
+            <Button
+              onClick={handleselectionrome}
+              color="button"
+              variant="contained"
+              sx={{ color: "black.main" }}
+            >
+              Valider
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
       <ThemeProvider theme={theme}>
         <MaterialReactTable
           state={tableloagin}
+          // enableEditing
+          // onEditingRowSave={(e) => console.log(e)}
+          // onEditingRowCancel={(e) => console.log(e)}
+          columns={columns}
+          data={fichecompetance}
+          enableColumnOrdering
+          localization={MRT_Localization_FR}
+          initialState={{ columnVisibility: { id: false } }}
+          enableRowActions
           renderDetailPanel={({ row }) => {
             let donnees = row.original.briquesCompetencesNiveaux;
             const groupedData = {};
@@ -331,7 +357,6 @@ function CompetanceScreen({ setLoading, setError }) {
               </Box>
             );
           }}
-          initialState={{ columnVisibility: { id: false } }}
           displayColumnDefOptions={{
             "mrt-row-actions": {
               muiTableHeadCellProps: {
@@ -340,9 +365,6 @@ function CompetanceScreen({ setLoading, setError }) {
               size: 120,
             },
           }}
-          columns={columns}
-          data={fichecompetance}
-          enableColumnOrdering
           muiBottomToolbarProps={{
             sx: {
               backgroundColor: "unset",
@@ -394,40 +416,70 @@ function CompetanceScreen({ setLoading, setError }) {
               Générer les fiches de competénces
             </Button>
           )}
-          enableEditing
-          onEditingRowSave={(e) => console.log(e)}
-          onEditingRowCancel={(e) => console.log(e)}
+          positionActionsColumn="last"
           renderRowActions={({ row, table }) => (
             <Box sx={{ display: "flex", gap: "1rem" }}>
-              <Tooltip arrow placement="right" title="Edit">
+              <Tooltip
+                arrow
+                placement="right"
+                title={`Modifier -> ${row.original.ficCompTitreEmploi}`}
+              >
                 <IconButton onClick={(e) => setEditingRow(row)}>
                   <Edit />
                 </IconButton>
               </Tooltip>
+              <Tooltip
+                arrow
+                placement="right"
+                title={`Supprimer -> ${row.original.ficCompTitreEmploi}`}
+              >
+                <IconButton
+                  onClick={(e) => {
+                    MySwal.fire({
+                      title: "Suppression",
+                      text: `Etes-vous sûr de supprimer le compétence de l'emploi : ${row.original.ficCompTitreEmploi}?`,
+                      icon: "error",
+                      showCancelButton: true,
+                      confirmButtonText: "Oui, supprimez-le!",
+                      cancelButtonText: "Non, annuler!",
+                      reverseButtons: true,
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        // logic is here
+                      }
+                    });
+                  }}
+                >
+                  <DeleteForever />
+                </IconButton>
+              </Tooltip>
             </Box>
           )}
-          localization={MRT_Localization_FR}
         />
-        <CreateNewCompetanceModal
-          open={createModalOpen}
-          onClose={() => setCreateModalOpen(false)}
-          onSubmit={handleCreateNewRow}
-          rome={matierselectionner}
-          competance={competance}
-          appelationlist={appelationlist}
-          setcompetance={setcompetance}
-        />
-        <EditCompetanceModal
-          open={EditModalOpen}
-          onClose={() => setEditModalOpen(false)}
-          onSubmit={handleSaveEditRow}
-          competance={competance}
-          setcompetance={setcompetance}
-          activeeditrow={activeeditrow}
-          competanceglobal={competanceglobal}
-          accreditationlist={accreditationlist}
-          setAccreditationlist={setAccreditationlist}
-        />
+        {createModalOpen && (
+          <CreateNewCompetanceModal
+            open={createModalOpen}
+            onClose={() => setCreateModalOpen(false)}
+            onSubmit={handleCreateNewRow}
+            rome={matierselectionner}
+            competance={competance}
+            appelationlist={appelationlist}
+            setcompetance={setcompetance}
+          />
+        )}
+        {EditModalOpen && (
+          <EditCompetanceModal
+            open={EditModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            onSubmit={handleSaveEditRow}
+            competance={competance}
+            setcompetance={setcompetance}
+            activeeditrow={activeeditrow}
+            competanceglobal={competanceglobal}
+            accreditationlist={accreditationlist}
+            setAccreditationlist={setAccreditationlist}
+          />
+        )}
       </ThemeProvider>
     </Paper>
   );

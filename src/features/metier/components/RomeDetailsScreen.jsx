@@ -15,7 +15,7 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-function MetierDetailScreen() {
+function RomeDetailScreen() {
   const { code } = useParams();
   const page = "COMPETENCES";
   const [loading, setLoading] = useState([]);
@@ -514,4 +514,4 @@ function MetierDetailScreen() {
   );
 }
 
-export default MetierDetailScreen;
+export default RomeDetailScreen;
