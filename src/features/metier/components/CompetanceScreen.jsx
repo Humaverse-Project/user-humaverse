@@ -27,8 +27,12 @@ import { MRT_Localization_FR } from "material-react-table/locales/fr";
 import theme from "./theme";
 import { datefonctionun } from "../../../services/DateFormat";
 import PartCompetanceShow from "./partie/PartCompetanceShow";
-import { Edit } from "@mui/icons-material";
+import { DeleteForever, Deselect, Edit } from "@mui/icons-material";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 function CompetanceScreen({ setLoading, setError }) {
   const [fichecompetance, setfichecompetance] = useState([]);
@@ -74,7 +78,7 @@ function CompetanceScreen({ setLoading, setError }) {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [EditModalOpen, setEditModalOpen] = useState(false);
   const setEditingRow = (row) => {
-    console.log(row);
+    console.log("row", row.original);
     const data = row.original.briquesCompetencesNiveaux;
     const groupedData = {};
     data.forEach((item) => {
@@ -99,7 +103,7 @@ function CompetanceScreen({ setLoading, setError }) {
     });
     setAccreditationlist(accredit);
     setappelationlist([row.original.appelation]);
-    setcompetance(groupedData);
+    // setcompetance(groupedData);
     setactiveeditrow(row.original.appelation);
     setEditModalOpen(true);
   };
@@ -254,8 +258,11 @@ function CompetanceScreen({ setLoading, setError }) {
             disablePortal
             options={listrome}
             onChange={(e, value) => {
-              if (value != null) setmatierselectionner(value);
-              else setmatierselectionner({});
+              if (value != null) {
+                setmatierselectionner(value);
+              } else {
+                setmatierselectionner({});
+              }
             }}
             renderInput={(params) => (
               <TextField
@@ -285,6 +292,15 @@ function CompetanceScreen({ setLoading, setError }) {
       <ThemeProvider theme={theme}>
         <MaterialReactTable
           state={tableloagin}
+          // enableEditing
+          // onEditingRowSave={(e) => console.log(e)}
+          // onEditingRowCancel={(e) => console.log(e)}
+          columns={columns}
+          data={fichecompetance}
+          enableColumnOrdering
+          localization={MRT_Localization_FR}
+          initialState={{ columnVisibility: { id: false } }}
+          enableRowActions
           renderDetailPanel={({ row }) => {
             let donnees = row.original.briquesCompetencesNiveaux;
             const groupedData = {};
@@ -331,7 +347,6 @@ function CompetanceScreen({ setLoading, setError }) {
               </Box>
             );
           }}
-          initialState={{ columnVisibility: { id: false } }}
           displayColumnDefOptions={{
             "mrt-row-actions": {
               muiTableHeadCellProps: {
@@ -340,9 +355,6 @@ function CompetanceScreen({ setLoading, setError }) {
               size: 120,
             },
           }}
-          columns={columns}
-          data={fichecompetance}
-          enableColumnOrdering
           muiBottomToolbarProps={{
             sx: {
               backgroundColor: "unset",
@@ -394,19 +406,45 @@ function CompetanceScreen({ setLoading, setError }) {
               Générer les fiches de competénces
             </Button>
           )}
-          enableEditing
-          onEditingRowSave={(e) => console.log(e)}
-          onEditingRowCancel={(e) => console.log(e)}
+          positionActionsColumn="last"
           renderRowActions={({ row, table }) => (
             <Box sx={{ display: "flex", gap: "1rem" }}>
-              <Tooltip arrow placement="right" title="Edit">
+              <Tooltip
+                arrow
+                placement="right"
+                title={`Modifier -> ${row.original.ficCompTitreEmploi}`}
+              >
                 <IconButton onClick={(e) => setEditingRow(row)}>
                   <Edit />
                 </IconButton>
               </Tooltip>
+              <Tooltip
+                arrow
+                placement="right"
+                title={`Supprimer -> ${row.original.ficCompTitreEmploi}`}
+              >
+                <IconButton
+                  onClick={(e) => {
+                    MySwal.fire({
+                      title: "Suppression",
+                      text: `Etes-vous sûr de supprimer le compétence de l'emploi : ${row.original.ficCompTitreEmploi}?`,
+                      icon: "error",
+                      showCancelButton: true,
+                      confirmButtonText: "Oui, supprimez-le!",
+                      cancelButtonText: "Non, annuler!",
+                      reverseButtons: true,
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        // logic is here
+                      }
+                    });
+                  }}
+                >
+                  <DeleteForever />
+                </IconButton>
+              </Tooltip>
             </Box>
           )}
-          localization={MRT_Localization_FR}
         />
         <CreateNewCompetanceModal
           open={createModalOpen}

@@ -149,7 +149,7 @@ const CreateNewCompetanceModal = ({
   console.log("res", res);
 
   const deletethiselement = (e, accreditation) => {
-    var index = accreditationlist.indexOf(accreditation);
+    let index = accreditationlist.indexOf(accreditation);
     accreditationlist.splice(index, 1);
     setAccreditationlist([...accreditationlist]);
   };
