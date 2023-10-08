@@ -1,59 +1,70 @@
-import React, { useState, useEffect, useMemo } from "react";
+import {
+  Box,
+  Button,
+  Dialog,
+  Tooltip,
+  Backdrop,
+  TextField,
+  IconButton,
+  DialogTitle,
+  Autocomplete,
+  DialogActions,
+  DialogContent,
+  ThemeProvider,
+  CircularProgress,
+} from "@mui/material";
+import theme from "./theme";
+import Paper from "@mui/material/Paper";
+import { Link } from "react-router-dom";
 import {
   listcompetance,
   postcompetance,
 } from "../../../services/CompetanceService";
 import MaterialReactTable from "material-react-table";
-import Paper from "@mui/material/Paper";
-import CreateNewCompetanceModal from "./NewCompetanceModal";
 import EditCompetanceModal from "./EditCompetanceModal";
+import { DeleteForever, Edit } from "@mui/icons-material";
+import React, { useState, useEffect, useMemo } from "react";
+import CreateNewCompetanceModal from "./NewCompetanceModal";
 import { getdatarome } from "../../../services/RomeService";
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  ThemeProvider,
-  Backdrop,
-  CircularProgress,
-  Tooltip,
-  IconButton,
-} from "@mui/material";
-import { MRT_Localization_FR } from "material-react-table/locales/fr";
-import theme from "./theme";
-import { datefonctionun } from "../../../services/DateFormat";
 import PartCompetanceShow from "./partie/PartCompetanceShow";
-import { DeleteForever, Deselect, Edit } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { datefonctionun } from "../../../services/DateFormat";
+import { MRT_Localization_FR } from "material-react-table/locales/fr";
+
+// Swal Notification
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
 const MySwal = withReactContent(Swal);
 
-function CompetanceScreen({ setLoading, setError }) {
-  const [fichecompetance, setfichecompetance] = useState([]);
-  const [matierselectionner, setmatierselectionner] = useState({});
-  const [listrome, setlistrome] = useState([]);
+function CompetanceScreen() {
   const [open, setOpen] = useState(false);
+  const [listrome, setlistrome] = useState([]);
   const [competance, setcompetance] = useState({});
+  const [loadingrome, setloadingrome] = useState(false);
   const [activeeditrow, setactiveeditrow] = useState({});
   const [appelationlist, setappelationlist] = useState([]);
+  const [fichecompetance, setfichecompetance] = useState([]);
   const [competanceglobal, setcompetanceglobal] = useState([]);
-  const [loadingrome, setloadingrome] = useState(false);
-  const [tableloagin, settableloagin] = useState({ isLoading: true });
-
   const [accreditationlist, setAccreditationlist] = useState([]);
+  const [matierselectionner, setmatierselectionner] = useState({});
+
+  // state local management Fetch data
+  const [errorFetchData, setErrorFetchData] = useState("");
+  const [loadingFetchData, setLoadingFetchData] = useState(false);
+
+  // state local management Create Competence Modal Modal
+  const [EditModalOpen, setEditModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  // Fetch data from API
   useEffect(() => {
+    setLoadingFetchData(true);
     const fetchData = async () => {
       try {
         const datametierexistant = await listcompetance();
         const reponsemetie = await datametierexistant;
-
         setfichecompetance(reponsemetie.fiche_competance);
+
         setlistrome(
           reponsemetie.rome.map((rome) => {
             return {
@@ -64,18 +75,14 @@ function CompetanceScreen({ setLoading, setError }) {
           })
         );
         setcompetanceglobal(reponsemetie.fiche_competance_global);
-        setLoading(false);
-        settableloagin({ isLoading: false });
+        setLoadingFetchData(false);
       } catch (error) {
-        setError("Une erreur s'est produite lors de l'appele serveur");
-        setLoading(false);
+        setLoadingFetchData(false);
+        setErrorFetchData(error);
       }
     };
     fetchData();
-  }, [setLoading, setError, setfichecompetance, setlistrome]);
-
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [EditModalOpen, setEditModalOpen] = useState(false);
+  }, [setLoadingFetchData, setErrorFetchData, setfichecompetance, setlistrome]);
 
   // Data competence eto izany dia data competence an'i edit
   const setEditingRow = (row) => {
@@ -137,53 +144,6 @@ function CompetanceScreen({ setLoading, setError }) {
       .catch((error) => {
         setloadingrome(false);
         setOpen(false);
-      });
-  };
-  const handleCreateNewRow = (values, elementsCoches, accreditationlist) => {
-    setLoading(true);
-    postcompetance(
-      values,
-      elementsCoches,
-      accreditationlist,
-      matierselectionner.id
-    )
-      .then((data) => {
-        setcompetanceglobal(data.fiche_competance_global);
-        setfichecompetance(data.fiche_competance);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError("bakend error");
-        setLoading(false);
-      });
-  };
-
-  const handleSaveEditRow = (
-    elementsCoches,
-    accreditationlist,
-    nouvellecompetance
-  ) => {
-    setLoading(true);
-    const values = {
-      emploistitre: activeeditrow.emploiTitre,
-      emploisid: activeeditrow.id,
-      titre: activeeditrow.emploiTitre,
-    };
-    postcompetance(
-      values,
-      elementsCoches,
-      accreditationlist,
-      activeeditrow.romeData.id,
-      nouvellecompetance
-    )
-      .then((data) => {
-        setcompetanceglobal(data.fiche_competance_global);
-        setfichecompetance(data.fiche_competance);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setError("bakend error");
-        setLoading(false);
       });
   };
 
@@ -301,7 +261,7 @@ function CompetanceScreen({ setLoading, setError }) {
       )}
       <ThemeProvider theme={theme}>
         <MaterialReactTable
-          state={tableloagin}
+          state={{ isLoading: loadingFetchData, error: errorFetchData }}
           // enableEditing
           // onEditingRowSave={(e) => console.log(e)}
           // onEditingRowCancel={(e) => console.log(e)}
@@ -460,24 +420,32 @@ function CompetanceScreen({ setLoading, setError }) {
           <CreateNewCompetanceModal
             open={createModalOpen}
             onClose={() => setCreateModalOpen(false)}
-            onSubmit={handleCreateNewRow}
             rome={matierselectionner}
             competance={competance}
             appelationlist={appelationlist}
             setcompetance={setcompetance}
+            competanceglobal={competanceglobal}
+            setcompetanceglobal={setcompetanceglobal}
+            setfichecompetance={setfichecompetance}
+            accreditationlist={accreditationlist}
+            setAccreditationlist={setAccreditationlist}
+            matierselectionner={matierselectionner}
+            postcompetance={postcompetance}
           />
         )}
         {EditModalOpen && (
           <EditCompetanceModal
             open={EditModalOpen}
             onClose={() => setEditModalOpen(false)}
-            onSubmit={handleSaveEditRow}
             competance={competance}
             setcompetance={setcompetance}
             activeeditrow={activeeditrow}
             competanceglobal={competanceglobal}
+            setcompetanceglobal={setcompetanceglobal}
+            setfichecompetance={setfichecompetance}
             accreditationlist={accreditationlist}
             setAccreditationlist={setAccreditationlist}
+            postcompetance={postcompetance}
           />
         )}
       </ThemeProvider>

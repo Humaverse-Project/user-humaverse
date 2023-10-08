@@ -1,14 +1,16 @@
-import Paper from "@mui/material/Paper";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { listrome, updaterome } from "../../../services/RomeService";
-import MaterialReactTable from "material-react-table";
-import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
-import { DeleteForever, Edit } from "@mui/icons-material";
-import { MRT_Localization_FR } from "material-react-table/locales/fr";
-import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme";
 import { Link } from "react-router-dom";
+import Paper from "@mui/material/Paper";
+import { ThemeProvider } from "@mui/material/styles";
+import MaterialReactTable from "material-react-table";
+import { DeleteForever, Edit } from "@mui/icons-material";
 import { datefonctionun } from "../../../services/DateFormat";
+import { listrome, updaterome } from "../../../services/RomeService";
+import { MRT_Localization_FR } from "material-react-table/locales/fr";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+
+// SweetAlert2 for notification
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
@@ -17,22 +19,31 @@ const MySwal = withReactContent(Swal);
 function RomeScreenScreen({ setLoading, setError }) {
   const [listromedata, setlistrome] = useState([]);
   const [selectedmetier, setNewnode] = useState({});
-  const [tableloagin, settableloagin] = useState({ isLoading: true });
+
+  // local state management
+  // fetch data
+  const [loadingFetchData, setLoadingFetchData] = useState(false);
+  const [errorFetchData, setErrorFetchData] = useState("");
+
+  // edit data
+  const [loadingEditData, setLoadingEditData] = useState(false);
+  const [errorEditData, setErrorEditData] = useState("");
+
   useEffect(() => {
+    setLoadingFetchData(true);
     const fetchData = async () => {
       try {
         const datametierexistant = await listrome();
         const reponsemetie = await datametierexistant;
         setlistrome(reponsemetie);
-        settableloagin({ isLoading: false });
-        setLoading(false);
+        setLoadingFetchData(false);
       } catch (error) {
-        setError("Une erreur s'est produite lors de l'appele serveur");
-        setLoading(false);
+        setErrorFetchData(error);
+        setLoadingFetchData(false);
       }
     };
     fetchData();
-  }, [setLoading, setError]);
+  }, [setLoadingFetchData, setErrorFetchData]);
 
   const handleCancelRowEdits = () => {
     setNewnode({});
@@ -180,7 +191,10 @@ function RomeScreenScreen({ setLoading, setError }) {
     <Paper sx={{ mt: 2, width: "100%", color: "black.main" }}>
       <ThemeProvider theme={theme}>
         <MaterialReactTable
-          state={tableloagin}
+          state={{
+            isLoading: loadingFetchData,
+            error: errorFetchData,
+          }}
           renderDetailPanel={({ row }) => (
             <Box
               sx={{

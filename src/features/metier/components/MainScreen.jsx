@@ -1,6 +1,5 @@
 import { LeftMenu } from "../../../shared";
 import { Fragment, useState } from "react";
-import { LoadingAPI } from "../../../shared";
 import { useTheme } from "@mui/material/styles";
 import { Box, Grid, Button } from "@mui/material";
 
@@ -16,15 +15,9 @@ export default function MainScreen() {
   const [screen, setScreen] = useState(1);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const page = "COMPETENCES";
-  if (loading || error) {
-    return (
-      <Fragment>
-        <HeaderInScreen title={page} />
-        {LoadingAPI(loading, error, page)}
-      </Fragment>
-    );
-  }
+
   return (
     <Fragment>
       <HeaderInScreen title={page} />
@@ -96,12 +89,8 @@ export default function MainScreen() {
                 Métiers
               </Button>
             </Box>
-            {screen === 1 && (
-              <RomeScreen setError={setError} setLoading={setLoading} />
-            )}
-            {screen === 2 && (
-              <CompetanceScreen setError={setError} setLoading={setLoading} />
-            )}
+            {screen === 1 && <RomeScreen />}
+            {screen === 2 && <CompetanceScreen />}
             {screen === 3 && (
               <PosteScreen setError={setError} setLoading={setLoading} />
             )}
