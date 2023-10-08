@@ -91,14 +91,14 @@ function RomeScreenScreen({ setLoading, setError }) {
       },
       {
         accessorKey: "nom",
-        header: "Nom",
+        header: "Libellé Rome",
         size: 140,
         enableClickToCopy: true,
         Edit: ({ cell, column, table }) => (
           <TextField
             defaultValue={cell.getValue()}
             key="nom"
-            label="Nom"
+            label="Libellé Rome"
             name="nom"
             variant="outlined"
             onChange={handleChange}
