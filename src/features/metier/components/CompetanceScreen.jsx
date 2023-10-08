@@ -198,7 +198,7 @@ function CompetanceScreen({ setLoading, setError }) {
       },
       {
         accessorKey: "ficCompTitreEmploi",
-        header: "Titre",
+        header: "Intitulé Métier",
         enableColumnOrdering: true,
         enableEditing: true,
         enableSorting: true,
