@@ -26,7 +26,7 @@ import {
 import React, { useState } from "react";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import PartCompetanceCreation from "./partie/PartCompetanceCreation";
+import PartCompetanceCreation from "../partie/PartCompetanceCreation";
 
 // Swal pour les notifications
 import Swal from "sweetalert2";

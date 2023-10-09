@@ -1,98 +1,170 @@
-import theme from "./theme";
-import Paper from "@mui/material/Paper";
-import { Link } from "react-router-dom";
-import { Edit } from "@mui/icons-material";
-import { ThemeProvider } from "@mui/material/styles";
+import React, { useState, useEffect, useMemo } from "react";
+import { listmetiermetier, getdatarome } from "../../../services/MetierService";
 import MaterialReactTable from "material-react-table";
+import Paper from "@mui/material/Paper";
+import CreateMetierModal from "./Modal/CreateMetierModal";
+import { Backdrop, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { MRT_Localization_FR } from "material-react-table/locales/fr";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
-
-// service
-import { datefonctionun } from "../../../services/DateFormat";
-import { listmetier, updatemetier } from "../../../services/MetierService";
+import theme from "./theme";
+import { ThemeProvider } from "@mui/material/styles";
+import { datefonctionun, datefonctiondeux } from "../../../services/DateFormat";
+import RomeSelectModal from "./Modal/RomeSelectModal";
 
 function MetierScreen({ setLoading, setError }) {
-  const [listmetierdata, setlistmetier] = useState([]);
-  const [selectedmetier, setNewnode] = useState({});
+  const [open, setOpen] = useState(false);
+  const [datacompetance, setdatacompetance] = useState([]);
+  const [datacompetancedata, setdatacompetancedata] = useState([]);
+  const [postedata, setPostedata] = useState([]);
   const [tableloagin, settableloagin] = useState({ isLoading: true });
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const datametierexistant = await listmetier();
-        const reponsemetier = await datametierexistant;
+  const [matierselectionner, setmatierselectionner] = useState({});
+  const [listrome, setlistrome] = useState([]);
+  const [loadingrome, setloadingrome] = useState(false);
+  const [appelationlist, setappelationlist] = useState([]);
+  const [contextlist, setcontextlist] = useState([]);
 
-        setlistmetier(reponsemetier);
+  useEffect(() => {
+    const fetchData = async (setLoading, setError) => {
+      try {
+        const datacompetanceexistant = await listmetiermetier();
+        const reponsecompetance = await datacompetanceexistant;
+        setPostedata(reponsecompetance.postelist);
+        setlistrome(
+          reponsecompetance.rome.map((rome) => {
+            return {
+              label: rome.rome_coderome + " " + rome.nom,
+              code: rome.rome_coderome,
+              id: rome.id,
+            };
+          })
+        );
         settableloagin({ isLoading: false });
         setLoading(false);
       } catch (error) {
-        console.error("Une erreur s'est produite :", error);
         setError("Une erreur s'est produite lors de l'appele serveur");
         setLoading(false);
       }
     };
-    fetchData();
-  }, []);
+    fetchData(setLoading, setError);
+  }, [setLoading, setError]);
 
-  const handleCancelRowEdits = () => {
-    setNewnode({});
-  };
-  const handleChange = useCallback(
-    (event) => {
-      const { name, value } = event.target;
-      setNewnode({ ...selectedmetier, [name]: value });
-    },
-    [setNewnode, selectedmetier]
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "id",
+        header: "ID",
+        enableColumnOrdering: true,
+        enableEditing: false,
+        enableSorting: true,
+        size: 80,
+      },
+      {
+        accessorKey: "titre",
+        header: "Titre",
+        enableColumnOrdering: true,
+        enableEditing: false,
+        enableSorting: true,
+      },
+      {
+        accessorKey: "activite",
+        header: "Activité",
+        enableColumnOrdering: true,
+        enableEditing: false,
+        enableSorting: true,
+      },
+      {
+        accessorKey: "version",
+        header: "Version",
+        enableColumnOrdering: true,
+        enableEditing: false,
+        enableSorting: true,
+      },
+      {
+        accessorKey: "rome.codeRome",
+        header: "Code Rome",
+        enableColumnOrdering: true,
+        enableEditing: false,
+        enableSorting: true,
+      },
+      {
+        accessorKey: "createdAt.date",
+        header: "Date création",
+        enableColumnOrdering: true,
+        enableEditing: false,
+        enableSorting: true,
+        Cell: ({ cell }) => datefonctionun(cell.getValue()),
+      },
+    ],
+    []
   );
 
-  const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-    if (selectedmetier.nom === undefined) {
-      selectedmetier.nom = values.nom;
-    }
-    if (selectedmetier.metier_definition === undefined) {
-      selectedmetier.metier_definition = values.metier_definition;
-    }
-    if (selectedmetier.metier_acces_metier === undefined) {
-      selectedmetier.metier_acces_metier = values.metier_acces_metier;
-    }
-    selectedmetier.id = values.id;
-    setLoading(true);
-    updatemetier(selectedmetier)
-      .then((data) => {
-        setlistmetier([...data]);
-        setLoading(false);
-        handleCancelRowEdits();
+  // Data competence eto izany dia data competence an'i creation
+  const handleselectionrome = (e) => {
+    setloadingrome(true);
+    setOpen(false);
+    getdatarome(matierselectionner.code)
+      .then((reponsemetie) => {
+        setloadingrome(false);
+        console.log(reponsemetie)
+        setCreateModalOpen(true)
+        setmatierselectionner(reponsemetie.rome)
+        setappelationlist(
+          reponsemetie.appelation.map((x) => {
+            return { ...x, label: x.emploiTitre };
+          })
+        );
+        const dataT = reponsemetie.briquecontexte;
+        const groupedDataT = {};
+        dataT.forEach((item) => {
+          const titre = item.contexte.ctxTrvTitre;
+          if (!groupedDataT[titre]) {
+            groupedDataT[titre] = [];
+          }
+          groupedDataT[titre].push(item);
+        });
+        setcontextlist(groupedDataT)
+        setdatacompetance(
+          reponsemetie.briquecompetance.map((metier) => {
+            return {
+              label:
+                "[v-" + metier.ficCompVersion + "] " + metier.ficCompTitreEmploi,
+              titre: metier.ficCompTitreEmploi,
+              id: metier.id,
+            };
+          })
+        );
+        setdatacompetancedata(reponsemetie.briquecompetance)
       })
       .catch((error) => {
-        setError("bakend error");
-        console.error("bakend error:", error.message);
-        setLoading(false);
+        setloadingrome(false);
+        setOpen(false);
       });
   };
-
-  const columns = useMemo(() => [][handleChange]);
-  // Affichez les données récupérées
+  const handleCreateNewRow = async (values) => {
+    console.log(values)
+    return true;
+  };
   return (
     <Paper sx={{ mt: 2, width: "100%", color: "black.main" }}>
-      {/* <ThemeProvider theme={theme}>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loadingrome}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      {open && (
+        <RomeSelectModal
+          open={open}
+          setmatierselectionner={setmatierselectionner}
+          setOpen={setOpen}
+          handleselectionrome={handleselectionrome}
+          listrome={listrome}
+        />
+      )}
+      <ThemeProvider theme={theme}>
         <MaterialReactTable
-          state={tableloagin}
-          localization={MRT_Localization_FR}
-          columns={columns}
-          data={listmetierdata}
-          editingMode="modal"
-          enableColumnOrdering
-          enableEditing
-          onEditingRowSave={handleSaveRowEdits}
-          onEditingRowCancel={handleCancelRowEdits}
-          initialState={{
-            columnVisibility: {
-              id: false,
-              metier_acces_metier: false,
-              metier_definition: false,
-            },
-          }}
-          //   Rendering
+          initialState={{ columnVisibility: { id: false } }}
           renderDetailPanel={({ row }) => (
             <Box
               sx={{
@@ -102,31 +174,27 @@ function MetierScreen({ setLoading, setError }) {
               }}
             >
               <Typography>
-                <b>Définition:</b>{" "}
+                <b>validation:</b>{" "}
+                {datefonctiondeux(row.original.validation.date)}
               </Typography>
-              <Typography
-                sx={{ color: "black.main" }}
-                dangerouslySetInnerHTML={{
-                  __html: row.original.metier_definition.replaceAll(
-                    "\\n",
-                    "<br>"
-                  ),
-                }}
-              ></Typography>
               <Typography>
-                <b>Access metier: </b>
+                <b>visa:</b> {datefonctiondeux(row.original.visa.date)}
               </Typography>
-              <Typography
-                sx={{ color: "black.main" }}
-                dangerouslySetInnerHTML={{
-                  __html: row.original.metier_acces_metier.replaceAll(
-                    "\\n",
-                    "<br>"
-                  ),
-                }}
-              ></Typography>
+              <Typography>
+                <b>instruction:</b> {row.original.instruction}
+              </Typography>
+              <Typography>
+                <b>definition:</b> {row.original.definition}
+              </Typography>
+              <Typography>
+                <b>agrement:</b> {row.original.agrement}
+              </Typography>
+              <Typography>
+                <b>condition:</b> {row.original.condition}
+              </Typography>
             </Box>
           )}
+          state={tableloagin}
           displayColumnDefOptions={{
             "mrt-row-actions": {
               muiTableHeadCellProps: {
@@ -135,6 +203,9 @@ function MetierScreen({ setLoading, setError }) {
               size: 120,
             },
           }}
+          columns={columns}
+          data={postedata}
+          enableColumnOrdering
           muiBottomToolbarProps={{
             sx: {
               backgroundColor: "unset",
@@ -177,17 +248,30 @@ function MetierScreen({ setLoading, setError }) {
               backgroundColor: "unset",
             },
           }}
-          renderRowActions={({ row, table }) => (
-            <Box sx={{ display: "flex", gap: "1rem" }}>
-              <Tooltip arrow placement="right" title="Edit">
-                <IconButton onClick={() => table.setEditingRow(row)}>
-                  <Edit />
-                </IconButton>
-              </Tooltip>
-            </Box>
+          renderTopToolbarCustomActions={() => (
+            <Button
+              color="success"
+              onClick={() => setOpen(true)}
+              variant="outlined"
+            >
+              Ajouté nouveau fiche metier
+            </Button>
           )}
+          localization={MRT_Localization_FR}
         />
-      </ThemeProvider> */}
+        {createModalOpen && (
+          <CreateMetierModal
+            open={createModalOpen}
+            onClose={() => setCreateModalOpen(false)}
+            onSubmit={handleCreateNewRow}
+            datacompetance={datacompetance}
+            matierselectionner={matierselectionner}
+            appelationlist={appelationlist}
+            datacompetancedata={datacompetancedata}
+            contextlist={contextlist}
+          />
+        )}
+      </ThemeProvider>
     </Paper>
   );
 }

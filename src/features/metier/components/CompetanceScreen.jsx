@@ -22,15 +22,15 @@ import {
   deletecompetance
 } from "../../../services/CompetanceService";
 import MaterialReactTable from "material-react-table";
-import EditCompetanceModal from "./EditCompetanceModal";
+import EditCompetanceModal from "./Modal/EditCompetanceModal";
 import { DeleteForever, Edit } from "@mui/icons-material";
 import React, { useState, useEffect, useMemo } from "react";
-import CreateNewCompetanceModal from "./NewCompetanceModal";
+import CreateNewCompetanceModal from "./Modal/NewCompetanceModal";
 import { getdatarome } from "../../../services/RomeService";
 import PartCompetanceShow from "./partie/PartCompetanceShow";
 import { datefonctionun } from "../../../services/DateFormat";
 import { MRT_Localization_FR } from "material-react-table/locales/fr";
-
+import RomeSelectModal from "./Modal/RomeSelectModal";
 // Swal Notification
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -227,60 +227,13 @@ function CompetanceScreen() {
         <CircularProgress color="inherit" />
       </Backdrop>
       {open && (
-        <Dialog
-          sx={{
-            "& .MuiDialog-paper": {
-              width: "80%",
-              maxHeight: 435,
-              overflow: "hidden",
-            },
-          }}
-          maxWidth="xs"
+        <RomeSelectModal
           open={open}
-        >
-          <DialogTitle color="button.main">
-            Sélectionner le code Rome
-          </DialogTitle>
-          <DialogContent dividers>
-            <Autocomplete
-              sx={{
-                m: 2,
-                width: "90%",
-              }}
-              disablePortal
-              options={listrome}
-              onChange={(e, value) => {
-                if (value != null) {
-                  setmatierselectionner(value);
-                } else {
-                  setmatierselectionner({});
-                }
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  label="Rome"
-                  name="rome"
-                  variant="outlined"
-                />
-              )}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button autoFocus onClick={(e) => setOpen(false)}>
-              Annuler
-            </Button>
-            <Button
-              onClick={handleselectionrome}
-              color="button"
-              variant="contained"
-              sx={{ color: "black.main" }}
-            >
-              Valider
-            </Button>
-          </DialogActions>
-        </Dialog>
+          setmatierselectionner={setmatierselectionner}
+          setOpen={setOpen}
+          handleselectionrome={handleselectionrome}
+          listrome={listrome}
+        />
       )}
       <ThemeProvider theme={theme}>
         <MaterialReactTable

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { listpost, postPoste } from "../../../services/PosteService";
 import MaterialReactTable from "material-react-table";
 import Paper from "@mui/material/Paper";
-import CreateNewPosteModal from "./NewPosteModal";
+import CreateNewPosteModal from "./Modal/NewPosteModal";
 import { Box, Button, Typography } from "@mui/material";
 import { MRT_Localization_FR } from "material-react-table/locales/fr";
 import theme from "./theme";

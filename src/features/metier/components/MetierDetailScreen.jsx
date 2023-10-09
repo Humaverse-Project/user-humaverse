@@ -14,6 +14,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ContextTravailShow from "./partie/ContextTravailShow";
 
 function MetierDetailScreen() {
   const { code } = useParams();
@@ -319,145 +320,39 @@ function MetierDetailScreen() {
                     spacing={2}
                   >
                     {"CONDITIONS_TRAVAIL" in context ? (
-                      <>
-                        <Grid
-                          sx={{ flexGrow: 1, mt: 1, ml: 2 }}
-                          container
-                          spacing={2}
-                        >
-                          <Grid
-                            item
-                            xs={5}
-                            key={
-                              "Conditions de travail et risques professionnels"
-                            }
-                          >
-                            <ListItem sx={{ p: 0 }}>
-                              {" "}
-                              Conditions de travail et risques professionnels
-                            </ListItem>
-                          </Grid>
-                          <Grid item xs={6}>
-                            {context["CONDITIONS_TRAVAIL"].map((accessitem) => (
-                              <ListItem sx={{ p: 0 }}>
-                                {" "}
-                                {accessitem.brqCtxTitre}
-                              </ListItem>
-                            ))}
-                          </Grid>
-                        </Grid>
-                        <hr></hr>
-                      </>
+                      <ContextTravailShow 
+                        context={context}
+                        type={"CONDITIONS_TRAVAIL"}
+                        titre={"Conditions de travail et risques professionnels"}
+                      />
                     ) : null}
                     {"HORAIRE_ET_DUREE_TRAVAIL" in context ? (
-                      <>
-                        <Grid
-                          sx={{ flexGrow: 1, mt: 1, ml: 2 }}
-                          container
-                          spacing={2}
-                        >
-                          <Grid
-                            item
-                            xs={5}
-                            key={"Horaires et durée du travail"}
-                          >
-                            <ListItem sx={{ p: 0 }}>
-                              {" "}
-                              Horaires et durée du travail
-                            </ListItem>
-                          </Grid>
-                          <Grid item xs={6}>
-                            {context["HORAIRE_ET_DUREE_TRAVAIL"].map(
-                              (accessitem) => (
-                                <ListItem sx={{ p: 0 }}>
-                                  {" "}
-                                  {accessitem.brqCtxTitre}
-                                </ListItem>
-                              )
-                            )}
-                          </Grid>
-                        </Grid>
-                        <hr></hr>
-                      </>
+                      <ContextTravailShow 
+                        context={context}
+                        type={"HORAIRE_ET_DUREE_TRAVAIL"}
+                        titre={"Horaires et durée du travail"}
+                      />
                     ) : null}
                     {"TYPE_BENEFICIAIRE" in context ? (
-                      <>
-                        <Grid
-                          sx={{ flexGrow: 1, mt: 1, ml: 2 }}
-                          container
-                          spacing={2}
-                        >
-                          <Grid item xs={5} key={"Publics spécifiques"}>
-                            <ListItem sx={{ p: 0 }}>
-                              {" "}
-                              Publics spécifiques
-                            </ListItem>
-                          </Grid>
-                          <Grid item xs={6}>
-                            {context["TYPE_BENEFICIAIRE"].map((accessitem) => (
-                              <ListItem sx={{ p: 0 }}>
-                                {" "}
-                                {accessitem.brqCtxTitre}
-                              </ListItem>
-                            ))}
-                          </Grid>
-                        </Grid>
-                        <hr></hr>
-                      </>
+                      <ContextTravailShow 
+                        context={context}
+                        type={"TYPE_BENEFICIAIRE"}
+                        titre={"Publics spécifiques"}
+                      />
                     ) : null}
                     {"TYPE_STRUCTURE_ACCUEIL" in context ? (
-                      <>
-                        <Grid
-                          sx={{ flexGrow: 1, mt: 1, ml: 2 }}
-                          container
-                          spacing={2}
-                        >
-                          <Grid item xs={5} key={"Types de structures"}>
-                            <ListItem sx={{ p: 0 }}>
-                              {" "}
-                              Types de structures
-                            </ListItem>
-                          </Grid>
-                          <Grid item xs={6}>
-                            {context["TYPE_STRUCTURE_ACCUEIL"].map(
-                              (accessitem) => (
-                                <ListItem sx={{ p: 0 }}>
-                                  {" "}
-                                  {accessitem.brqCtxTitre}
-                                </ListItem>
-                              )
-                            )}
-                          </Grid>
-                        </Grid>
-                        <hr></hr>
-                      </>
+                      <ContextTravailShow 
+                        context={context}
+                        type={"TYPE_STRUCTURE_ACCUEIL"}
+                        titre={"Types de structures"}
+                      />
                     ) : null}
                     {"LIEU_ET_DEPLACEMENT" in context ? (
-                      <>
-                        <Grid
-                          sx={{ flexGrow: 1, mt: 1, ml: 2 }}
-                          container
-                          spacing={2}
-                        >
-                          <Grid item xs={5} key={"LIEU_ET_DEPLACEMENT"}>
-                            <ListItem sx={{ p: 0 }}>
-                              {" "}
-                              LIEU_ET_DEPLACEMENT
-                            </ListItem>
-                          </Grid>
-                          <Grid item xs={6}>
-                            {context["LIEU_ET_DEPLACEMENT"].map(
-                              (accessitem) => (
-                                <ListItem sx={{ p: 0 }}>
-                                  {" "}
-                                  {accessitem.brqCtxTitre}
-                                </ListItem>
-                              )
-                            )}
-                          </Grid>
-                        </Grid>
-                        <hr></hr>
-                      </>
+                      <ContextTravailShow 
+                        context={context}
+                        type={"LIEU_ET_DEPLACEMENT"}
+                        titre={"LIEU_ET_DEPLACEMENT"}
+                      />
                     ) : null}
                   </Grid>
                 </AccordionDetails>

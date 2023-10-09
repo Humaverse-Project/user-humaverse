@@ -82,7 +82,7 @@ export default function MainScreen() {
               <Button
                 key="apemp"
                 variant="contained"
-                color={"green"}
+                color={screen === 4 ? "primary" : "green"}
                 size="large"
                 onClick={(e) => setScreen(4)}
                 sx={{ color: "black.main", fontWeight: "bold", mx: 2 }}

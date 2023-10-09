@@ -28,7 +28,7 @@ const PartCompetanceShow = ({ groupedData, type, titre }) => {
                     </Grid>
                     <Grid item xs={6} key={accessitem + "11"}>
                       <Slider
-                        defaultValue={datass.niveau}
+                        value={datass.niveau}
                         valueLabelDisplay="on"
                         step={1}
                         min={0}
