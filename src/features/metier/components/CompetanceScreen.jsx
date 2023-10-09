@@ -19,6 +19,7 @@ import { Link } from "react-router-dom";
 import {
   listcompetance,
   postcompetance,
+  deletecompetance
 } from "../../../services/CompetanceService";
 import MaterialReactTable from "material-react-table";
 import EditCompetanceModal from "./EditCompetanceModal";
@@ -146,6 +147,28 @@ function CompetanceScreen() {
         setOpen(false);
       });
   };
+
+  const handledeleteevent = (id, name) => {
+    setloadingrome(true);
+    deletecompetance(id).then((data) => {
+      setcompetanceglobal(data.fiche_competance_global);
+      setfichecompetance(data.fiche_competance);
+      setloadingrome(false);
+      Swal.fire({
+        text: `${name} a été modifié avec succès`,
+        target: "#custom-target",
+        icon: "success",
+        customClass: {
+          container: "position-absolute",
+        },
+        toast: true,
+        position: "top-right",
+      });
+    })
+    .catch((error) => {
+      setloadingrome(false);
+    });
+  }
 
   const columns = useMemo(
     () => [
@@ -405,7 +428,7 @@ function CompetanceScreen() {
                       reverseButtons: true,
                     }).then((result) => {
                       if (result.isConfirmed) {
-                        // logic is here
+                        handledeleteevent(row.original.id, row.original.ficCompTitreEmploi)
                       }
                     });
                   }}

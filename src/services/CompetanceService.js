@@ -91,3 +91,19 @@ export async function loadcompetanceglobal(formdata) {
     }
     return await response.json();
 }
+
+export async function deletecompetance(id) {
+    console.log(id)
+    const url = `${base_url}/fiches/competences/delete/${id}`;
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    });
+
+    if (!response.ok) {
+      throw new Error('erreur backend');
+    }
+    return await response.json();
+}
