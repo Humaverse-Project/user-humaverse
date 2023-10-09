@@ -2,7 +2,7 @@ import { LeftMenu } from "../../../shared";
 import { Fragment, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import { Box, Grid, Button } from "@mui/material";
-
+import { useParams } from "react-router-dom";
 // components
 import RomeScreen from "./RomeScreen";
 import PosteScreen from "./PosteScreen";
@@ -11,8 +11,9 @@ import CompetanceScreen from "./CompetanceScreen";
 import HeaderInScreen from "../../header/HeaderInScreen";
 
 export default function MainScreen() {
+  const { screennum } = useParams();
   const theme = useTheme();
-  const [screen, setScreen] = useState(1);
+  const [screen, setScreen] = useState(parseInt(screennum));
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
