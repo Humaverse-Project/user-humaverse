@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { listmetiermetier, getdatarome } from "../../../services/MetierService";
+import { listmetiermetier, getdatarome, postmetier } from "../../../services/MetierService";
 import MaterialReactTable from "material-react-table";
 import Paper from "@mui/material/Paper";
 import CreateMetierModal from "./Modal/CreateMetierModal";
-import { Backdrop, Box, Button, CircularProgress, Typography } from "@mui/material";
+import { Backdrop, Box, Button, CircularProgress, IconButton, Tooltip, Typography } from "@mui/material";
 import { MRT_Localization_FR } from "material-react-table/locales/fr";
 import theme from "./theme";
 import { ThemeProvider } from "@mui/material/styles";
 import { datefonctionun, datefonctiondeux } from "../../../services/DateFormat";
 import RomeSelectModal from "./Modal/RomeSelectModal";
+import { DeleteForever, Edit } from "@mui/icons-material";
+// Swal pour les notifications
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+const MySwal = withReactContent(Swal);
+
 
 function MetierScreen({ setLoading, setError }) {
   const [open, setOpen] = useState(false);
@@ -27,6 +33,7 @@ function MetierScreen({ setLoading, setError }) {
       try {
         const datacompetanceexistant = await listmetiermetier();
         const reponsecompetance = await datacompetanceexistant;
+        console.log(reponsecompetance)
         setPostedata(reponsecompetance.postelist);
         setlistrome(
           reponsecompetance.rome.map((rome) => {
@@ -52,43 +59,36 @@ function MetierScreen({ setLoading, setError }) {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
-        header: "ID",
+        accessorKey: "titre",
+        header: "Intitulé Emploi",
         enableColumnOrdering: true,
         enableEditing: false,
         enableSorting: true,
         size: 80,
       },
       {
-        accessorKey: "titre",
-        header: "Titre",
-        enableColumnOrdering: true,
-        enableEditing: false,
-        enableSorting: true,
-      },
-      {
-        accessorKey: "activite",
-        header: "Activité",
-        enableColumnOrdering: true,
-        enableEditing: false,
-        enableSorting: true,
-      },
-      {
-        accessorKey: "version",
-        header: "Version",
+        accessorKey: "emplois.emploiTitre",
+        header: "Intitulé Métier ROME",
         enableColumnOrdering: true,
         enableEditing: false,
         enableSorting: true,
       },
       {
         accessorKey: "rome.codeRome",
-        header: "Code Rome",
+        header: "Code ROME",
         enableColumnOrdering: true,
         enableEditing: false,
         enableSorting: true,
       },
       {
-        accessorKey: "createdAt.date",
+        accessorKey: "rome.titre",
+        header: "Libellé ROME",
+        enableColumnOrdering: true,
+        enableEditing: false,
+        enableSorting: true,
+      },
+      {
+        accessorKey: "createdAt",
         header: "Date création",
         enableColumnOrdering: true,
         enableEditing: false,
@@ -141,8 +141,30 @@ function MetierScreen({ setLoading, setError }) {
         setOpen(false);
       });
   };
-  const handleCreateNewRow = async (values) => {
-    console.log(values)
+  const handleCreateNewRow = async (agrementlist, ficheslist, conditionlist, newnode) => {
+    newnode.romeid = matierselectionner.id
+    const datametierexistant = await postmetier(agrementlist, ficheslist, conditionlist, newnode);
+    const reponsemetie = await datametierexistant;
+    setPostedata(reponsemetie.postelist);
+    setlistrome(
+      reponsemetie.rome.map((rome) => {
+        return {
+          label: rome.rome_coderome + " " + rome.nom,
+          code: rome.rome_coderome,
+          id: rome.id,
+        };
+      })
+    );
+    settableloagin({ isLoading: false });
+    MySwal.fire({
+      text: "Le fiche metier a été créée avec succès",
+      target: "#custom-target",
+      customClass: {
+        container: "position-absolute",
+      },
+      toast: true,
+      position: "top-right",
+    });
     return true;
   };
   return (
@@ -257,7 +279,22 @@ function MetierScreen({ setLoading, setError }) {
               Ajouté nouveau fiche metier
             </Button>
           )}
+          enableEditing
           localization={MRT_Localization_FR}
+          positionActionsColumn="last"
+          renderRowActions={({ row, table }) => (
+            <Box sx={{ display: "flex", gap: "1rem" }}>
+              <Tooltip
+                arrow
+                placement="right"
+                title={`Modifier -> ${row.original.rome_coderome}`}
+              >
+                <IconButton onClick={() => table.setEditingRow(row)}>
+                  <Edit />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
         />
         {createModalOpen && (
           <CreateMetierModal

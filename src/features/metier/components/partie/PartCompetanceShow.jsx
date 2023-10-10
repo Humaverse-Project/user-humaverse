@@ -1,4 +1,4 @@
-import { Grid, ListItem, Slider, Typography } from "@mui/material";
+import { Divider, Grid, ListItem, Slider, Typography } from "@mui/material";
 
 const PartCompetanceShow = ({ groupedData, type, titre }) => {
   if (groupedData === undefined) {
@@ -41,7 +41,7 @@ const PartCompetanceShow = ({ groupedData, type, titre }) => {
               ))}
             </Grid>
           </Grid>
-          <hr></hr>
+          <Divider variant="middle" sx={{width:"100%"}}/>
         </>
       ))}
     </>

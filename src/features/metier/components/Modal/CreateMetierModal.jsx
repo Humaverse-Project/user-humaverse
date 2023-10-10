@@ -15,12 +15,26 @@ import {
   Grid,
   Typography,
   ListItem,
+  Divider,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
 import { LoadingButton } from "@mui/lab";
 import PartCompetanceShow from "../partie/PartCompetanceShow";
 import ContextTravailShow from "../partie/ContextTravailShow";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import MuiInput from "@mui/material/Input";
+import { styled } from "@mui/material/styles";
+const Input = styled(MuiInput)`
+  width: 100%;
+`;
 
 const CreateMetierModal = ({
   open,
@@ -33,13 +47,50 @@ const CreateMetierModal = ({
   contextlist
 }) => {
   const [loading, setLoading] = useState(false);
-  const [newnode, setNewnode] = useState({});
+  const [newnode, setNewnode] = useState({
+    competanceid:0,
+    definition: matierselectionner.rome_definition,
+    formation: matierselectionner.rome_acces_metier,
+    metierid: 0
+  });
   const [agrementlist, setagrementlist] = useState([]);
   const [conditionlist, setconditionlist] = useState([]);
   const [ficheslist, setficheslist] = useState([]);
   const [datacompetanceafficher, setdatacompetanceafficher] = useState({});
   const [accreditationlist, setaccreditationlist] = useState([]);
+  const [expanded, setExpanded] = useState(false);
+
+  const handleChangeaccord = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
+  const deletethisagrementelement = (e, accreditation) => {
+    let index = agrementlist.indexOf(accreditation);
+    agrementlist.splice(index, 1);
+    setagrementlist([...agrementlist]);
+  };
+  const deletethisconditionlement = (e, accreditation) => {
+    let index = conditionlist.indexOf(accreditation);
+    conditionlist.splice(index, 1);
+    setconditionlist([...conditionlist]);
+  };
+  const deletethisFICHElement = (e, accreditation) => {
+    let index = ficheslist.indexOf(accreditation);
+    ficheslist.splice(index, 1);
+    setficheslist([...ficheslist]);
+  };
   
+  const generateRandomid = () => {
+    const length = 10;
+    const charset =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=[]{};:,.<>?";
+    let password = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset.charAt(randomIndex);
+    }
+    return password;
+  };
   const handleChangePoste = (event, value) => {
     if (value != null) {
       setNewnode({
@@ -64,7 +115,6 @@ const CreateMetierModal = ({
             groupedData[categorie][titre].push(item);
         });
       setdatacompetanceafficher(groupedData)
-      console.log(affichage[0])
       setaccreditationlist(affichage[0].accreditation)
     } else {
       setNewnode({ ...newnode, competance: "", competanceid: 0 });
@@ -75,8 +125,9 @@ const CreateMetierModal = ({
     setNewnode({ ...newnode, [name]: value });
   };
   const submitdata = async (e) => {
+    console.log(agrementlist, ficheslist, conditionlist, newnode)
     setLoading(true);
-    await onSubmit(newnode);
+    await onSubmit(agrementlist, ficheslist, conditionlist, newnode);
     setLoading(false);
     onClose();
   };
@@ -333,7 +384,7 @@ const CreateMetierModal = ({
                   required
                 >
                   <TextField
-                    name="activite"
+                    name="formation"
                     onChange={handleChange}
                     value={matierselectionner.rome_acces_metier.replaceAll("\\n", "\n")}
                     InputProps={{
@@ -384,62 +435,88 @@ const CreateMetierModal = ({
                   width: "100%",
                 }}
               >
-                {"SAVOIRS FAIRE" in datacompetanceafficher ? (
-                  <PartCompetanceShow
-                    datacompetanceafficher={datacompetanceafficher}
-                    type={"SAVOIRS FAIRE"}
-                    titre={"Savoir-faire"}
-                  />
-                ) : null}
-                {"SAVOIRS" in datacompetanceafficher ? (
-                  <PartCompetanceShow
-                    groupedData={datacompetanceafficher}
-                    type={"SAVOIRS"}
-                    titre={"Savoirs"}
-                  />
-                ) : null}
-                {"SAVOIR ÊTRE" in datacompetanceafficher ? (
-                  <PartCompetanceShow
-                    groupedData={datacompetanceafficher}
-                    type={"SAVOIR ÊTRE"}
-                    titre={"Savoirs être"}
-                  />
+                {newnode.competanceid != 0 ? (
+                  <Accordion expanded={expanded === 'competance'} onChange={handleChangeaccord('competance')}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                    >
+                      <Typography sx={{ width: '33%', flexShrink: 0 }} variant="h5">
+                        Competance
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {"SAVOIRS FAIRE" in datacompetanceafficher ? (
+                        <PartCompetanceShow
+                          datacompetanceafficher={datacompetanceafficher}
+                          type={"SAVOIRS FAIRE"}
+                          titre={"Savoir-faire"}
+                        />
+                      ) : null}
+                      {"SAVOIRS" in datacompetanceafficher ? (
+                        <PartCompetanceShow
+                          groupedData={datacompetanceafficher}
+                          type={"SAVOIRS"}
+                          titre={"Savoirs"}
+                        />
+                      ) : null}
+                      {"SAVOIR ÊTRE" in datacompetanceafficher ? (
+                        <PartCompetanceShow
+                          groupedData={datacompetanceafficher}
+                          type={"SAVOIR ÊTRE"}
+                          titre={"Savoirs être"}
+                        />
+                      ) : null}
+                    </AccordionDetails>
+                  </Accordion>
                 ) : null}
                 {accreditationlist.length > 0 ? (
-                <>
-                    <Typography variant="h5">Accreditation</Typography>
-                    {accreditationlist.map((definitionitem) => {
-                    return (
-                        <>
-                        <Grid
-                            sx={{ flexGrow: 1, mt: 1 }}
-                            container
-                            spacing={2}
-                        >
-                            <Grid item xs={4} key={definitionitem.id}>
-                            <ListItem sx={{ p: 0 }}>
-                                {" "}
-                                {definitionitem.accreTitre}
-                            </ListItem>
+                  <Accordion expanded={expanded === 'Accreditation'} onChange={handleChangeaccord('Accreditation')}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                    >
+                      <Typography sx={{ width: '33%', flexShrink: 0 }} variant="h5">
+                      Accreditation
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {accreditationlist.map((definitionitem) => {
+                        return (
+                            <>
+                            <Grid
+                                sx={{ flexGrow: 1, mt: 1, pl: 2 }}
+                                container
+                                spacing={2}
+                            >
+                                <Grid item xs={4} key={definitionitem.id}>
+                                <ListItem sx={{ p: 0 }}>
+                                    {" "}
+                                    {definitionitem.accreTitre}
+                                </ListItem>
+                                </Grid>
+                                <Grid item xs={4} key={definitionitem.accreTitre + "2"}>
+                                <ListItem sx={{ p: 0 }}>
+                                    {" "}
+                                    {definitionitem.value}
+                                </ListItem>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={4} key={definitionitem.accreTitre + "2"}>
-                            <ListItem sx={{ p: 0 }}>
-                                {" "}
-                                {definitionitem.value}
-                            </ListItem>
-                            </Grid>
-                        </Grid>
-                        </>
-                    );
-                    })}
-                </>
+                            <Divider variant="middle" sx={{width:"100%"}}/>
+                            </>
+                        );
+                      })}
+                    </AccordionDetails>
+                  </Accordion>
                 ) : null}
-                <Typography variant="h5">Contextes de travail</Typography>
-                <Grid
-                    sx={{ flexGrow: 1, mt: 1 }}
-                    container
-                    spacing={2}
+                {newnode.competanceid != 0 ? (
+                  <Accordion expanded={expanded === 'Contextes'} onChange={handleChangeaccord('Contextes')}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
                   >
+                    <Typography sx={{ width: '33%', flexShrink: 0 }} variant="h5">
+                      Contextes de travail
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
                     {"CONDITIONS_TRAVAIL" in contextlist ? (
                         <ContextTravailShow 
                             context={contextlist}
@@ -475,7 +552,213 @@ const CreateMetierModal = ({
                             titre={"LIEU_ET_DEPLACEMENT"}
                         />
                     ) : null}
-                </Grid>
+                    <Grid
+                        sx={{ flexGrow: 1, mt: 1, ml: 2 }}
+                        container
+                        spacing={2}
+                    >
+                        <Grid
+                          item
+                          xs={5}
+                        >
+                        <ListItem sx={{ p: 0,  display: "flex", }}>
+                            {" "}
+                            <Typography>Agrément - Réglementation du métier</Typography>
+                            <IconButton
+                              onClick={(e) =>
+                                setagrementlist([
+                                  ...agrementlist,
+                                  {
+                                    name : "",
+                                    id: generateRandomid(),
+                                  },
+                                ])
+                              }
+                              sx={{ color: "green" }}
+                            >
+                              <AddCircleIcon />
+                            </IconButton>
+                        </ListItem>
+                        </Grid>
+                        <Grid item xs={6}>
+                          {agrementlist.map(
+                              (accessitem) => (
+                                <FormControl
+                                  sx={{
+                                    color: "black.main",
+                                    width: "100%"
+                                  }}
+                                  key={accessitem.id + "iun"}
+                                  variant="outlined"
+                                >
+                                  <Input
+                                    key={accessitem.id + "input"}
+                                    onChange={(e) => {
+                                      if (e.target.value) {
+                                        accessitem.name = e.target.value;
+                                        setagrementlist([...agrementlist]);
+                                      }
+                                    }}
+                                    value={accessitem.name}
+                                    endAdornment={
+                                      <InputAdornment position="end">
+                                        <IconButton
+                                          onMouseDown={(e) =>
+                                            deletethisagrementelement(e, accessitem)
+                                          }
+                                          edge="end"
+                                          sx={{ color: "red" }}
+                                        >
+                                          <DeleteForeverIcon />
+                                        </IconButton>
+                                      </InputAdornment>
+                                    }
+                                  />
+                                </FormControl>
+                              )
+                          )}
+                        </Grid>
+                    </Grid>
+                    <Divider variant="middle" sx={{width:"100%"}}/>
+                    <Grid
+                        sx={{ flexGrow: 1, mt: 1, ml: 2 }}
+                        container
+                        spacing={2}
+                    >
+                        <Grid
+                          item
+                          xs={5}
+                        >
+                        <ListItem sx={{ p: 0,  display: "flex", }}>
+                            {" "}
+                            <Typography>Conditions générales de travail</Typography>
+                            <IconButton
+                              onClick={(e) =>
+                                setconditionlist([
+                                  ...conditionlist,
+                                  {
+                                    name : "",
+                                    id: generateRandomid(),
+                                  },
+                                ])
+                              }
+                              sx={{ color: "green" }}
+                            >
+                              <AddCircleIcon />
+                            </IconButton>
+                        </ListItem>
+                        </Grid>
+                        <Grid item xs={6}>
+                          {conditionlist.map(
+                              (accessitem) => (
+                                <FormControl
+                                  sx={{
+                                    color: "black.main",
+                                    width: "100%"
+                                  }}
+                                  key={accessitem.id + "iun"}
+                                  variant="outlined"
+                                >
+                                  <Input
+                                    key={accessitem.id + "input"}
+                                    onChange={(e) => {
+                                      if (e.target.value) {
+                                        accessitem.name = e.target.value;
+                                        setconditionlist([...conditionlist]);
+                                      }
+                                    }}
+                                    value={accessitem.name}
+                                    endAdornment={
+                                      <InputAdornment position="end">
+                                        <IconButton
+                                          onMouseDown={(e) =>
+                                            deletethisconditionlement(e, accessitem)
+                                          }
+                                          edge="end"
+                                          sx={{ color: "red" }}
+                                        >
+                                          <DeleteForeverIcon />
+                                        </IconButton>
+                                      </InputAdornment>
+                                    }
+                                  />
+                                </FormControl>
+                              )
+                          )}
+                        </Grid>
+                    </Grid>
+                    <Divider variant="middle" sx={{width:"100%"}}/>
+                    <Grid
+                        sx={{ flexGrow: 1, mt: 1, ml: 2 }}
+                        container
+                        spacing={2}
+                    >
+                        <Grid
+                          item
+                          xs={5}
+                        >
+                        <ListItem sx={{ p: 0,  display: "flex", }}>
+                            {" "}
+                            <Typography>Fiches - Instructions - Scripts à respecter</Typography>
+                            <IconButton
+                              onClick={(e) =>
+                                setficheslist([
+                                  ...ficheslist,
+                                  {
+                                    name : "",
+                                    id: generateRandomid(),
+                                  },
+                                ])
+                              }
+                              sx={{ color: "green" }}
+                            >
+                              <AddCircleIcon />
+                            </IconButton>
+                        </ListItem>
+                        </Grid>
+                        <Grid item xs={6}>
+                          {ficheslist.map(
+                              (accessitem) => (
+                                <FormControl
+                                  sx={{
+                                    color: "black.main",
+                                    width: "100%"
+                                  }}
+                                  key={accessitem.id + "iun"}
+                                  variant="outlined"
+                                >
+                                  <Input
+                                    key={accessitem.id + "input"}
+                                    onChange={(e) => {
+                                      if (e.target.value) {
+                                        accessitem.name = e.target.value;
+                                        setficheslist([...ficheslist]);
+                                      }
+                                    }}
+                                    value={accessitem.name}
+                                    endAdornment={
+                                      <InputAdornment position="end">
+                                        <IconButton
+                                          onMouseDown={(e) =>
+                                            deletethisFICHElement(e, accessitem)
+                                          }
+                                          edge="end"
+                                          sx={{ color: "red" }}
+                                        >
+                                          <DeleteForeverIcon />
+                                        </IconButton>
+                                      </InputAdornment>
+                                    }
+                                  />
+                                </FormControl>
+                              )
+                          )}
+                        </Grid>
+                    </Grid>
+                    <Divider variant="middle" sx={{width:"100%"}}/>
+                  </AccordionDetails>
+                </Accordion>
+                ) : null}
             </Box>
           </Stack>
         </DialogContent>

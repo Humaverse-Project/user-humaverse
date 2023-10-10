@@ -1,4 +1,4 @@
-import { Grid, ListItem } from "@mui/material";
+import { Divider, Grid, ListItem } from "@mui/material";
 
 const ContextTravailShow = ({ context, type, titre }) => {
   if (context === undefined) {
@@ -32,7 +32,7 @@ const ContextTravailShow = ({ context, type, titre }) => {
             )}
             </Grid>
         </Grid>
-        <hr></hr>
+        <Divider variant="middle" sx={{width:"100%"}}/>
     </>
   );
 };
