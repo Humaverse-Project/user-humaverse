@@ -15,7 +15,7 @@ import {
   Grid,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import theme from "./theme";
+import theme from "../theme";
 import { LoadingButton } from "@mui/lab";
 
 const NewPosteModal = ({

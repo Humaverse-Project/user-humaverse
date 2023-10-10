@@ -19,17 +19,18 @@ import { Link } from "react-router-dom";
 import {
   listcompetance,
   postcompetance,
+  deletecompetance
 } from "../../../services/CompetanceService";
 import MaterialReactTable from "material-react-table";
-import EditCompetanceModal from "./EditCompetanceModal";
+import EditCompetanceModal from "./Modal/EditCompetanceModal";
 import { DeleteForever, Edit } from "@mui/icons-material";
 import React, { useState, useEffect, useMemo } from "react";
-import CreateNewCompetanceModal from "./NewCompetanceModal";
+import CreateNewCompetanceModal from "./Modal/NewCompetanceModal";
 import { getdatarome } from "../../../services/RomeService";
 import PartCompetanceShow from "./partie/PartCompetanceShow";
 import { datefonctionun } from "../../../services/DateFormat";
 import { MRT_Localization_FR } from "material-react-table/locales/fr";
-
+import RomeSelectModal from "./Modal/RomeSelectModal";
 // Swal Notification
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -147,6 +148,28 @@ function CompetanceScreen() {
       });
   };
 
+  const handledeleteevent = (id, name) => {
+    setloadingrome(true);
+    deletecompetance(id).then((data) => {
+      setcompetanceglobal(data.fiche_competance_global);
+      setfichecompetance(data.fiche_competance);
+      setloadingrome(false);
+      Swal.fire({
+        text: `${name} a été modifié avec succès`,
+        target: "#custom-target",
+        icon: "success",
+        customClass: {
+          container: "position-absolute",
+        },
+        toast: true,
+        position: "top-right",
+      });
+    })
+    .catch((error) => {
+      setloadingrome(false);
+    });
+  }
+
   const columns = useMemo(
     () => [
       {
@@ -204,60 +227,13 @@ function CompetanceScreen() {
         <CircularProgress color="inherit" />
       </Backdrop>
       {open && (
-        <Dialog
-          sx={{
-            "& .MuiDialog-paper": {
-              width: "80%",
-              maxHeight: 435,
-              overflow: "hidden",
-            },
-          }}
-          maxWidth="xs"
+        <RomeSelectModal
           open={open}
-        >
-          <DialogTitle color="button.main">
-            Sélectionner le code Rome
-          </DialogTitle>
-          <DialogContent dividers>
-            <Autocomplete
-              sx={{
-                m: 2,
-                width: "90%",
-              }}
-              disablePortal
-              options={listrome}
-              onChange={(e, value) => {
-                if (value != null) {
-                  setmatierselectionner(value);
-                } else {
-                  setmatierselectionner({});
-                }
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  required
-                  label="Rome"
-                  name="rome"
-                  variant="outlined"
-                />
-              )}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button autoFocus onClick={(e) => setOpen(false)}>
-              Annuler
-            </Button>
-            <Button
-              onClick={handleselectionrome}
-              color="button"
-              variant="contained"
-              sx={{ color: "black.main" }}
-            >
-              Valider
-            </Button>
-          </DialogActions>
-        </Dialog>
+          setmatierselectionner={setmatierselectionner}
+          setOpen={setOpen}
+          handleselectionrome={handleselectionrome}
+          listrome={listrome}
+        />
       )}
       <ThemeProvider theme={theme}>
         <MaterialReactTable
@@ -405,7 +381,7 @@ function CompetanceScreen() {
                       reverseButtons: true,
                     }).then((result) => {
                       if (result.isConfirmed) {
-                        // logic is here
+                        handledeleteevent(row.original.id, row.original.ficCompTitreEmploi)
                       }
                     });
                   }}

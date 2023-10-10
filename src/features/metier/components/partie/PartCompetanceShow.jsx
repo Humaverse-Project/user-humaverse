@@ -1,4 +1,4 @@
-import { Grid, ListItem, Slider, Typography } from "@mui/material";
+import { Divider, Grid, ListItem, Slider, Typography } from "@mui/material";
 
 const PartCompetanceShow = ({ groupedData, type, titre }) => {
   if (groupedData === undefined) {
@@ -28,7 +28,7 @@ const PartCompetanceShow = ({ groupedData, type, titre }) => {
                     </Grid>
                     <Grid item xs={6} key={accessitem + "11"}>
                       <Slider
-                        defaultValue={datass.niveau}
+                        value={datass.niveau}
                         valueLabelDisplay="on"
                         step={1}
                         min={0}
@@ -41,7 +41,7 @@ const PartCompetanceShow = ({ groupedData, type, titre }) => {
               ))}
             </Grid>
           </Grid>
-          <hr></hr>
+          <Divider variant="middle" sx={{width:"100%"}}/>
         </>
       ))}
     </>

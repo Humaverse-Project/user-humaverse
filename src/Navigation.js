@@ -40,7 +40,7 @@ function Navigation() {
     },
     {
       id: 6,
-      path: "/competences",
+      path: "/competences/:screennum",
       components: <MainScreen />,
     },
     {
@@ -52,6 +52,11 @@ function Navigation() {
       id: 8,
       path: "/competancedetail/:code",
       components: <CompetanceDetailScreen />,
+    },
+    {
+      id: 9,
+      path: "/competences",
+      components: <MainScreen />,
     },
   ];
 

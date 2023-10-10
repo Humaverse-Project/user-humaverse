@@ -30,7 +30,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 
 // components
-import PartCompetanceCreation from "./partie/PartCompetanceCreation";
+import PartCompetanceCreation from "../partie/PartCompetanceCreation";
 
 const MySwal = withReactContent(Swal);
 

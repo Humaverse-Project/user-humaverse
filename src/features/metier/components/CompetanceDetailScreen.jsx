@@ -115,7 +115,7 @@ function CompetanceDetailScreen() {
             }}
           >
             <NavLink
-              to="/competences"
+              to="/competences/2"
               style={{
                 textDecoration: "none",
                 color: "black",
