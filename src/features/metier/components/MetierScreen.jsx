@@ -23,7 +23,7 @@ const MySwal = withReactContent(Swal);
 
 function MetierScreen() {
 
-  const [loadingFetchData, setLoadingFetchData] = useState(false);
+  const [loadingFetchData, setLoadingFetchData] = useState(true);
   const [errorFetchData, setErrorFetchData] = useState("");
 
   const [open, setOpen] = useState(false);
@@ -31,6 +31,7 @@ function MetierScreen() {
   const [datacompetancedata, setdatacompetancedata] = useState([]);
   const [postedata, setPostedata] = useState([]);
   const [matierselectionner, setmatierselectionner] = useState({});
+  const [selectedpostdata, setselectedpostdata] = useState({});
   const [matierselectionnerv1, setmatierselectionnerv1] = useState({});
   const [listrome, setlistrome] = useState([]);
   const [loadingrome, setloadingrome] = useState(false);
@@ -46,7 +47,7 @@ function MetierScreen() {
       try {
         const datacompetanceexistant = await listmetiermetier();
         const reponsecompetance = await datacompetanceexistant;
-        
+        console.log(reponsecompetance)
         setPostedata(reponsecompetance.postelist);
         setlistrome(
           reponsecompetance.rome.map((rome) => {
@@ -106,11 +107,14 @@ function MetierScreen() {
   );
 
   // Data competence eto izany dia data competence an'i creation
-  const handleselectionrome = (e, edit) => {
+  const handleselectionrome = (e, edit, rome={}) => {
     console.log(fichecompetance)
     setloadingrome(true);
     setOpen(false);
-    getdatarome(matierselectionnerv1.code)
+    let code = ""
+    if (edit) {code = rome.rome.code; setselectedpostdata(rome)}
+    else{code = matierselectionnerv1.code}
+    getdatarome(code)
       .then((reponsemetie) => {
         setloadingrome(false);
         console.log(reponsemetie)
@@ -220,25 +224,6 @@ function MetierScreen() {
                 width: "100%",
               }}
             >
-              <Typography>
-                <b>validation:</b>{" "}
-                {datefonctiondeux(row.original.validation.date)}
-              </Typography>
-              <Typography>
-                <b>visa:</b> {datefonctiondeux(row.original.visa.date)}
-              </Typography>
-              <Typography>
-                <b>instruction:</b> {row.original.instruction}
-              </Typography>
-              <Typography>
-                <b>definition:</b> {row.original.definition}
-              </Typography>
-              <Typography>
-                <b>agrement:</b> {row.original.agrement}
-              </Typography>
-              <Typography>
-                <b>condition:</b> {row.original.condition}
-              </Typography>
             </Box>
           )}
           displayColumnDefOptions={{
@@ -313,7 +298,7 @@ function MetierScreen() {
                 placement="right"
                 title={`Modifier -> ${row.original.titre}`}
               >
-                <IconButton onClick={(e)=>handleselectionrome(e, true)}>
+                <IconButton onClick={(e)=>handleselectionrome(e, true, row.original)}>
                   <Edit />
                 </IconButton>
               </Tooltip>
@@ -343,6 +328,7 @@ function MetierScreen() {
             appelationlist={appelationlist}
             datacompetancedata={datacompetancedata}
             contextlist={contextlist}
+            selectedpostdata={selectedpostdata}
           />
         )}
         {createCompetanceModalOpen && (
