@@ -41,7 +41,7 @@ const Input = styled(MuiInput)`
 `;
 const MySwal = withReactContent(Swal);
 
-const CreateMetierModal = ({
+const EditMetierModal = ({
   open,
   onClose,
   onSubmit,
@@ -50,121 +50,114 @@ const CreateMetierModal = ({
   appelationlist,
   datacompetancedata,
   contextlist,
-  createCompetanceModalOpen
+  selectedpostdata
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [newnode, setNewnode] = useState({
-    competanceid:0,
-    definition: matierselectionner.rome_definition,
-    formation: matierselectionner.rome_acces_metier,
-    metierid: 0
-  });
-  const [agrementlist, setagrementlist] = useState([]);
-  const [conditionlist, setconditionlist] = useState([]);
-  const [ficheslist, setficheslist] = useState([]);
-  const [datacompetanceafficher, setdatacompetanceafficher] = useState({});
-  const [accreditationlist, setaccreditationlist] = useState([]);
-  const [expanded, setExpanded] = useState(false);
+    console.log(selectedpostdata)
+    const [loading, setLoading] = useState(false);
+    
+    
+    let agr = []
+    let cnd = []
+    let fiche = []
+    for (let index = 0; index < selectedpostdata.briquecontextmetier.length; index++) {
+        const element = selectedpostdata.briquecontextmetier[index];
+        if(element.contexttitre === "Agrément - Réglementation du métier") {
+            agr.push({name: element.name, id: element.id })
+        } else if(element.contexttitre === "Conditions générales de travail") {
+            cnd.push({name: element.name, id: element.id })
+        } else if(element.contexttitre === "Fiches - Instructions - Scripts à respecter") {
+            fiche.push({name: element.name, id: element.id })
+        }
+    }
 
-  const handleChangeaccord = (panel) => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
-  };
-  const deletethisagrementelement = (e, accreditation) => {
-    let index = agrementlist.indexOf(accreditation);
-    agrementlist.splice(index, 1);
-    setagrementlist([...agrementlist]);
-  };
-  const deletethisconditionlement = (e, accreditation) => {
-    let index = conditionlist.indexOf(accreditation);
-    conditionlist.splice(index, 1);
-    setconditionlist([...conditionlist]);
-  };
-  const deletethisFICHElement = (e, accreditation) => {
-    let index = ficheslist.indexOf(accreditation);
-    ficheslist.splice(index, 1);
-    setficheslist([...ficheslist]);
-  };
+    const [agrementlist, setagrementlist] = useState(agr);
+    const [conditionlist, setconditionlist] = useState(cnd);
+    const [ficheslist, setficheslist] = useState(fiche);
+
+    const [expanded, setExpanded] = useState(false);
+
+    const handleChangeaccord = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    };
+    const deletethisagrementelement = (e, accreditation) => {
+        let index = agrementlist.indexOf(accreditation);
+        agrementlist.splice(index, 1);
+        setagrementlist([...agrementlist]);
+    };
+    const deletethisconditionlement = (e, accreditation) => {
+        let index = conditionlist.indexOf(accreditation);
+        conditionlist.splice(index, 1);
+        setconditionlist([...conditionlist]);
+    };
+    const deletethisFICHElement = (e, accreditation) => {
+        let index = ficheslist.indexOf(accreditation);
+        ficheslist.splice(index, 1);
+        setficheslist([...ficheslist]);
+    };
   
-  const generateRandomid = () => {
-    const length = 10;
-    const charset =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=[]{};:,.<>?";
-    let password = "";
+    const generateRandomid = () => {
+        const length = 10;
+        const charset =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+=[]{};:,.<>?";
+        let password = "";
 
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * charset.length);
-      password += charset.charAt(randomIndex);
-    }
-    return password;
-  };
-  const handleChangePoste = (event, value) => {
-    console.log(value)
-    if (value != null) {
-      
-      let das = datacompetance.filter(com => {if(com.titre === value.emploiTitre) return true; return false})
-      if (das.length === 0) {
-        MySwal.fire({
-          title: "Competance",
-          html: `Il n'a pas d'enregistrement competance trouvé pour l'emplois: <b>${value.emploiTitre}</b>. <br>Souhaiter vous le créé?`,
-          icon: "error",
-          showCancelButton: true,
-          confirmButtonText: "Oui, je veux le crée maintenant!",
-          cancelButtonText: "Non, annuler!",
-          reverseButtons: true,
-        }).then((result) => {
-          if (result.isConfirmed) {
-            createCompetanceModalOpen()
-          }
-        });
-        onClose();
-        return false
-      }
-      setNewnode({
-        ...newnode,
+        for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charset.length);
+        password += charset.charAt(randomIndex);
+        }
+        return password;
+    };
+
+    let das = datacompetance.filter(com => {if(com.titre === selectedpostdata.emplois.emploiTitre) return true; return false})
+
+    const [newnode, setNewnode] = useState({
+        competanceid:0,
+        definition: matierselectionner.rome_definition,
+        formation: matierselectionner.rome_acces_metier,
+        metierid: 0,
+        convention: selectedpostdata.convention,
+        definition: selectedpostdata.definition,
+        activite: selectedpostdata.activite,
+        formation: selectedpostdata.formation,
         competance: das[0].titre,
+        titre: selectedpostdata.titre,
         competanceid: das[0].id,
-        emploistitre: value.label,
-        emploisid: value.id
-      });
-      let affichage = datacompetancedata.filter(data=> {
-        if(das[0].id === data.id){return true}return false
-      })
-      let donnees = affichage[0].briquesCompetencesNiveaux;
-      const groupedData = {};
-      donnees.forEach((item) => {
-          const categorie = item.briquescompetances.compGb.compGbCategorie;
-          const titre = item.briquescompetances.compGb.compGbTitre;
-          if (!groupedData[categorie]) {
-          groupedData[categorie] = {};
-          }
-          if (!groupedData[categorie][titre]) {
-          groupedData[categorie][titre] = [];
-          }
-          groupedData[categorie][titre].push(item);
-      });
-      setdatacompetanceafficher(groupedData)
-      setaccreditationlist(affichage[0].accreditation)
-    } else {
-      setNewnode({ ...newnode, competance: "", competanceid: 0, emploistitre: "",
-      emploisid: "" });
-    }
-  };
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setNewnode({ ...newnode, [name]: value });
-  };
-  const submitdata = async (e) => {
-    console.log(agrementlist, ficheslist, conditionlist, newnode)
-    setLoading(true);
-    await onSubmit(agrementlist, ficheslist, conditionlist, newnode);
-    setLoading(false);
-    onClose();
-  };
+        emploistitre: selectedpostdata.emplois.emploiTitre,
+        emploisid: selectedpostdata.emplois.id
+    });
+    let affichage = datacompetancedata.filter(data=> {
+    if(das[0].id === data.id){return true}return false
+    })
+    let donnees = affichage[0].briquesCompetencesNiveaux;
+    const groupedData = {};
+    donnees.forEach((item) => {
+        const categorie = item.briquescompetances.compGb.compGbCategorie;
+        const titre = item.briquescompetances.compGb.compGbTitre;
+        if (!groupedData[categorie]) {
+        groupedData[categorie] = {};
+        }
+        if (!groupedData[categorie][titre]) {
+        groupedData[categorie][titre] = [];
+        }
+        groupedData[categorie][titre].push(item);
+    });
+    const [datacompetanceafficher, setdatacompetanceafficher] = useState(groupedData);
+    const [accreditationlist, setaccreditationlist] = useState(affichage[0].accreditation);
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setNewnode({ ...newnode, [name]: value });
+    };
+    const submitdata = async (e) => {
+        setLoading(true);
+        await onSubmit(agrementlist, ficheslist, conditionlist, newnode);
+        setLoading(false);
+        onClose();
+    };
   return (
     <ThemeProvider theme={theme}>
       <Dialog open={open} onClose={onClose}>
         <DialogTitle textAlign="center" color={"black.main"}>
-          Formulaire de création métier
+          Formulaire de modification métier
         </DialogTitle>
         <DialogContent dividers={true}>
           <Stack
@@ -194,14 +187,15 @@ const CreateMetierModal = ({
                         }}
                         required
                     >
-                    <InputLabel htmlFor="outlined-adornment-password">
-                        Intitulé Emploi
-                    </InputLabel>
-                    <OutlinedInput
-                        name="titre"
-                        onChange={handleChange}
-                        label="Intitulé Emploi"
-                    />
+                        <InputLabel htmlFor="outlined-adornment-password">
+                            Intitulé Emploi
+                        </InputLabel>
+                        <OutlinedInput
+                            readOnly
+                            value={selectedpostdata.titre}
+                            name="titre"
+                            label="Intitulé Emploi"
+                        />
                     </FormControl>
                 </Grid>
                 <Grid
@@ -213,23 +207,24 @@ const CreateMetierModal = ({
                     marginRight: "5px",
                     }}
                 >
-                    <Autocomplete
+                    <FormControl
+                        variant="outlined"
                         sx={{
                             width: "100%",
                         }}
-                        disablePortal
-                        options={appelationlist || []}
-                        onChange={handleChangePoste}
-                        renderInput={(params) => (
-                            <TextField
-                            {...params}
-                            required
+                        required
+                    >
+                        <InputLabel htmlFor="outlined-adornment-password">
+                            Intitulé Métier ROME
+                        </InputLabel>
+                        <OutlinedInput
                             label="Intitulé Métier ROME"
                             name="appelation"
                             variant="outlined"
-                            />
-                        )}
-                    />
+                            readOnly
+                            value={selectedpostdata.fichecompetance.titre}
+                        />
+                    </FormControl>
                 </Grid>
             </Box>
             <Box
@@ -316,6 +311,7 @@ const CreateMetierModal = ({
                   <TextField
                     name="convention"
                     onChange={handleChange}
+                    value={newnode.convention}
                     InputProps={{
                       multiline: true,
                     }}
@@ -342,6 +338,7 @@ const CreateMetierModal = ({
                   <TextField
                     name="activite"
                     onChange={handleChange}
+                    value={newnode.activite}
                     InputProps={{
                       multiline: true,
                     }}
@@ -374,7 +371,7 @@ const CreateMetierModal = ({
                   <TextField
                     name="definition"
                     onChange={handleChange}
-                    value={matierselectionner.rome_definition.replaceAll("\\n", "\n")}
+                    value={newnode.definition}
                     InputProps={{
                       multiline: true,
                     }}
@@ -401,7 +398,7 @@ const CreateMetierModal = ({
                   <TextField
                     name="formation"
                     onChange={handleChange}
-                    value={matierselectionner.rome_acces_metier.replaceAll("\\n", "\n")}
+                    value={newnode.formation}
                     InputProps={{
                       multiline: true,
                     }}
@@ -809,4 +806,4 @@ const CreateMetierModal = ({
     </ThemeProvider>
   );
 };
-export default CreateMetierModal;
+export default EditMetierModal;

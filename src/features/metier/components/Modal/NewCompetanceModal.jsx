@@ -42,7 +42,6 @@ const CreateNewCompetanceModal = ({
   setcompetance,
   setcompetanceglobal,
   setfichecompetance,
-  matierselectionner,
   postcompetance,
 }) => {
   // state local for loading creation
@@ -80,7 +79,7 @@ const CreateNewCompetanceModal = ({
       values,
       elementsCoches,
       accreditationlist,
-      matierselectionner.id
+      rome.id
     )
       .then((data) => {
         setcompetanceglobal(data.fiche_competance_global);

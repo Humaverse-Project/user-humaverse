@@ -7,29 +7,43 @@ import { Backdrop, Box, Button, CircularProgress, IconButton, Tooltip, Typograph
 import { MRT_Localization_FR } from "material-react-table/locales/fr";
 import theme from "./theme";
 import { ThemeProvider } from "@mui/material/styles";
-import { datefonctionun, datefonctiondeux } from "../../../services/DateFormat";
+import { datefonctiondeux } from "../../../services/DateFormat";
 import RomeSelectModal from "./Modal/RomeSelectModal";
-import { DeleteForever, Edit } from "@mui/icons-material";
+import { Edit } from "@mui/icons-material";
+import CreateNewCompetanceModal from "./Modal/NewCompetanceModal";
+import EditMetierModal from "./Modal/EditMetierModal";
+import {
+  postcompetance
+} from "../../../services/CompetanceService";
 // Swal pour les notifications
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal);
 
 
-function MetierScreen({ setLoading, setError }) {
+function MetierScreen() {
+
+  const [loadingFetchData, setLoadingFetchData] = useState(true);
+  const [errorFetchData, setErrorFetchData] = useState("");
+
   const [open, setOpen] = useState(false);
   const [datacompetance, setdatacompetance] = useState([]);
   const [datacompetancedata, setdatacompetancedata] = useState([]);
   const [postedata, setPostedata] = useState([]);
-  const [tableloagin, settableloagin] = useState({ isLoading: true });
   const [matierselectionner, setmatierselectionner] = useState({});
+  const [selectedpostdata, setselectedpostdata] = useState({});
+  const [matierselectionnerv1, setmatierselectionnerv1] = useState({});
   const [listrome, setlistrome] = useState([]);
   const [loadingrome, setloadingrome] = useState(false);
   const [appelationlist, setappelationlist] = useState([]);
   const [contextlist, setcontextlist] = useState([]);
+  const [competance, setcompetance] = useState({});
+  const [competanceglobal, setcompetanceglobal] = useState([]);
+  const [accreditationlist, setAccreditationlist] = useState([]);
+  const [fichecompetance, setfichecompetance] = useState([]);
 
   useEffect(() => {
-    const fetchData = async (setLoading, setError) => {
+    const fetchData = async () => {
       try {
         const datacompetanceexistant = await listmetiermetier();
         const reponsecompetance = await datacompetanceexistant;
@@ -44,18 +58,19 @@ function MetierScreen({ setLoading, setError }) {
             };
           })
         );
-        settableloagin({ isLoading: false });
-        setLoading(false);
+        setLoadingFetchData(false);
       } catch (error) {
-        setError("Une erreur s'est produite lors de l'appele serveur");
-        setLoading(false);
+        setErrorFetchData(error);
+        setLoadingFetchData(false);
       }
     };
-    fetchData(setLoading, setError);
-  }, [setLoading, setError]);
+    fetchData();
+  }, []);
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
-
+  const [editMetierModal, setEditMetierModalOpen] = useState(false);
+  const [createCompetanceModalOpen, setcreateCompetanceModalOpen] = useState(false);
+  
   const columns = useMemo(
     () => [
       {
@@ -86,34 +101,45 @@ function MetierScreen({ setLoading, setError }) {
         enableColumnOrdering: true,
         enableEditing: false,
         enableSorting: true,
-      },
-      {
-        accessorKey: "createdAt",
-        header: "Date création",
-        enableColumnOrdering: true,
-        enableEditing: false,
-        enableSorting: true,
-        Cell: ({ cell }) => datefonctionun(cell.getValue()),
-      },
+      }
     ],
     []
   );
 
   // Data competence eto izany dia data competence an'i creation
-  const handleselectionrome = (e) => {
+  const handleselectionrome = (e, edit, rome={}) => {
+    console.log(fichecompetance)
     setloadingrome(true);
     setOpen(false);
-    getdatarome(matierselectionner.code)
+    let code = ""
+    if (edit) {code = rome.rome.code; setselectedpostdata(rome)}
+    else{code = matierselectionnerv1.code}
+    getdatarome(code)
       .then((reponsemetie) => {
         setloadingrome(false);
         console.log(reponsemetie)
-        setCreateModalOpen(true)
+        if (edit) {
+          setEditMetierModalOpen(true)
+        } else {
+          setCreateModalOpen(true)
+        }
         setmatierselectionner(reponsemetie.rome)
         setappelationlist(
           reponsemetie.appelation.map((x) => {
             return { ...x, label: x.emploiTitre };
           })
         );
+        const data = reponsemetie.briquecompetancerome;
+        const groupedData = {};
+        data.forEach((item) => {
+          const categorie = item.compGb.compGbCategorie;
+          if (!groupedData[categorie]) {
+            groupedData[categorie] = [];
+          }
+          item.niveau = 0;
+          groupedData[categorie].push(item);
+        });
+        setcompetance(groupedData);
         const dataT = reponsemetie.briquecontexte;
         const groupedDataT = {};
         dataT.forEach((item) => {
@@ -155,7 +181,6 @@ function MetierScreen({ setLoading, setError }) {
         };
       })
     );
-    settableloagin({ isLoading: false });
     MySwal.fire({
       text: "Le fiche metier a été créée avec succès",
       target: "#custom-target",
@@ -178,15 +203,19 @@ function MetierScreen({ setLoading, setError }) {
       {open && (
         <RomeSelectModal
           open={open}
-          setmatierselectionner={setmatierselectionner}
+          setmatierselectionner={setmatierselectionnerv1}
           setOpen={setOpen}
-          handleselectionrome={handleselectionrome}
+          handleselectionrome={(e)=>handleselectionrome(e, false)}
           listrome={listrome}
         />
       )}
       <ThemeProvider theme={theme}>
         <MaterialReactTable
           initialState={{ columnVisibility: { id: false } }}
+          state={{
+            isLoading: loadingFetchData,
+            error: errorFetchData,
+          }}
           renderDetailPanel={({ row }) => (
             <Box
               sx={{
@@ -195,28 +224,8 @@ function MetierScreen({ setLoading, setError }) {
                 width: "100%",
               }}
             >
-              <Typography>
-                <b>validation:</b>{" "}
-                {datefonctiondeux(row.original.validation.date)}
-              </Typography>
-              <Typography>
-                <b>visa:</b> {datefonctiondeux(row.original.visa.date)}
-              </Typography>
-              <Typography>
-                <b>instruction:</b> {row.original.instruction}
-              </Typography>
-              <Typography>
-                <b>definition:</b> {row.original.definition}
-              </Typography>
-              <Typography>
-                <b>agrement:</b> {row.original.agrement}
-              </Typography>
-              <Typography>
-                <b>condition:</b> {row.original.condition}
-              </Typography>
             </Box>
           )}
-          state={tableloagin}
           displayColumnDefOptions={{
             "mrt-row-actions": {
               muiTableHeadCellProps: {
@@ -287,9 +296,9 @@ function MetierScreen({ setLoading, setError }) {
               <Tooltip
                 arrow
                 placement="right"
-                title={`Modifier -> ${row.original.rome_coderome}`}
+                title={`Modifier -> ${row.original.titre}`}
               >
-                <IconButton onClick={() => table.setEditingRow(row)}>
+                <IconButton onClick={(e)=>handleselectionrome(e, true, row.original)}>
                   <Edit />
                 </IconButton>
               </Tooltip>
@@ -306,6 +315,36 @@ function MetierScreen({ setLoading, setError }) {
             appelationlist={appelationlist}
             datacompetancedata={datacompetancedata}
             contextlist={contextlist}
+            createCompetanceModalOpen={(e)=> setcreateCompetanceModalOpen(true)}
+          />
+        )}
+        { editMetierModal && (
+          <EditMetierModal
+            open={editMetierModal}
+            onClose={() => setEditMetierModalOpen(false)}
+            onSubmit={handleCreateNewRow}
+            datacompetance={datacompetance}
+            matierselectionner={matierselectionner}
+            appelationlist={appelationlist}
+            datacompetancedata={datacompetancedata}
+            contextlist={contextlist}
+            selectedpostdata={selectedpostdata}
+          />
+        )}
+        {createCompetanceModalOpen && (
+          <CreateNewCompetanceModal
+            open={createCompetanceModalOpen}
+            onClose={() => setcreateCompetanceModalOpen(false)}
+            rome={matierselectionnerv1}
+            competance={competance}
+            appelationlist={appelationlist}
+            setcompetance={setcompetance}
+            competanceglobal={competanceglobal}
+            setcompetanceglobal={setcompetanceglobal}
+            setfichecompetance={setfichecompetance}
+            accreditationlist={accreditationlist}
+            setAccreditationlist={setAccreditationlist}
+            postcompetance={postcompetance}
           />
         )}
       </ThemeProvider>

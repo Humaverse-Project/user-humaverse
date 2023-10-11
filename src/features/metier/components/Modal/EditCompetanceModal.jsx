@@ -27,12 +27,8 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 // Swal for notifications
 import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-
 // components
 import PartCompetanceCreation from "../partie/PartCompetanceCreation";
-
-const MySwal = withReactContent(Swal);
 
 const EditCompetanceModal = ({
   open,
