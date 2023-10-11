@@ -14,9 +14,6 @@ export default function MainScreen() {
   const { screennum } = useParams();
   const theme = useTheme();
   const [screen, setScreen] = useState(parseInt(screennum));
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
-
   const page = "COMPETENCES";
 
   return (
@@ -93,10 +90,10 @@ export default function MainScreen() {
             {screen === 1 && <RomeScreen />}
             {screen === 2 && <CompetanceScreen />}
             {screen === 3 && (
-              <PosteScreen setError={setError} setLoading={setLoading} />
+              <PosteScreen />
             )}
             {screen === 4 && (
-              <MetierScreen setError={setError} setLoading={setLoading} />
+              <MetierScreen />
             )}
           </Grid>
         </Grid>

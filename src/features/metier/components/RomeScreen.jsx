@@ -3,20 +3,14 @@ import { Link } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import { ThemeProvider } from "@mui/material/styles";
 import MaterialReactTable from "material-react-table";
-import { DeleteForever, Edit } from "@mui/icons-material";
+import { Edit } from "@mui/icons-material";
 import { datefonctionun } from "../../../services/DateFormat";
 import { listrome, updaterome } from "../../../services/RomeService";
 import { MRT_Localization_FR } from "material-react-table/locales/fr";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Box, IconButton, TextField, Tooltip, Typography } from "@mui/material";
 
-// SweetAlert2 for notification
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-
-const MySwal = withReactContent(Swal);
-
-function RomeScreenScreen({ setLoading, setError }) {
+function RomeScreenScreen() {
   const [listromedata, setlistrome] = useState([]);
   const [selectedmetier, setNewnode] = useState({});
 
@@ -24,10 +18,6 @@ function RomeScreenScreen({ setLoading, setError }) {
   // fetch data
   const [loadingFetchData, setLoadingFetchData] = useState(false);
   const [errorFetchData, setErrorFetchData] = useState("");
-
-  // edit data
-  const [loadingEditData, setLoadingEditData] = useState(false);
-  const [errorEditData, setErrorEditData] = useState("");
 
   useEffect(() => {
     setLoadingFetchData(true);
@@ -67,16 +57,16 @@ function RomeScreenScreen({ setLoading, setError }) {
       selectedmetier.rome_acces_metier = values.rome_acces_metier;
     }
     selectedmetier.id = values.id;
-    setLoading(true);
+    setLoadingFetchData(true);
     updaterome(selectedmetier)
       .then((data) => {
         setlistrome([...data]);
-        setLoading(false);
+        setLoadingFetchData(false);
         handleCancelRowEdits();
       })
       .catch((error) => {
-        setError("bakend error");
-        setLoading(false);
+        setErrorFetchData(error);
+        setLoadingFetchData(false);
       });
   };
 

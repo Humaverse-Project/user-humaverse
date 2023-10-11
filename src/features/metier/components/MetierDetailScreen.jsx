@@ -1,5 +1,5 @@
 import HeaderInScreen from "../../header/HeaderInScreen";
-import { LeftMenu, Text } from "../../../shared";
+import { LeftMenu } from "../../../shared";
 import { LoadingAPI } from "../../../shared";
 import React, { Fragment, useState, useEffect } from "react";
 import { getdatarome } from "../../../services/RomeService";
@@ -8,7 +8,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
-import { Link, NavLink, useParams } from "react-router-dom"; // Importez useParams pour récupérer les paramètres d'URL
+import { NavLink, useParams } from "react-router-dom"; // Importez useParams pour récupérer les paramètres d'URL
 import { Button, ListItem, Typography } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";

@@ -41,7 +41,7 @@ const Input = styled(MuiInput)`
 `;
 const MySwal = withReactContent(Swal);
 
-const CreateMetierModal = ({
+const EditMetierModal = ({
   open,
   onClose,
   onSubmit,
@@ -49,8 +49,7 @@ const CreateMetierModal = ({
   matierselectionner,
   appelationlist,
   datacompetancedata,
-  contextlist,
-  createCompetanceModalOpen
+  contextlist
 }) => {
   const [loading, setLoading] = useState(false);
   const [newnode, setNewnode] = useState({
@@ -99,8 +98,7 @@ const CreateMetierModal = ({
   };
   const handleChangePoste = (event, value) => {
     console.log(value)
-    if (value != null) {
-      
+    if (value !== null) {
       let das = datacompetance.filter(com => {if(com.titre === value.emploiTitre) return true; return false})
       if (das.length === 0) {
         MySwal.fire({
@@ -113,7 +111,6 @@ const CreateMetierModal = ({
           reverseButtons: true,
         }).then((result) => {
           if (result.isConfirmed) {
-            createCompetanceModalOpen()
           }
         });
         onClose();
@@ -809,4 +806,4 @@ const CreateMetierModal = ({
     </ThemeProvider>
   );
 };
-export default CreateMetierModal;
+export default EditMetierModal;
