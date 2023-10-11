@@ -32,9 +32,14 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import MuiInput from "@mui/material/Input";
 import { styled } from "@mui/material/styles";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+
 const Input = styled(MuiInput)`
   width: 100%;
 `;
+const MySwal = withReactContent(Swal);
 
 const CreateMetierModal = ({
   open,
@@ -44,7 +49,8 @@ const CreateMetierModal = ({
   matierselectionner,
   appelationlist,
   datacompetancedata,
-  contextlist
+  contextlist,
+  createCompetanceModalOpen
 }) => {
   const [loading, setLoading] = useState(false);
   const [newnode, setNewnode] = useState({
@@ -92,32 +98,55 @@ const CreateMetierModal = ({
     return password;
   };
   const handleChangePoste = (event, value) => {
+    console.log(value)
     if (value != null) {
+      
+      let das = datacompetance.filter(com => {if(com.titre == value.emploiTitre) return true; return false})
+      if (das.length == 0) {
+        MySwal.fire({
+          title: "Competance",
+          html: `Il n'a pas d'enregistrement competance trouvé pour l'emplois: <b>${value.emploiTitre}</b>. <br>Souhaiter vous le créé?`,
+          icon: "error",
+          showCancelButton: true,
+          confirmButtonText: "Oui, je veux le crée maintenant!",
+          cancelButtonText: "Non, annuler!",
+          reverseButtons: true,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            createCompetanceModalOpen()
+          }
+        });
+        onClose();
+        return false
+      }
       setNewnode({
         ...newnode,
-        competance: value.titre,
-        competanceid: value.id
+        competance: das[0].titre,
+        competanceid: das[0].id,
+        emploistitre: value.label,
+        emploisid: value.id
       });
       let affichage = datacompetancedata.filter(data=> {
-        if(value.id === data.id){return true}return false
+        if(das[0].id === data.id){return true}return false
       })
-        let donnees = affichage[0].briquesCompetencesNiveaux;
-        const groupedData = {};
-        donnees.forEach((item) => {
-            const categorie = item.briquescompetances.compGb.compGbCategorie;
-            const titre = item.briquescompetances.compGb.compGbTitre;
-            if (!groupedData[categorie]) {
-            groupedData[categorie] = {};
-            }
-            if (!groupedData[categorie][titre]) {
-            groupedData[categorie][titre] = [];
-            }
-            groupedData[categorie][titre].push(item);
-        });
+      let donnees = affichage[0].briquesCompetencesNiveaux;
+      const groupedData = {};
+      donnees.forEach((item) => {
+          const categorie = item.briquescompetances.compGb.compGbCategorie;
+          const titre = item.briquescompetances.compGb.compGbTitre;
+          if (!groupedData[categorie]) {
+          groupedData[categorie] = {};
+          }
+          if (!groupedData[categorie][titre]) {
+          groupedData[categorie][titre] = [];
+          }
+          groupedData[categorie][titre].push(item);
+      });
       setdatacompetanceafficher(groupedData)
       setaccreditationlist(affichage[0].accreditation)
     } else {
-      setNewnode({ ...newnode, competance: "", competanceid: 0 });
+      setNewnode({ ...newnode, competance: "", competanceid: 0, emploistitre: "",
+      emploisid: "" });
     }
   };
   const handleChange = (event) => {
@@ -190,21 +219,7 @@ const CreateMetierModal = ({
                         }}
                         disablePortal
                         options={appelationlist || []}
-                        onChange={(e, value) => {
-                            if (value != null) {
-                                setNewnode({
-                                    ...newnode,
-                                    emploistitre: value.label,
-                                    emploisid: value.id
-                                });
-                            } else {
-                                setNewnode({
-                                    ...newnode,
-                                    emploistitre: "",
-                                    emploisid: ""
-                                });
-                            }
-                        }}
+                        onChange={handleChangePoste}
                         renderInput={(params) => (
                             <TextField
                             {...params}
@@ -396,39 +411,6 @@ const CreateMetierModal = ({
               </Grid>
             </Box>
             <Box
-              sx={{
-                display: "flex",
-              }}
-            >
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                sx={{
-                  display: "flex",
-                  marginRight: "5px",
-                }}
-              >
-                <Autocomplete
-                  sx={{
-                    width: "100%",
-                  }}
-                  disablePortal
-                  options={datacompetance || []}
-                  onChange={handleChangePoste}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      required
-                      label="Fiche compétence"
-                      name="fiche_competance"
-                      variant="outlined"
-                    />
-                  )}
-                />
-              </Grid>
-            </Box>
-            <Box
                 sx={{
                   margin: "auto",
                   gridTemplateColumns: "1fr 1fr",
@@ -507,6 +489,52 @@ const CreateMetierModal = ({
                     </AccordionDetails>
                   </Accordion>
                 ) : null}
+                <Accordion expanded={expanded === 'Mobilite'} onChange={handleChangeaccord('Mobilite')}>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                  >
+                    <Typography sx={{ width: '33%', flexShrink: 0 }} variant="h5">
+                    Mobilité professionnelle
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography variant="h5" sx={{ mt: 2, ml: 2 }}>
+                      Fiches ROME proches
+                    </Typography>
+                    <hr></hr>
+                    <Grid
+                      sx={{ flexGrow: 1, mt: 1, ml: 2 }}
+                      container
+                      spacing={2}
+                    >
+                      {matierselectionner.romeproche.map((definitionitem) => (
+                        <Grid item xs={11} key={definitionitem.id}>
+                          <ListItem sx={{ p: 0 }}>
+                            {definitionitem.rome_coderome} {definitionitem.nom}
+                          </ListItem>
+                        </Grid>
+                      ))}
+                    </Grid>
+                    <hr></hr>
+                    <Typography variant="h5" sx={{ mt: 2, ml: 2 }}>
+                      Fiches ROME envisageables si évolution
+                    </Typography>
+                    <hr></hr>
+                    <Grid
+                      sx={{ flexGrow: 1, mt: 1, ml: 2 }}
+                      container
+                      spacing={2}
+                    >
+                      {matierselectionner.romeevolution.map((definitionitem) => (
+                        <Grid item xs={11} key={definitionitem.id}>
+                          <ListItem sx={{ p: 0 }}>
+                            {definitionitem.rome_coderome} {definitionitem.nom}
+                          </ListItem>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
                 {newnode.competanceid != 0 ? (
                   <Accordion expanded={expanded === 'Contextes'} onChange={handleChangeaccord('Contextes')}>
                   <AccordionSummary

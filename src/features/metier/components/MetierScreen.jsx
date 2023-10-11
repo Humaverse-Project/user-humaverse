@@ -10,6 +10,10 @@ import { ThemeProvider } from "@mui/material/styles";
 import { datefonctionun, datefonctiondeux } from "../../../services/DateFormat";
 import RomeSelectModal from "./Modal/RomeSelectModal";
 import { DeleteForever, Edit } from "@mui/icons-material";
+import CreateNewCompetanceModal from "./Modal/NewCompetanceModal";
+import {
+  postcompetance
+} from "../../../services/CompetanceService";
 // Swal pour les notifications
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
@@ -23,10 +27,15 @@ function MetierScreen({ setLoading, setError }) {
   const [postedata, setPostedata] = useState([]);
   const [tableloagin, settableloagin] = useState({ isLoading: true });
   const [matierselectionner, setmatierselectionner] = useState({});
+  const [matierselectionnerv1, setmatierselectionnerv1] = useState({});
   const [listrome, setlistrome] = useState([]);
   const [loadingrome, setloadingrome] = useState(false);
   const [appelationlist, setappelationlist] = useState([]);
   const [contextlist, setcontextlist] = useState([]);
+  const [competance, setcompetance] = useState({});
+  const [competanceglobal, setcompetanceglobal] = useState([]);
+  const [accreditationlist, setAccreditationlist] = useState([]);
+  const [fichecompetance, setfichecompetance] = useState([]);
 
   useEffect(() => {
     const fetchData = async (setLoading, setError) => {
@@ -55,7 +64,8 @@ function MetierScreen({ setLoading, setError }) {
   }, [setLoading, setError]);
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
-
+  const [createCompetanceModalOpen, setcreateCompetanceModalOpen] = useState(false);
+  
   const columns = useMemo(
     () => [
       {
@@ -86,15 +96,7 @@ function MetierScreen({ setLoading, setError }) {
         enableColumnOrdering: true,
         enableEditing: false,
         enableSorting: true,
-      },
-      {
-        accessorKey: "createdAt",
-        header: "Date création",
-        enableColumnOrdering: true,
-        enableEditing: false,
-        enableSorting: true,
-        Cell: ({ cell }) => datefonctionun(cell.getValue()),
-      },
+      }
     ],
     []
   );
@@ -103,7 +105,7 @@ function MetierScreen({ setLoading, setError }) {
   const handleselectionrome = (e) => {
     setloadingrome(true);
     setOpen(false);
-    getdatarome(matierselectionner.code)
+    getdatarome(matierselectionnerv1.code)
       .then((reponsemetie) => {
         setloadingrome(false);
         console.log(reponsemetie)
@@ -114,6 +116,17 @@ function MetierScreen({ setLoading, setError }) {
             return { ...x, label: x.emploiTitre };
           })
         );
+        const data = reponsemetie.briquecompetancerome;
+        const groupedData = {};
+        data.forEach((item) => {
+          const categorie = item.compGb.compGbCategorie;
+          if (!groupedData[categorie]) {
+            groupedData[categorie] = [];
+          }
+          item.niveau = 0;
+          groupedData[categorie].push(item);
+        });
+        setcompetance(groupedData);
         const dataT = reponsemetie.briquecontexte;
         const groupedDataT = {};
         dataT.forEach((item) => {
@@ -178,7 +191,7 @@ function MetierScreen({ setLoading, setError }) {
       {open && (
         <RomeSelectModal
           open={open}
-          setmatierselectionner={setmatierselectionner}
+          setmatierselectionner={setmatierselectionnerv1}
           setOpen={setOpen}
           handleselectionrome={handleselectionrome}
           listrome={listrome}
@@ -306,6 +319,23 @@ function MetierScreen({ setLoading, setError }) {
             appelationlist={appelationlist}
             datacompetancedata={datacompetancedata}
             contextlist={contextlist}
+            createCompetanceModalOpen={(e)=> setcreateCompetanceModalOpen(true)}
+          />
+        )}
+        {createCompetanceModalOpen && (
+          <CreateNewCompetanceModal
+            open={createCompetanceModalOpen}
+            onClose={() => setcreateCompetanceModalOpen(false)}
+            rome={matierselectionnerv1}
+            competance={competance}
+            appelationlist={appelationlist}
+            setcompetance={setcompetance}
+            competanceglobal={competanceglobal}
+            setcompetanceglobal={setcompetanceglobal}
+            setfichecompetance={setfichecompetance}
+            accreditationlist={accreditationlist}
+            setAccreditationlist={setAccreditationlist}
+            postcompetance={postcompetance}
           />
         )}
       </ThemeProvider>
