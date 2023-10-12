@@ -316,7 +316,7 @@ const EditCompetanceModal = ({
                 </div>
               ))}
               <Button onClick={handleajoutcompetance}>
-                Ajouter plus de competances
+                Ajouter plus de compétences
               </Button>
               <Grid container spacing={2} alignItems="center">
                 {nouvellecompetancelist.map((list) => (

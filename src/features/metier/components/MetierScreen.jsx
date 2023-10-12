@@ -83,7 +83,7 @@ function MetierScreen() {
       },
       {
         accessorKey: "emplois.emploiTitre",
-        header: "Intitulé Métier ROME",
+        header: "Intitulé Métier",
         enableColumnOrdering: true,
         enableEditing: false,
         enableSorting: true,
@@ -285,7 +285,7 @@ function MetierScreen() {
               onClick={() => setOpen(true)}
               variant="outlined"
             >
-              Ajouté nouveau fiche metier
+              Créer une fiche metier
             </Button>
           )}
           enableEditing
