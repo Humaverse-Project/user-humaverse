@@ -111,9 +111,6 @@ const EditMetierModal = ({
     let das = datacompetance.filter(com => {if(com.titre === selectedpostdata.emplois.emploiTitre) return true; return false})
 
     const [newnode, setNewnode] = useState({
-        competanceid:0,
-        definition: matierselectionner.rome_definition,
-        formation: matierselectionner.rome_acces_metier,
         metierid: 0,
         convention: selectedpostdata.convention,
         definition: selectedpostdata.definition,
