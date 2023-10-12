@@ -149,7 +149,7 @@ function CompetanceScreen() {
       setfichecompetance(data.fiche_competance);
       setloadingrome(false);
       Swal.fire({
-        text: `${name} a été modifié avec succès`,
+        text: `${name} a été supprimer avec succès`,
         target: "#custom-target",
         icon: "success",
         customClass: {
