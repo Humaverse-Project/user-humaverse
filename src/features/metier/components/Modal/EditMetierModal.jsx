@@ -10,7 +10,6 @@ import {
   FormControl,
   InputLabel,
   OutlinedInput,
-  Autocomplete,
   TextField,
   Grid,
   Typography,
@@ -32,14 +31,11 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import MuiInput from "@mui/material/Input";
 import { styled } from "@mui/material/styles";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
 
 
 const Input = styled(MuiInput)`
   width: 100%;
 `;
-const MySwal = withReactContent(Swal);
 
 const EditMetierModal = ({
   open,
@@ -111,10 +107,7 @@ const EditMetierModal = ({
     let das = datacompetance.filter(com => {if(com.titre === selectedpostdata.emplois.emploiTitre) return true; return false})
 
     const [newnode, setNewnode] = useState({
-        competanceid:0,
-        definition: matierselectionner.rome_definition,
-        formation: matierselectionner.rome_acces_metier,
-        metierid: 0,
+        metierid: selectedpostdata.id,
         convention: selectedpostdata.convention,
         definition: selectedpostdata.definition,
         activite: selectedpostdata.activite,
@@ -149,7 +142,7 @@ const EditMetierModal = ({
     };
     const submitdata = async (e) => {
         setLoading(true);
-        await onSubmit(agrementlist, ficheslist, conditionlist, newnode);
+        await onSubmit(agrementlist, ficheslist, conditionlist, newnode, "update");
         setLoading(false);
         onClose();
     };

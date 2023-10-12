@@ -154,9 +154,8 @@ const CreateMetierModal = ({
     setNewnode({ ...newnode, [name]: value });
   };
   const submitdata = async (e) => {
-    console.log(agrementlist, ficheslist, conditionlist, newnode)
     setLoading(true);
-    await onSubmit(agrementlist, ficheslist, conditionlist, newnode);
+    await onSubmit(agrementlist, ficheslist, conditionlist, newnode, "create");
     setLoading(false);
     onClose();
   };

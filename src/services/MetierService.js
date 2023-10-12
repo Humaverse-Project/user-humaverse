@@ -113,7 +113,7 @@ export async function updatemetier(formdata) {
 }
 
 export async function deletemetier(id) {
-  const url = `${base_url}/metier/${id}`;
+  const url = `${base_url}/fiches/postes/delete/${id}`;
 
   const body = new URLSearchParams();
   body.append("id", id);

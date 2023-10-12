@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { listmetiermetier, getdatarome, postmetier } from "../../../services/MetierService";
+import { listmetiermetier, getdatarome, postmetier, deletemetier } from "../../../services/MetierService";
 import MaterialReactTable from "material-react-table";
 import Paper from "@mui/material/Paper";
 import CreateMetierModal from "./Modal/CreateMetierModal";
@@ -7,11 +7,11 @@ import { Backdrop, Box, Button, CircularProgress, IconButton, Tooltip, Typograph
 import { MRT_Localization_FR } from "material-react-table/locales/fr";
 import theme from "./theme";
 import { ThemeProvider } from "@mui/material/styles";
-import { datefonctiondeux } from "../../../services/DateFormat";
 import RomeSelectModal from "./Modal/RomeSelectModal";
-import { Edit } from "@mui/icons-material";
+import { DeleteForever, Edit } from "@mui/icons-material";
 import CreateNewCompetanceModal from "./Modal/NewCompetanceModal";
 import EditMetierModal from "./Modal/EditMetierModal";
+import { datefonctionun } from "../../../services/DateFormat";
 import {
   postcompetance
 } from "../../../services/CompetanceService";
@@ -47,7 +47,6 @@ function MetierScreen() {
       try {
         const datacompetanceexistant = await listmetiermetier();
         const reponsecompetance = await datacompetanceexistant;
-        console.log(reponsecompetance)
         setPostedata(reponsecompetance.postelist);
         setlistrome(
           reponsecompetance.rome.map((rome) => {
@@ -70,7 +69,27 @@ function MetierScreen() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [editMetierModal, setEditMetierModalOpen] = useState(false);
   const [createCompetanceModalOpen, setcreateCompetanceModalOpen] = useState(false);
-  
+  const handledeleteevent = (id, name) => {
+    setLoadingFetchData(true);
+    deletemetier(id).then((data) => {
+      setPostedata(data.postelist);
+      setLoadingFetchData(false);
+      Swal.fire({
+        text: `${name} a été supprimer avec succès`,
+        target: "#custom-target",
+        icon: "success",
+        customClass: {
+          container: "position-absolute",
+        },
+        toast: true,
+        position: "top-right",
+      });
+    })
+    .catch((error) => {
+      setErrorFetchData(error);
+      setLoadingFetchData(false);
+    });
+  }
   const columns = useMemo(
     () => [
       {
@@ -167,22 +186,19 @@ function MetierScreen() {
         setOpen(false);
       });
   };
-  const handleCreateNewRow = async (agrementlist, ficheslist, conditionlist, newnode) => {
+  const handleCreateNewRow = async (agrementlist, ficheslist, conditionlist, newnode, type) => {
     newnode.romeid = matierselectionner.id
     const datametierexistant = await postmetier(agrementlist, ficheslist, conditionlist, newnode);
     const reponsemetie = await datametierexistant;
     setPostedata(reponsemetie.postelist);
-    setlistrome(
-      reponsemetie.rome.map((rome) => {
-        return {
-          label: rome.rome_coderome + " " + rome.nom,
-          code: rome.rome_coderome,
-          id: rome.id,
-        };
-      })
-    );
+    let message = ""
+    if (type === "create") {
+      message = "Le fiche metier a été créée avec succès"
+    } else {
+      message = "Le fiche metier a été modifier avec succès"
+    }
     MySwal.fire({
-      text: "Le fiche metier a été créée avec succès",
+      text: message,
       target: "#custom-target",
       customClass: {
         container: "position-absolute",
@@ -224,6 +240,66 @@ function MetierScreen() {
                 width: "100%",
               }}
             >
+              <Typography>
+                <b>Conventions collectives:</b>{" "}
+              </Typography>
+              <Typography
+                sx={{ color: "black.main" }}
+                dangerouslySetInnerHTML={{
+                  __html: row.original.convention.replaceAll(
+                    "\\n",
+                    "<br>"
+                  ),
+                }}
+              ></Typography>
+              <Typography>
+                <b>Activité: </b>
+              </Typography>
+              <Typography
+                sx={{ color: "black.main" }}
+                dangerouslySetInnerHTML={{
+                  __html: row.original.activite.replaceAll(
+                    "\\n",
+                    "<br>"
+                  ),
+                }}
+              ></Typography>
+              <Typography>
+                <b>Définition des tâches: </b>
+              </Typography>
+              <Typography
+                sx={{ color: "black.main" }}
+                dangerouslySetInnerHTML={{
+                  __html: row.original.definition.replaceAll(
+                    "\\n",
+                    "<br>"
+                  ),
+                }}
+              ></Typography>
+              <Typography>
+                <b>Formation - Expérience nécessaire: </b>
+              </Typography>
+              <Typography
+                sx={{ color: "black.main" }}
+                dangerouslySetInnerHTML={{
+                  __html: row.original.formation.replaceAll(
+                    "\\n",
+                    "<br>"
+                  ),
+                }}
+              ></Typography>
+              <Typography>
+                <b>Date de création: </b>
+              </Typography>
+              <Typography
+                sx={{ color: "black.main" }}
+              > {datefonctionun(row.original.createdAt)}</Typography>
+              <Typography>
+                <b>Date dernier modification: </b>
+              </Typography>
+              <Typography
+                sx={{ color: "black.main" }}
+              > {datefonctionun(row.original.UpdatedAt)}</Typography>
             </Box>
           )}
           displayColumnDefOptions={{
@@ -300,6 +376,31 @@ function MetierScreen() {
               >
                 <IconButton onClick={(e)=>handleselectionrome(e, true, row.original)}>
                   <Edit />
+                </IconButton>
+              </Tooltip>
+              <Tooltip
+                arrow
+                placement="right"
+                title={`Supprimer -> ${row.original.titre}`}
+              >
+                <IconButton
+                  onClick={(e) => {
+                    MySwal.fire({
+                      title: "Suppression",
+                      text: `Etes-vous sûr de supprimer le métier : ${row.original.titre}?`,
+                      icon: "error",
+                      showCancelButton: true,
+                      confirmButtonText: "Oui, supprimez-le!",
+                      cancelButtonText: "Non, annuler!",
+                      reverseButtons: true,
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        handledeleteevent(row.original.id, row.original.titre)
+                      }
+                    });
+                  }}
+                >
+                  <DeleteForever />
                 </IconButton>
               </Tooltip>
             </Box>

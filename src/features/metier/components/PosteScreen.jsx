@@ -9,13 +9,17 @@ import theme from "./theme";
 import { ThemeProvider } from "@mui/material/styles";
 import { datefonctionun, datefonctiondeux } from "../../../services/DateFormat";
 
-function PosteScreen({ setLoading, setError }) {
+function PosteScreen() {
+
+  const [loadingFetchData, setLoadingFetchData] = useState(true);
+  const [errorFetchData, setErrorFetchData] = useState("");
+
   const [datacompetance, setdatacompetance] = useState([]);
   const [metierdata, setMetierdata] = useState([]);
   const [postedata, setPostedata] = useState([]);
   const [tableloagin, settableloagin] = useState({ isLoading: true });
   useEffect(() => {
-    const fetchData = async (setLoading, setError) => {
+    const fetchData = async () => {
       try {
         const datacompetanceexistant = await listpost();
         const reponsecompetance = await datacompetanceexistant;
@@ -40,15 +44,14 @@ function PosteScreen({ setLoading, setError }) {
             };
           })
         );
-        settableloagin({ isLoading: false });
-        setLoading(false);
+        setLoadingFetchData(false);
       } catch (error) {
-        setError("Une erreur s'est produite lors de l'appele serveur");
-        setLoading(false);
+        setErrorFetchData(error)
+        setLoadingFetchData(false);
       }
     };
-    fetchData(setLoading, setError);
-  }, [setLoading, setError]);
+    fetchData();
+  }, []);
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
@@ -142,7 +145,10 @@ function PosteScreen({ setLoading, setError }) {
               </Typography>
             </Box>
           )}
-          state={tableloagin}
+          state={{
+            isLoading: loadingFetchData,
+            error: errorFetchData,
+          }}
           displayColumnDefOptions={{
             "mrt-row-actions": {
               muiTableHeadCellProps: {
