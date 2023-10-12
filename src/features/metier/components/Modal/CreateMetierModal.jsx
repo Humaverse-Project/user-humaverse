@@ -119,7 +119,7 @@ const CreateMetierModal = ({
           reverseButtons: true,
         }).then((result) => {
           if (result.isConfirmed) {
-            createCompetanceModalOpen()
+            createCompetanceModalOpen(event, value)
           }
         });
         onClose();
@@ -254,9 +254,6 @@ const CreateMetierModal = ({
                       error={errorformulaire.competanceid[0]}
                   >
                     <Autocomplete
-                      sx={{
-                          width: "100%",
-                      }}
                       disablePortal
                       options={appelationlist || []}
                       onChange={handleChangePoste}

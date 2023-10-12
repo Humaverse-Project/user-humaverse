@@ -41,7 +41,8 @@ function MetierScreen() {
   const [competanceglobal, setcompetanceglobal] = useState([]);
   const [accreditationlist, setAccreditationlist] = useState([]);
   const [fichecompetance, setfichecompetance] = useState([]);
-
+  const [appelationselectionner, setappelationselectionner] = useState([]);
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -425,7 +426,11 @@ function MetierScreen() {
             appelationlist={appelationlist}
             datacompetancedata={datacompetancedata}
             contextlist={contextlist}
-            createCompetanceModalOpen={(e)=> setcreateCompetanceModalOpen(true)}
+            createCompetanceModalOpen={(e, value)=> {
+              console.log(value)
+              setappelationselectionner(value)
+              setcreateCompetanceModalOpen(true)}
+            }
             postedatanamelist={postedatanamelist}
           />
         )}
@@ -456,6 +461,8 @@ function MetierScreen() {
             accreditationlist={accreditationlist}
             setAccreditationlist={setAccreditationlist}
             postcompetance={postcompetance}
+            creationpourunmetier={true}
+            appelationselectionner={appelationselectionner}
           />
         )}
       </ThemeProvider>

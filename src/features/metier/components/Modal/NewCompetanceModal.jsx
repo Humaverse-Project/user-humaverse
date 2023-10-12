@@ -43,6 +43,8 @@ const CreateNewCompetanceModal = ({
   setcompetanceglobal,
   setfichecompetance,
   postcompetance,
+  creationpourunmetier=false,
+  appelationselectionner={}
 }) => {
   // state local for loading creation
   const [loadingCreate, setLoadingCreate] = useState(false);
@@ -60,7 +62,11 @@ const CreateNewCompetanceModal = ({
     }
     return password;
   };
-  const [newmetier, setNewnode] = useState({});
+  const [newmetier, setNewnode] = useState({
+    emploistitre: creationpourunmetier ? appelationselectionner.label : "",
+    emploisid: creationpourunmetier ? appelationselectionner.id : 0,
+    titre: creationpourunmetier ? appelationselectionner.label : "",
+  });
   const [accreditationlist, setAccreditationlist] = useState([
     { accreditaiontitre: "", acrreditationvalue: "", id: generateRandomid() },
   ]);
@@ -235,9 +241,12 @@ const CreateNewCompetanceModal = ({
                       width: "100%",
                     }}
                     disabled={isCheckedCreateAllMetier}
+                    readOnly={creationpourunmetier}
+                    value={creationpourunmetier ? appelationselectionner : null}
                     disablePortal
                     options={appelationlist}
                     onChange={(e, value) => {
+                      console.log(value)
                       if (value != null) {
                         setNewnode({
                           ...newmetier,
@@ -269,44 +278,45 @@ const CreateNewCompetanceModal = ({
                   />
                 </Grid>
               </Grid>
-              <Grid
-                container
-                spacing={2}
-                alignItems="center"
-                sx={{
-                  mb: 3,
-                  mt: 2,
-                }}
-              >
-                <Grid item xs={6}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        disabled={isCreateByMetier}
-                        onChange={(event) => {
-                          const isChecked = event.target.checked;
-                          if (isChecked) {
-                            setNewnode({ ...newmetier, applicationall: "ok" });
-                            setIsCheckedCreateAllMetier(true);
-                          } else {
-                            setNewnode({ ...newmetier, applicationall: "ko" });
-                            setIsCheckedCreateAllMetier(false);
-                          }
-                        }}
-                      />
-                    }
-                    label={
-                      <ListItemText
-                        primary={"Créer les compétences pour tous les métiers"}
-                      />
-                    }
-                    sx={{
-                      width: "100%",
-                    }}
-                  />
+              {!creationpourunmetier && (
+                <Grid
+                  container
+                  spacing={2}
+                  alignItems="center"
+                  sx={{
+                    mb: 3,
+                    mt: 2,
+                  }}
+                >
+                  <Grid item xs={6}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          disabled={isCreateByMetier}
+                          onChange={(event) => {
+                            const isChecked = event.target.checked;
+                            if (isChecked) {
+                              setNewnode({ ...newmetier, applicationall: "ok" });
+                              setIsCheckedCreateAllMetier(true);
+                            } else {
+                              setNewnode({ ...newmetier, applicationall: "ko" });
+                              setIsCheckedCreateAllMetier(false);
+                            }
+                          }}
+                        />
+                      }
+                      label={
+                        <ListItemText
+                          primary={"Créer les compétences pour tous les métiers"}
+                        />
+                      }
+                      sx={{
+                        width: "100%",
+                      }}
+                    />
+                  </Grid>
                 </Grid>
-              </Grid>
-
+              )}
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={6}>
                   <Typography
