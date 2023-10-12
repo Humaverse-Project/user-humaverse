@@ -25,11 +25,11 @@ function MetierScreen() {
 
   const [loadingFetchData, setLoadingFetchData] = useState(true);
   const [errorFetchData, setErrorFetchData] = useState("");
-
   const [open, setOpen] = useState(false);
   const [datacompetance, setdatacompetance] = useState([]);
   const [datacompetancedata, setdatacompetancedata] = useState([]);
   const [postedata, setPostedata] = useState([]);
+  const [postedatanamelist, setpostedatanamelist] = useState([]);
   const [matierselectionner, setmatierselectionner] = useState({});
   const [selectedpostdata, setselectedpostdata] = useState({});
   const [matierselectionnerv1, setmatierselectionnerv1] = useState({});
@@ -48,6 +48,7 @@ function MetierScreen() {
         const datacompetanceexistant = await listmetiermetier();
         const reponsecompetance = await datacompetanceexistant;
         setPostedata(reponsecompetance.postelist);
+        setpostedatanamelist(reponsecompetance.postelist.map(item => item.titre))
         setlistrome(
           reponsecompetance.rome.map((rome) => {
             return {
@@ -73,6 +74,7 @@ function MetierScreen() {
     setLoadingFetchData(true);
     deletemetier(id).then((data) => {
       setPostedata(data.postelist);
+      setpostedatanamelist(data.postelist.map(item => item.titre))
       setLoadingFetchData(false);
       Swal.fire({
         text: `${name} a été supprimer avec succès`,
@@ -127,7 +129,6 @@ function MetierScreen() {
 
   // Data competence eto izany dia data competence an'i creation
   const handleselectionrome = (e, edit, rome={}) => {
-    console.log(fichecompetance)
     setloadingrome(true);
     setOpen(false);
     let code = ""
@@ -143,11 +144,12 @@ function MetierScreen() {
           setCreateModalOpen(true)
         }
         setmatierselectionner(reponsemetie.rome)
-        setappelationlist(
-          reponsemetie.appelation.map((x) => {
-            return { ...x, label: x.emploiTitre };
-          })
-        );
+        let appelationsall = reponsemetie.appelation.map((x) => {
+          return { ...x, label: x.emploiTitre };
+        })
+        var nameappelation = postedata.map(item => item.emplois.emploiTitre);
+        appelationsall = appelationsall.filter(item => !nameappelation.includes(item.label));
+        setappelationlist(appelationsall);
         const data = reponsemetie.briquecompetancerome;
         const groupedData = {};
         data.forEach((item) => {
@@ -191,6 +193,7 @@ function MetierScreen() {
     const datametierexistant = await postmetier(agrementlist, ficheslist, conditionlist, newnode);
     const reponsemetie = await datametierexistant;
     setPostedata(reponsemetie.postelist);
+    setpostedatanamelist(reponsemetie.postelist.map(item => item.titre))
     let message = ""
     if (type === "create") {
       message = "Le fiche metier a été créée avec succès"
@@ -300,6 +303,12 @@ function MetierScreen() {
               <Typography
                 sx={{ color: "black.main" }}
               > {datefonctionun(row.original.UpdatedAt)}</Typography>
+              <Typography>
+                <b>Version: </b>
+              </Typography>
+              <Typography
+                sx={{ color: "black.main" }}
+              > {datefonctionun(row.original.version)}</Typography>
             </Box>
           )}
           displayColumnDefOptions={{
@@ -417,6 +426,7 @@ function MetierScreen() {
             datacompetancedata={datacompetancedata}
             contextlist={contextlist}
             createCompetanceModalOpen={(e)=> setcreateCompetanceModalOpen(true)}
+            postedatanamelist={postedatanamelist}
           />
         )}
         { editMetierModal && (
