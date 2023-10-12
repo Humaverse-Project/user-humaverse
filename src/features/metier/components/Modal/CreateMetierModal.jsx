@@ -21,6 +21,7 @@ import {
   AccordionSummary,
   InputAdornment,
   IconButton,
+  FormHelperText,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../theme";
@@ -50,7 +51,8 @@ const CreateMetierModal = ({
   appelationlist,
   datacompetancedata,
   contextlist,
-  createCompetanceModalOpen
+  createCompetanceModalOpen,
+  postedatanamelist
 }) => {
   const [loading, setLoading] = useState(false);
   const [newnode, setNewnode] = useState({
@@ -60,6 +62,11 @@ const CreateMetierModal = ({
     metierid: 0
   });
   const [agrementlist, setagrementlist] = useState([]);
+  const [errorformulaire, seterrorformulaire] = useState({
+      "titre": [false, ""],
+      "competanceid": [false, ""]
+    }
+  );
   const [conditionlist, setconditionlist] = useState([]);
   const [ficheslist, setficheslist] = useState([]);
   const [datacompetanceafficher, setdatacompetanceafficher] = useState({});
@@ -98,9 +105,8 @@ const CreateMetierModal = ({
     return password;
   };
   const handleChangePoste = (event, value) => {
-    console.log(value)
     if (value != null) {
-      
+      seterrorformulaire({...errorformulaire, competanceid: [false, ""]})
       let das = datacompetance.filter(com => {if(com.titre === value.emploiTitre) return true; return false})
       if (das.length === 0) {
         MySwal.fire({
@@ -113,7 +119,7 @@ const CreateMetierModal = ({
           reverseButtons: true,
         }).then((result) => {
           if (result.isConfirmed) {
-            createCompetanceModalOpen()
+            createCompetanceModalOpen(event, value)
           }
         });
         onClose();
@@ -151,9 +157,31 @@ const CreateMetierModal = ({
   };
   const handleChange = (event) => {
     const { name, value } = event.target;
+    if(name === "titre") {
+      if(postedatanamelist.includes(value)){
+        seterrorformulaire({...errorformulaire, titre: [true, "Le métier de même titre existe déjà"]})
+        return false
+      } else {
+        seterrorformulaire({...errorformulaire, titre: [false, ""]})
+      }
+    }
     setNewnode({ ...newnode, [name]: value });
   };
   const submitdata = async (e) => {
+    if (newnode.competanceid === 0) {
+      seterrorformulaire({...errorformulaire, competanceid: [true, "Merci de sélectionner un métier ROME"]})
+      return false
+    }
+    let formulairevalidation = Object.keys(errorformulaire);
+    for (let index = 0; index < formulairevalidation.length; index++) {
+      const element = formulairevalidation[index];
+      if(errorformulaire[element][0]){
+        return false
+      } else if (newnode[element] === "" || newnode[element] === undefined) {
+        seterrorformulaire({...errorformulaire, [element]: [true, "Merci de remplir ce champs"]})
+        return false
+      }
+    }
     setLoading(true);
     await onSubmit(agrementlist, ficheslist, conditionlist, newnode, "create");
     setLoading(false);
@@ -192,15 +220,21 @@ const CreateMetierModal = ({
                             width: "100%",
                         }}
                         required
+                        error={errorformulaire.titre[0]}
                     >
-                    <InputLabel htmlFor="outlined-adornment-password">
-                        Intitulé Emploi
-                    </InputLabel>
-                    <OutlinedInput
-                        name="titre"
-                        onChange={handleChange}
-                        label="Intitulé Emploi"
-                    />
+                      <InputLabel htmlFor="outlined-adornment-password">
+                          Intitulé Emploi
+                      </InputLabel>
+                      <OutlinedInput
+                          name="titre"
+                          onChange={handleChange}
+                          label="Intitulé Emploi"
+                      />
+                      {   errorformulaire.titre[0] ? (
+                          <FormHelperText>{errorformulaire.titre[1]}</FormHelperText>
+                        ) : (
+                        null
+                      )}
                     </FormControl>
                 </Grid>
                 <Grid
@@ -212,23 +246,34 @@ const CreateMetierModal = ({
                     marginRight: "5px",
                     }}
                 >
+                  <FormControl
+                    sx={{
+                      width: "100%",
+                  }}
+                      variant="outlined"
+                      error={errorformulaire.competanceid[0]}
+                  >
                     <Autocomplete
-                        sx={{
-                            width: "100%",
-                        }}
-                        disablePortal
-                        options={appelationlist || []}
-                        onChange={handleChangePoste}
-                        renderInput={(params) => (
-                            <TextField
-                            {...params}
-                            required
-                            label="Intitulé Métier"
-                            name="appelation"
-                            variant="outlined"
-                            />
-                        )}
+                      disablePortal
+                      options={appelationlist || []}
+                      onChange={handleChangePoste}
+                      renderInput={(params) => (
+                          <TextField
+                          {...params}
+                          required
+                          label="Intitulé Métier"
+                          name="appelation"
+                          variant="outlined"
+                          />
+                      )}
                     />
+                    {   errorformulaire.competanceid[0] ? (
+                        <FormHelperText>{errorformulaire.competanceid[1]}</FormHelperText>
+                      ) : (
+                      null
+                    )}
+                  </FormControl>
+                    
                 </Grid>
             </Box>
             <Box
