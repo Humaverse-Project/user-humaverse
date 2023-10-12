@@ -47,7 +47,6 @@ function MetierScreen() {
       try {
         const datacompetanceexistant = await listmetiermetier();
         const reponsecompetance = await datacompetanceexistant;
-        console.log(reponsecompetance)
         setPostedata(reponsecompetance.postelist);
         setlistrome(
           reponsecompetance.rome.map((rome) => {
