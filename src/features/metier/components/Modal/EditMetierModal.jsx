@@ -150,7 +150,7 @@ const EditMetierModal = ({
     <ThemeProvider theme={theme}>
       <Dialog open={open} onClose={onClose}>
         <DialogTitle textAlign="center" color={"black.main"}>
-          Formulaire de modification métier
+          Modification métier
         </DialogTitle>
         <DialogContent dividers={true}>
           <Stack
@@ -208,10 +208,10 @@ const EditMetierModal = ({
                         required
                     >
                         <InputLabel htmlFor="outlined-adornment-password">
-                            Intitulé Métier ROME
+                            Intitulé Métier
                         </InputLabel>
                         <OutlinedInput
-                            label="Intitulé Métier ROME"
+                            label="Intitulé Métier"
                             name="appelation"
                             variant="outlined"
                             readOnly
@@ -413,7 +413,7 @@ const EditMetierModal = ({
                       expandIcon={<ExpandMoreIcon />}
                     >
                       <Typography sx={{ width: '33%', flexShrink: 0 }} variant="h5">
-                        Competance
+                        Compétences
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>

@@ -104,11 +104,11 @@ const CreateMetierModal = ({
       let das = datacompetance.filter(com => {if(com.titre === value.emploiTitre) return true; return false})
       if (das.length === 0) {
         MySwal.fire({
-          title: "Competance",
-          html: `Il n'a pas d'enregistrement competance trouvé pour l'emplois: <b>${value.emploiTitre}</b>. <br>Souhaiter vous le créé?`,
+          title: "Compétence",
+          html: `Fiche de compétences non trouvée pour le métier <b>${value.emploiTitre}</b>. <br>Pour continuer, vous devez la créer`,
           icon: "error",
           showCancelButton: true,
-          confirmButtonText: "Oui, je veux le crée maintenant!",
+          confirmButtonText: "Créer la fiche de compétences et continuer",
           cancelButtonText: "Non, annuler!",
           reverseButtons: true,
         }).then((result) => {
@@ -163,7 +163,7 @@ const CreateMetierModal = ({
     <ThemeProvider theme={theme}>
       <Dialog open={open} onClose={onClose}>
         <DialogTitle textAlign="center" color={"black.main"}>
-          Formulaire de création métier
+          Création métier
         </DialogTitle>
         <DialogContent dividers={true}>
           <Stack
@@ -223,7 +223,7 @@ const CreateMetierModal = ({
                             <TextField
                             {...params}
                             required
-                            label="Intitulé Métier ROME"
+                            label="Intitulé Métier"
                             name="appelation"
                             variant="outlined"
                             />
@@ -422,7 +422,7 @@ const CreateMetierModal = ({
                       expandIcon={<ExpandMoreIcon />}
                     >
                       <Typography sx={{ width: '33%', flexShrink: 0 }} variant="h5">
-                        Competance
+                        Compétences
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
